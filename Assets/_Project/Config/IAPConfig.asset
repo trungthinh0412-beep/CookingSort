@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84f5003364fe6394d9e0a7c4ed06d8da, type: 3}
+  m_Name: IAPConfig
+  m_EditorClassIdentifier: Assembly-CSharp::IAPConfig
+  packData:
+  - packName: 0
+    packId: com.gamme.packingmaster.removeads
+  - packName: 1
+    packId: com.gamme.packingmaster.smallbundle
+  - packName: 2
+    packId: com.gamme.packingmaster.bigbundle
+  - packName: 3
+    packId: com.gamme.packingmaster.goldpack1
+  - packName: 4
+    packId: com.gamme.packingmaster.goldpack2
+  - packName: 5
+    packId: com.gamme.packingmaster.goldpack3
+  - packName: 6
+    packId: com.gamme.packingmaster.goldpack4
+  - packName: 7
+    packId: com.gamme.packingmaster.goldpack5
+  - packName: 8
+    packId: com.gamme.packingmaster.goldpack6

@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78daea3e95316964c89a9986dd2ee5f7, type: 3}
+  m_Name: FeatureConfig
+  m_EditorClassIdentifier: Assembly-CSharp::FeatureConfig
+  featureDataList:
+  - featureType: 1
+    featureName: Mystery Box
+    sprite: {fileID: 21300000, guid: ed0d2fe38d00d5346b63053e77eb3263, type: 3}
+    description: When dropped, the <color="yellow">Mystery Box</color> will turn
+      into a food item.
+    levelIndex: 5
+  - featureType: 0
+    featureName: Frozen Food
+    sprite: {fileID: 21300000, guid: 3dd7a8dffa48ac14981adf0ec7d2cadb, type: 3}
+    description: <color="yellow">A Frozen Food</color> item cannot be dropped. To
+      break the ice, another food item must fall onto it.
+    levelIndex: 8
+  - featureType: 2
+    featureName: Rope
+    sprite: {fileID: 21300000, guid: e9b3910bd66ee3c4f9f6ba7867c44595, type: 3}
+    description: <color="yellow">Rope</color> will block other food items from falling
+      down.
+    levelIndex: 12
+  - featureType: 3
+    featureName: Teleport Gate
+    sprite: {fileID: 21300000, guid: df2514f2637f2244f9feece4ef01c247, type: 3}
+    description: The food will move from the <color="blue">Blue</color> gate to the
+      <color="red">Red</color> gate.
+    levelIndex: 18

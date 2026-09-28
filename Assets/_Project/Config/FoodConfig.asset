@@ -1,0 +1,64 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e5e8f56be68e15a46bc320c34f444c76, type: 3}
+  m_Name: FoodConfig
+  m_EditorClassIdentifier: Assembly-CSharp::FoodConfig
+  foodData:
+  - foodType: 0
+    foodPrefab: {fileID: 716691228311778634, guid: ecc7ffbac4cbc3442a4e00a6a49cfdd1, type: 3}
+  - foodType: 1
+    foodPrefab: {fileID: 716691228311778634, guid: d91396b1a09a9c241a4a7d10ccc72a30, type: 3}
+  - foodType: 2
+    foodPrefab: {fileID: 716691228311778634, guid: d36f26d579c8af7419ce8dfb7ac7f08a, type: 3}
+  - foodType: 3
+    foodPrefab: {fileID: 716691228311778634, guid: 179f50a448e365c4c859728e3643c4b5, type: 3}
+  - foodType: 4
+    foodPrefab: {fileID: 716691228311778634, guid: 0f8cc4fa634582e4baaa130ed2257769, type: 3}
+  - foodType: 5
+    foodPrefab: {fileID: 716691228311778634, guid: 9f085c1d24f4683429a0e712ac7dcd17, type: 3}
+  - foodType: 6
+    foodPrefab: {fileID: 716691228311778634, guid: f1ab9bfae7c536846a9e181889db1aaf, type: 3}
+  - foodType: 7
+    foodPrefab: {fileID: 716691228311778634, guid: bff6ef3dec2bc4644a7eee44b51cd0d5, type: 3}
+  - foodType: 8
+    foodPrefab: {fileID: 716691228311778634, guid: de7b6d179c1e1e746b81fbd61100da29, type: 3}
+  - foodType: 9
+    foodPrefab: {fileID: 716691228311778634, guid: 9dcb56041d4fe5d4583e2088fcba266b, type: 3}
+  - foodType: 10
+    foodPrefab: {fileID: 716691228311778634, guid: 7f6e51163e8b6db43bcc69559cb87c88, type: 3}
+  - foodType: 11
+    foodPrefab: {fileID: 716691228311778634, guid: 60d8221e3c3a2f14d845d0544dbb8e02, type: 3}
+  - foodType: 12
+    foodPrefab: {fileID: 716691228311778634, guid: 21c875a15ebb54e20a8dddf003ad63ce, type: 3}
+  - foodType: 13
+    foodPrefab: {fileID: 716691228311778634, guid: 0bd043f1fcc8d48aba38736cf208aace, type: 3}
+  - foodType: 14
+    foodPrefab: {fileID: 716691228311778634, guid: 682e18366e5d0434db81091b56c70b25, type: 3}
+  - foodType: 15
+    foodPrefab: {fileID: 716691228311778634, guid: b0a25b1913f9249d5993c7c3348a7463, type: 3}
+  - foodType: 16
+    foodPrefab: {fileID: 716691228311778634, guid: c07f3ec6fd0314b26a4ef6d025034ddd, type: 3}
+  - foodType: 17
+    foodPrefab: {fileID: 716691228311778634, guid: c7e6309af836040689dc0ab0df9d981c, type: 3}
+  - foodType: 18
+    foodPrefab: {fileID: 716691228311778634, guid: 9481cef70212c4550a94b59ff2d91642, type: 3}
+  - foodType: 19
+    foodPrefab: {fileID: 716691228311778634, guid: ad4166a882b0e4454ae7fa2a76a707b6, type: 3}
+  - foodType: 20
+    foodPrefab: {fileID: 716691228311778634, guid: cd380479902e54f88a2f13afacdb03ce, type: 3}
+  - foodType: 21
+    foodPrefab: {fileID: 716691228311778634, guid: e86ea0be7b2c7403393b60281f48a0a8, type: 3}
+  - foodType: 22
+    foodPrefab: {fileID: 716691228311778634, guid: ec945ad0b8ed2445e8dfc4da4ee14308, type: 3}
+  - foodType: 23
+    foodPrefab: {fileID: 716691228311778634, guid: 8519c1cf30fc74d52a27468166da1381, type: 3}
+  mysteryBox: {fileID: 2715186705368964915, guid: 5cdb66dc6bbed9345a79af76ca6ae2af, type: 3}

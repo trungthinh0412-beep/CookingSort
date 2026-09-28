@@ -1,0 +1,3352 @@
+fileFormatVersion: 2
+guid: b592a649651a57d44b44004865f5d626
+TextureImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 0
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 8192
+    resizeAlgorithm: 0
+    textureFormat: 50
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: King_animation_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 7046
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 027daff3059494f4eac47df28b7d8613
+      internalID: -806109762
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_1
+      rect:
+        serializedVersion: 2
+        x: 464
+        y: 7046
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7180ab380d2b68e4490677fe785e41bc
+      internalID: 1763888168
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_2
+      rect:
+        serializedVersion: 2
+        x: 928
+        y: 7046
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b8fa12c71ab22444393ca6d0b45129d7
+      internalID: -1177945654
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_3
+      rect:
+        serializedVersion: 2
+        x: 1392
+        y: 7046
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0a35d417ad7261145b14f4a87b0f8a9b
+      internalID: 88923244
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_4
+      rect:
+        serializedVersion: 2
+        x: 1856
+        y: 7046
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 350d1b11f94604244bb287271ab53437
+      internalID: -811056339
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_5
+      rect:
+        serializedVersion: 2
+        x: 2320
+        y: 7046
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5295de86a2c8ab246809c2f6086829d6
+      internalID: -1969108171
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_6
+      rect:
+        serializedVersion: 2
+        x: 2784
+        y: 7046
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fcc98f514e03cf24d8d6c1a3eb10cb80
+      internalID: 1116972416
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_7
+      rect:
+        serializedVersion: 2
+        x: 3248
+        y: 7046
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 06570f91eac9d10478d916a2f30412cd
+      internalID: -658895102
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_8
+      rect:
+        serializedVersion: 2
+        x: 3712
+        y: 7046
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 255433bdf4bd8e745b8d84092d449b34
+      internalID: -617749802
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_9
+      rect:
+        serializedVersion: 2
+        x: 4176
+        y: 7046
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a289502d1093d3d4fbd2d2cf0bb2c02f
+      internalID: -1425525720
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_10
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 6504
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f91c9306e3297cb42bdd36cfdaa390f0
+      internalID: -399322222
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_11
+      rect:
+        serializedVersion: 2
+        x: 464
+        y: 6504
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 89ebff42d681fb4418099fe5791ab726
+      internalID: 859210759
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_12
+      rect:
+        serializedVersion: 2
+        x: 928
+        y: 6504
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 398b7772002e30240b6269fdcc772b5e
+      internalID: -123884493
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_13
+      rect:
+        serializedVersion: 2
+        x: 1392
+        y: 6504
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 13c095e63fa766340b76f584a0897d05
+      internalID: -262420924
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_14
+      rect:
+        serializedVersion: 2
+        x: 1856
+        y: 6504
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 15756cf7f596bc24286642b896f6e92f
+      internalID: 935867409
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_15
+      rect:
+        serializedVersion: 2
+        x: 2320
+        y: 6504
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: baf29c17a9e9da542a8e2fef48bef22a
+      internalID: -858884877
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_16
+      rect:
+        serializedVersion: 2
+        x: 2784
+        y: 6504
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bb83d06260c9f3945ac0b8daa4ed3f18
+      internalID: 472414154
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_17
+      rect:
+        serializedVersion: 2
+        x: 3248
+        y: 6504
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0f653f370d3b4864a9482d07e39be160
+      internalID: -722213236
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_18
+      rect:
+        serializedVersion: 2
+        x: 3712
+        y: 6504
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a317a9848614140479c7bb4c0bc748fc
+      internalID: -1922125647
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_19
+      rect:
+        serializedVersion: 2
+        x: 4176
+        y: 6504
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0dd537975befde34e86057a21993fd9d
+      internalID: -1414756558
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_20
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 5962
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 011b4c49ac78c1746b8a190759d86fd5
+      internalID: -77439487
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_21
+      rect:
+        serializedVersion: 2
+        x: 464
+        y: 5962
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0a073b884d73160418976cdcbcfea9a8
+      internalID: 229484778
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_22
+      rect:
+        serializedVersion: 2
+        x: 928
+        y: 5962
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 478b8784f3d09c74aa27513f5dc2c347
+      internalID: 716416484
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_23
+      rect:
+        serializedVersion: 2
+        x: 1392
+        y: 5962
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7f8e422a9dc31c44e8c5827d05e3cc5c
+      internalID: 2047906180
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_24
+      rect:
+        serializedVersion: 2
+        x: 1856
+        y: 5962
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f3c78531c7700dc4db31390c5b412314
+      internalID: 1550729747
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_25
+      rect:
+        serializedVersion: 2
+        x: 2320
+        y: 5962
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 47c740f6345a43b4f89689139f95fae8
+      internalID: 1440896285
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_26
+      rect:
+        serializedVersion: 2
+        x: 2784
+        y: 5962
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 926877e81e445e345a9eda5ab70d7628
+      internalID: 739516854
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_27
+      rect:
+        serializedVersion: 2
+        x: 3248
+        y: 5962
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4eb34815ac8ef6e4c8095c25e9e1e6ce
+      internalID: 1895520604
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_28
+      rect:
+        serializedVersion: 2
+        x: 3712
+        y: 5962
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0815af78eda5be14dab464b3fd1abb29
+      internalID: -1625743568
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_29
+      rect:
+        serializedVersion: 2
+        x: 4176
+        y: 5962
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 491078ee8ad16294ebe218c6955a453d
+      internalID: 1124555715
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_30
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 5420
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5b2b410a00594f04ba33ac112f4b86fc
+      internalID: -704785108
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_31
+      rect:
+        serializedVersion: 2
+        x: 464
+        y: 5420
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 975610182679306498fab58234aa83d2
+      internalID: 1026850217
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_32
+      rect:
+        serializedVersion: 2
+        x: 928
+        y: 5420
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6436c03a3f7e826418590ee11c61ec9d
+      internalID: -2049274183
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_33
+      rect:
+        serializedVersion: 2
+        x: 1392
+        y: 5420
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8426ac1650bba8347832c412c30fe982
+      internalID: 1956945994
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_34
+      rect:
+        serializedVersion: 2
+        x: 1856
+        y: 5420
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2b355514df8c9f64fbd113dc90bfd2ab
+      internalID: 297626925
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_35
+      rect:
+        serializedVersion: 2
+        x: 2320
+        y: 5420
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0127b30362e8a33428efb47658722531
+      internalID: -997964215
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_36
+      rect:
+        serializedVersion: 2
+        x: 2784
+        y: 5420
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e33c20fc92e922c4880456fd16422146
+      internalID: 1964425902
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_37
+      rect:
+        serializedVersion: 2
+        x: 3248
+        y: 5420
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 96f79c7472c17ec4da136768dde24804
+      internalID: 632566246
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_38
+      rect:
+        serializedVersion: 2
+        x: 3712
+        y: 5420
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e1f5e33d60db2f145ad72d0f1f777036
+      internalID: -1653412976
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_39
+      rect:
+        serializedVersion: 2
+        x: 4176
+        y: 5420
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ab05860dd38681e48853b93d0faad4f3
+      internalID: -1492449537
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_40
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 4878
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 31474990f1131df43bcceebdb6fbe928
+      internalID: -1160740524
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_41
+      rect:
+        serializedVersion: 2
+        x: 464
+        y: 4878
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 26208d42ec12710408ae02549b4990af
+      internalID: -1262981779
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_42
+      rect:
+        serializedVersion: 2
+        x: 928
+        y: 4878
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e4837fa981715674bbbded289155b48f
+      internalID: -314531248
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_43
+      rect:
+        serializedVersion: 2
+        x: 1392
+        y: 4878
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 99176c0c0cf4be64096bba75196647f4
+      internalID: 1671868300
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_44
+      rect:
+        serializedVersion: 2
+        x: 1856
+        y: 4878
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5d3f56bc65d146e4a985900d106e866a
+      internalID: 269925580
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_45
+      rect:
+        serializedVersion: 2
+        x: 2320
+        y: 4878
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ed76e945c8cb13343b827c0f7554de69
+      internalID: -2080318230
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_46
+      rect:
+        serializedVersion: 2
+        x: 2784
+        y: 4878
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1934db678abd9d34a928a1a2e2bbadcd
+      internalID: 1568573505
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_47
+      rect:
+        serializedVersion: 2
+        x: 3248
+        y: 4878
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 816d7d4f3756dfd458d332fea852a342
+      internalID: 2045045192
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_48
+      rect:
+        serializedVersion: 2
+        x: 3712
+        y: 4878
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 724b8c6192f723a4eb76f2b31d8cdce5
+      internalID: 2058821205
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_49
+      rect:
+        serializedVersion: 2
+        x: 4176
+        y: 4878
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 08f3310bc6322fd47bdf267c6e253e3d
+      internalID: 770432169
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_50
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 4336
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f543e88cb1ac72946b097661b474b94e
+      internalID: -1055858227
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_51
+      rect:
+        serializedVersion: 2
+        x: 464
+        y: 4336
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 68e8b3ec82ad6c2459b7c87d3e1793d6
+      internalID: 1209681564
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_52
+      rect:
+        serializedVersion: 2
+        x: 928
+        y: 4336
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: aa0195028d9f5fb468b9096ad993f584
+      internalID: 2014430905
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_53
+      rect:
+        serializedVersion: 2
+        x: 1392
+        y: 4336
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3aee4c93895ea6848b739f7af3ea4843
+      internalID: -1945817264
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_54
+      rect:
+        serializedVersion: 2
+        x: 1856
+        y: 4336
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dc3c23c68e3066b4c89f13f08027fd03
+      internalID: -1723551611
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_55
+      rect:
+        serializedVersion: 2
+        x: 2320
+        y: 4336
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c35c800ad6b2e8749a7ed343b8460bf2
+      internalID: -1873253505
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_56
+      rect:
+        serializedVersion: 2
+        x: 2784
+        y: 4336
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4fcb6d71dde2b984aa94eabbe0edd110
+      internalID: 1806451597
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_57
+      rect:
+        serializedVersion: 2
+        x: 3248
+        y: 4336
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b10481d48a15e67418c226f4a74e4048
+      internalID: 742490104
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_58
+      rect:
+        serializedVersion: 2
+        x: 3712
+        y: 4336
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d75e0c64ce3060c44af95fa5f6c62618
+      internalID: 858418046
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_59
+      rect:
+        serializedVersion: 2
+        x: 4176
+        y: 4336
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4301bd8948f23e54cb703568f240dc93
+      internalID: 1738442307
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_60
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 3794
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f23834567a69c4642b9ddcc09e7e675b
+      internalID: -1356858905
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_61
+      rect:
+        serializedVersion: 2
+        x: 464
+        y: 3794
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5ce7d7199d304654987677ba7d0755df
+      internalID: 463869034
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_62
+      rect:
+        serializedVersion: 2
+        x: 928
+        y: 3794
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5db42f73560c9a04dbb8a6c2bbc61572
+      internalID: 1499660414
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_63
+      rect:
+        serializedVersion: 2
+        x: 1392
+        y: 3794
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f3426f9077b9a3641ac11ac3ba56e842
+      internalID: 346500474
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_64
+      rect:
+        serializedVersion: 2
+        x: 1856
+        y: 3794
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c30717364ad0842489f6ce12cfeeeb50
+      internalID: -2134578900
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_65
+      rect:
+        serializedVersion: 2
+        x: 2320
+        y: 3794
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 16e93cd660c7f0c4e99d713c56261c81
+      internalID: -263669416
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_66
+      rect:
+        serializedVersion: 2
+        x: 2784
+        y: 3794
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0f693e5a740637d4981e471a43b815dc
+      internalID: 807207214
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_67
+      rect:
+        serializedVersion: 2
+        x: 3248
+        y: 3794
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5db48b4e4afdd694a96336ccd6a12fd3
+      internalID: 639189634
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_68
+      rect:
+        serializedVersion: 2
+        x: 3712
+        y: 3794
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0bec6370aab5dc34a987a644ed18ceda
+      internalID: 1132304822
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_69
+      rect:
+        serializedVersion: 2
+        x: 4176
+        y: 3794
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b5f95899efaa2ad458a3fc636d2e0039
+      internalID: -339126370
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_70
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 3252
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c1bac9f072e707041913fa74a408c03c
+      internalID: -1483309812
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_71
+      rect:
+        serializedVersion: 2
+        x: 464
+        y: 3252
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5760bd445a3ca934c954f70ce6223f4f
+      internalID: -1478241514
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_72
+      rect:
+        serializedVersion: 2
+        x: 928
+        y: 3252
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7f2ba5a68898c004ebb8b95893bb4092
+      internalID: -2138270084
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_73
+      rect:
+        serializedVersion: 2
+        x: 1392
+        y: 3252
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 06c238a4b28c9c745b50d1ba4c04610e
+      internalID: -2138830602
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_74
+      rect:
+        serializedVersion: 2
+        x: 1856
+        y: 3252
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2e9d80effb27ea347a3be8db85f3633e
+      internalID: -101028682
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_75
+      rect:
+        serializedVersion: 2
+        x: 2320
+        y: 3252
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0b1b588b0863020489067c04f518a790
+      internalID: -1779229865
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_76
+      rect:
+        serializedVersion: 2
+        x: 2784
+        y: 3252
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bdd4f025e61796846ade90da7dedaec4
+      internalID: -1231086072
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_77
+      rect:
+        serializedVersion: 2
+        x: 3248
+        y: 3252
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 07b5e995d3c87cb4aa6dc902cff0ac02
+      internalID: 69889883
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_78
+      rect:
+        serializedVersion: 2
+        x: 3712
+        y: 3252
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ad1bcff985aae5e4aa3126cc742aba36
+      internalID: -1786576113
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_79
+      rect:
+        serializedVersion: 2
+        x: 4176
+        y: 3252
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 058c789e8ebe3724ca3f4a59d43e4b52
+      internalID: -953523223
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_80
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 2710
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a31a8f8e9f6e7b941aeaed19708ed131
+      internalID: -615970607
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_81
+      rect:
+        serializedVersion: 2
+        x: 464
+        y: 2710
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 51d979275266ded419e1a6917b0370a3
+      internalID: 668773382
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_82
+      rect:
+        serializedVersion: 2
+        x: 928
+        y: 2710
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: edaf37cffc76e6b4690e45be53f5afdf
+      internalID: -530536910
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_83
+      rect:
+        serializedVersion: 2
+        x: 1392
+        y: 2710
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5528ccd5f5d3f17479b4531b94fcc6b1
+      internalID: -1795388444
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_84
+      rect:
+        serializedVersion: 2
+        x: 1856
+        y: 2710
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ebd1bc5a613086f41be6a4e740c67563
+      internalID: -1074781495
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_85
+      rect:
+        serializedVersion: 2
+        x: 2320
+        y: 2710
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f957cd9bf04158d45b330400627f1ce6
+      internalID: -1714110941
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_86
+      rect:
+        serializedVersion: 2
+        x: 2784
+        y: 2710
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5ed087a339927a249a8c6eecc6f7d26b
+      internalID: 517925547
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_87
+      rect:
+        serializedVersion: 2
+        x: 3248
+        y: 2710
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6a5e5a86cfc13dd4eba0ca6273102702
+      internalID: 1388930035
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_88
+      rect:
+        serializedVersion: 2
+        x: 3712
+        y: 2710
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7fb7c61728e7b4147bfdf1d30015d78b
+      internalID: -904484134
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_89
+      rect:
+        serializedVersion: 2
+        x: 4176
+        y: 2710
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d1a8b99d55e56024faca4d7da8e09eb7
+      internalID: -1785317891
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_90
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 2168
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 71f2af0cba84a0443acdece269481ea5
+      internalID: 576756305
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_91
+      rect:
+        serializedVersion: 2
+        x: 464
+        y: 2168
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8043d925ba6847f4bb34c327664cd430
+      internalID: 350256202
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_92
+      rect:
+        serializedVersion: 2
+        x: 928
+        y: 2168
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 90246c686e3a07a4c93f306dbad1d7a5
+      internalID: 2070412228
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_93
+      rect:
+        serializedVersion: 2
+        x: 1392
+        y: 2168
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9b9099689dd306c429b03d1d9a418309
+      internalID: -909223505
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_94
+      rect:
+        serializedVersion: 2
+        x: 1856
+        y: 2168
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a39a51489f627bf45b034c5c3d9c694c
+      internalID: 1278368929
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_95
+      rect:
+        serializedVersion: 2
+        x: 2320
+        y: 2168
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 13566a59eb83f804784f8870fe062a65
+      internalID: 1205208847
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_96
+      rect:
+        serializedVersion: 2
+        x: 2784
+        y: 2168
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8d864ebcff2ca9a459636a7449eff6a4
+      internalID: -551719326
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_97
+      rect:
+        serializedVersion: 2
+        x: 3248
+        y: 2168
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 02f22d3a8334aef42b6c3c804441ede5
+      internalID: 1963314118
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_98
+      rect:
+        serializedVersion: 2
+        x: 3712
+        y: 2168
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 07f3cf381f7bd18458328dcbf0625ba5
+      internalID: 609176999
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_99
+      rect:
+        serializedVersion: 2
+        x: 4176
+        y: 2168
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7db47763a852c3b4ba53ac34a4d0239d
+      internalID: 592469444
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_100
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1626
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6cb4a1abf2fe96d49b180f80d1a06cd5
+      internalID: 1177482393
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_101
+      rect:
+        serializedVersion: 2
+        x: 464
+        y: 1626
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f8499b2b51cef044db7ed7044057b950
+      internalID: -1129093757
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_102
+      rect:
+        serializedVersion: 2
+        x: 928
+        y: 1626
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7a131974ea3489942945057273257b15
+      internalID: 754832592
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_103
+      rect:
+        serializedVersion: 2
+        x: 1392
+        y: 1626
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1dedbfc320aa6574187c8f1f201e5fe2
+      internalID: 780299368
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_104
+      rect:
+        serializedVersion: 2
+        x: 1856
+        y: 1626
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e5a81525780816b4f9294f1f435cdab5
+      internalID: 2028302622
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_105
+      rect:
+        serializedVersion: 2
+        x: 2320
+        y: 1626
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 49f01105e1feec14fbb567058cee3a6b
+      internalID: 1996733889
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_106
+      rect:
+        serializedVersion: 2
+        x: 2784
+        y: 1626
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ce028a4d2a65e7347918cc059ec2beca
+      internalID: -1496492428
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_107
+      rect:
+        serializedVersion: 2
+        x: 3248
+        y: 1626
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f830b35780e2f4a448f592d035608c39
+      internalID: 762944796
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_108
+      rect:
+        serializedVersion: 2
+        x: 3712
+        y: 1626
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 39f56af40a71a614d8dfae81d9c852b2
+      internalID: -1586292557
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_109
+      rect:
+        serializedVersion: 2
+        x: 4176
+        y: 1626
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9b81077510c543043a4431c5c60b47ee
+      internalID: -1640177625
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_110
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1084
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b369e60363e2f764da7fe8ef56cdd7ac
+      internalID: -906344739
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_111
+      rect:
+        serializedVersion: 2
+        x: 464
+        y: 1084
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 972d18956c4731a4fa0c09a0302673c9
+      internalID: -1365074421
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_112
+      rect:
+        serializedVersion: 2
+        x: 928
+        y: 1084
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a4c0292d434772a48b2b7dbeaee39fef
+      internalID: -261090588
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_113
+      rect:
+        serializedVersion: 2
+        x: 1392
+        y: 1084
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 68759ab297f48de4981942ac8e0abbb4
+      internalID: -1711308878
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_114
+      rect:
+        serializedVersion: 2
+        x: 1856
+        y: 1084
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8b93c1e7d2ad0a94f9879319150ca0fd
+      internalID: -1896447417
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_115
+      rect:
+        serializedVersion: 2
+        x: 2320
+        y: 1084
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 743bc9bcc63be534c803d5637fd09b9a
+      internalID: 975901996
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_116
+      rect:
+        serializedVersion: 2
+        x: 2784
+        y: 1084
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0e042ef07423b72418f3d6b34dfe2028
+      internalID: 1621948006
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_117
+      rect:
+        serializedVersion: 2
+        x: 3248
+        y: 1084
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9cbfcb38b15403c4487d9877557c6274
+      internalID: 1636209023
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_118
+      rect:
+        serializedVersion: 2
+        x: 3712
+        y: 1084
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a695a6e91ccdf6e4bb4ad14e22a2add3
+      internalID: 337796974
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_119
+      rect:
+        serializedVersion: 2
+        x: 4176
+        y: 1084
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b80a1d3e5ba84674380c4acbd53cb0f7
+      internalID: -677561760
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_120
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 542
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c2ab868f7ae855f479df9729259902d4
+      internalID: 1089011322
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_121
+      rect:
+        serializedVersion: 2
+        x: 464
+        y: 542
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e08cf3986f3595649bd15363b557ed35
+      internalID: 1528324990
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_122
+      rect:
+        serializedVersion: 2
+        x: 928
+        y: 542
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0568532c722b4eb48b14a8266782bef6
+      internalID: 475012257
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_123
+      rect:
+        serializedVersion: 2
+        x: 1392
+        y: 542
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ae83fa3a306c3094f99d25f6a7741fee
+      internalID: 367862448
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_124
+      rect:
+        serializedVersion: 2
+        x: 1856
+        y: 542
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9da171e7561398a499cfaf77f4422ae0
+      internalID: 721517674
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_125
+      rect:
+        serializedVersion: 2
+        x: 2320
+        y: 542
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 171fbac427951e7489fc4222d19dbcad
+      internalID: -639703870
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_126
+      rect:
+        serializedVersion: 2
+        x: 2784
+        y: 542
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b57dad26f0c6f7e4099ed171b638b9a7
+      internalID: 418797355
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_127
+      rect:
+        serializedVersion: 2
+        x: 3248
+        y: 542
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f6d76b31cc2c61c49b3f4547a9c54cda
+      internalID: 277664456
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_128
+      rect:
+        serializedVersion: 2
+        x: 3712
+        y: 542
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 18032e302f1b89744b1f7578223c2a06
+      internalID: 1699492537
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_129
+      rect:
+        serializedVersion: 2
+        x: 4176
+        y: 542
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3aaf29720fcdddd4d89f31d41e755ea4
+      internalID: -1360939281
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_130
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c353f8d2ef01b5745b0a53f77a30c570
+      internalID: -1199487020
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_131
+      rect:
+        serializedVersion: 2
+        x: 464
+        y: 0
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a1807faf932749c45978ca60350f022a
+      internalID: -1423014559
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_132
+      rect:
+        serializedVersion: 2
+        x: 928
+        y: 0
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3ad002757797c1e47b47fdc15ecf0f56
+      internalID: -1643812098
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_133
+      rect:
+        serializedVersion: 2
+        x: 1392
+        y: 0
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8ebdfe9cae814724fb45837b82d33003
+      internalID: -29875991
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_134
+      rect:
+        serializedVersion: 2
+        x: 1856
+        y: 0
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d418f34927a5c3242b1c59a5a4bc599d
+      internalID: 1932112963
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_135
+      rect:
+        serializedVersion: 2
+        x: 2320
+        y: 0
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2178f851088bcfd4fa5e65c61b5cae08
+      internalID: 1228436824
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_136
+      rect:
+        serializedVersion: 2
+        x: 2784
+        y: 0
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: afb1cbe0974f0d24eb6ea8c776a6134d
+      internalID: -1165508774
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_137
+      rect:
+        serializedVersion: 2
+        x: 3248
+        y: 0
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 90c5895dab559f646afbf9aba548c919
+      internalID: 448883259
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_138
+      rect:
+        serializedVersion: 2
+        x: 3712
+        y: 0
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 193f9546b54411245ad5f1a2adf8e6f5
+      internalID: -138253515
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: King_animation_139
+      rect:
+        serializedVersion: 2
+        x: 4176
+        y: 0
+        width: 464
+        height: 542
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c10de2498b1373e4fbe388b3c1f7dc76
+      internalID: -1770791517
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":464.0,"y":542.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":1,"keepEmptyRects":false,"isAlternate":false}'
+    nameFileIdTable:
+      King_animation_0: -806109762
+      King_animation_1: 1763888168
+      King_animation_10: -399322222
+      King_animation_100: 1177482393
+      King_animation_101: -1129093757
+      King_animation_102: 754832592
+      King_animation_103: 780299368
+      King_animation_104: 2028302622
+      King_animation_105: 1996733889
+      King_animation_106: -1496492428
+      King_animation_107: 762944796
+      King_animation_108: -1586292557
+      King_animation_109: -1640177625
+      King_animation_11: 859210759
+      King_animation_110: -906344739
+      King_animation_111: -1365074421
+      King_animation_112: -261090588
+      King_animation_113: -1711308878
+      King_animation_114: -1896447417
+      King_animation_115: 975901996
+      King_animation_116: 1621948006
+      King_animation_117: 1636209023
+      King_animation_118: 337796974
+      King_animation_119: -677561760
+      King_animation_12: -123884493
+      King_animation_120: 1089011322
+      King_animation_121: 1528324990
+      King_animation_122: 475012257
+      King_animation_123: 367862448
+      King_animation_124: 721517674
+      King_animation_125: -639703870
+      King_animation_126: 418797355
+      King_animation_127: 277664456
+      King_animation_128: 1699492537
+      King_animation_129: -1360939281
+      King_animation_13: -262420924
+      King_animation_130: -1199487020
+      King_animation_131: -1423014559
+      King_animation_132: -1643812098
+      King_animation_133: -29875991
+      King_animation_134: 1932112963
+      King_animation_135: 1228436824
+      King_animation_136: -1165508774
+      King_animation_137: 448883259
+      King_animation_138: -138253515
+      King_animation_139: -1770791517
+      King_animation_14: 935867409
+      King_animation_15: -858884877
+      King_animation_16: 472414154
+      King_animation_17: -722213236
+      King_animation_18: -1922125647
+      King_animation_19: -1414756558
+      King_animation_2: -1177945654
+      King_animation_20: -77439487
+      King_animation_21: 229484778
+      King_animation_22: 716416484
+      King_animation_23: 2047906180
+      King_animation_24: 1550729747
+      King_animation_25: 1440896285
+      King_animation_26: 739516854
+      King_animation_27: 1895520604
+      King_animation_28: -1625743568
+      King_animation_29: 1124555715
+      King_animation_3: 88923244
+      King_animation_30: -704785108
+      King_animation_31: 1026850217
+      King_animation_32: -2049274183
+      King_animation_33: 1956945994
+      King_animation_34: 297626925
+      King_animation_35: -997964215
+      King_animation_36: 1964425902
+      King_animation_37: 632566246
+      King_animation_38: -1653412976
+      King_animation_39: -1492449537
+      King_animation_4: -811056339
+      King_animation_40: -1160740524
+      King_animation_41: -1262981779
+      King_animation_42: -314531248
+      King_animation_43: 1671868300
+      King_animation_44: 269925580
+      King_animation_45: -2080318230
+      King_animation_46: 1568573505
+      King_animation_47: 2045045192
+      King_animation_48: 2058821205
+      King_animation_49: 770432169
+      King_animation_5: -1969108171
+      King_animation_50: -1055858227
+      King_animation_51: 1209681564
+      King_animation_52: 2014430905
+      King_animation_53: -1945817264
+      King_animation_54: -1723551611
+      King_animation_55: -1873253505
+      King_animation_56: 1806451597
+      King_animation_57: 742490104
+      King_animation_58: 858418046
+      King_animation_59: 1738442307
+      King_animation_6: 1116972416
+      King_animation_60: -1356858905
+      King_animation_61: 463869034
+      King_animation_62: 1499660414
+      King_animation_63: 346500474
+      King_animation_64: -2134578900
+      King_animation_65: -263669416
+      King_animation_66: 807207214
+      King_animation_67: 639189634
+      King_animation_68: 1132304822
+      King_animation_69: -339126370
+      King_animation_7: -658895102
+      King_animation_70: -1483309812
+      King_animation_71: -1478241514
+      King_animation_72: -2138270084
+      King_animation_73: -2138830602
+      King_animation_74: -101028682
+      King_animation_75: -1779229865
+      King_animation_76: -1231086072
+      King_animation_77: 69889883
+      King_animation_78: -1786576113
+      King_animation_79: -953523223
+      King_animation_8: -617749802
+      King_animation_80: -615970607
+      King_animation_81: 668773382
+      King_animation_82: -530536910
+      King_animation_83: -1795388444
+      King_animation_84: -1074781495
+      King_animation_85: -1714110941
+      King_animation_86: 517925547
+      King_animation_87: 1388930035
+      King_animation_88: -904484134
+      King_animation_89: -1785317891
+      King_animation_9: -1425525720
+      King_animation_90: 576756305
+      King_animation_91: 350256202
+      King_animation_92: 2070412228
+      King_animation_93: -909223505
+      King_animation_94: 1278368929
+      King_animation_95: 1205208847
+      King_animation_96: -551719326
+      King_animation_97: 1963314118
+      King_animation_98: 609176999
+      King_animation_99: 592469444
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

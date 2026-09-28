@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f5c85b3b7f7c468439270aae26b9b12b, type: 3}
+  m_Name: BoosterConfig
+  m_EditorClassIdentifier: Assembly-CSharp::BoosterConfig
+  boosterData:
+  - boosterType: 0
+    sprite: {fileID: 216505355, guid: ee3c6f97064c9654a8b46cfc91665e18, type: 3}
+    price: 180
+  - boosterType: 1
+    sprite: {fileID: 833916964, guid: ee3c6f97064c9654a8b46cfc91665e18, type: 3}
+    price: 120

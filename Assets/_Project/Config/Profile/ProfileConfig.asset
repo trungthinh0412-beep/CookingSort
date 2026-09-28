@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 072704865374f67449964bc1a7bd6a6b, type: 3}
+  m_Name: ProfileConfig
+  m_EditorClassIdentifier: Assembly-CSharp::ProfileConfig
+  profileDatas:
+  - {fileID: 11400000, guid: 045438dc01fd5f4478dd5487e192c410, type: 2}
+  - {fileID: 11400000, guid: 7b95625c3de8e9e429c8a41ac75dfa60, type: 2}

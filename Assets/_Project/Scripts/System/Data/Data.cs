@@ -1,0 +1,74 @@
+using System.IO;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+using UnityEngine;
+
+public static class Data 
+{
+    public static PlayerData PlayerData;
+    public static string SavePath = Application.persistentDataPath + "/player_data.json";
+    public static void SaveData()
+    {
+        var jsonSettings = new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() };
+        string jsonData = JsonConvert.SerializeObject(PlayerData, Formatting.Indented, jsonSettings);
+
+        // Encrypt the JSON data
+        string encryptedData = EncryptionHelper.Encrypt(jsonData);
+        File.WriteAllText(SavePath, encryptedData);
+        Debug.Log("<color=green>Save player data (encrypted) succeed</color>");
+    }
+
+    public static void LoadData()
+    {
+        if (File.Exists(SavePath))
+        {
+            string encryptedData = File.ReadAllText(SavePath);
+
+            // Decrypt the data before loading
+            string decryptedData = EncryptionHelper.Decrypt(encryptedData);
+            PlayerData = JsonConvert.DeserializeObject<PlayerData>(decryptedData);
+
+            Debug.Log("<color=green>Load player data (decrypted) succeed</color>");
+        }
+        else
+        {
+            PlayerData = new PlayerData();
+            Debug.Log("<color=green>Create new player data ... </color>");
+        }
+    }
+
+    public static void ClearData()
+    {
+        int previousStar = PlayerData == null ? 0 : PlayerData.CurrentStar;
+
+        if (File.Exists(SavePath))
+        {
+            File.Delete(SavePath);
+            Debug.Log("<color=green>Clear player data succeed </color>");
+        }
+        else
+        {
+            Debug.LogWarning("No save file found to delete!");
+        }
+
+        // Clearing only the file leaves the current PlayerData object alive
+        // while Play Mode is running. Reset the in-memory state as well so
+        // PopupKingdomBuild immediately reads every slot as NotBuilt.
+        PlayerData = new PlayerData();
+
+        if (previousStar > 0)
+            Observer.StarChanged?.Invoke(-previousStar);
+
+        Observer.StarChangedDone?.Invoke();
+    }
+
+    public static async Task UpdateData(string jsonContent)
+    {
+        Debug.Log(Application.persistentDataPath);
+        string encryptedData = EncryptionHelper.Encrypt(jsonContent);
+        await File.WriteAllTextAsync(SavePath, encryptedData);
+        PlayerData = JsonConvert.DeserializeObject<PlayerData>(jsonContent);
+        Debug.Log("<color=green>Update player data succeed </color>");
+    }
+}
