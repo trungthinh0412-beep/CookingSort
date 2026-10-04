@@ -1,0 +1,67 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f46653cb70564b288414f6d11882763, type: 3}
+  m_Name: CardDeskConfig
+  m_EditorClassIdentifier: Assembly-CSharp::CardDeskConfig
+  minFillPercentage: 0.4
+  maxFillPercentage: 0.6
+  leaveOneTrayEmptyChance: 0.15
+  allowThreeValuesPerTrayChance: 0.15
+  weightDistribution:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0.2
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  dealWeightProfiles:
+  - lowerValueCount: 5
+    weights:
+    - 5
+    - 15
+    - 20
+    - 25
+    - 35
+  - lowerValueCount: 4
+    weights:
+    - 15
+    - 20
+    - 25
+    - 30
+  - lowerValueCount: 3
+    weights:
+    - 20
+    - 30
+    - 50
+  - lowerValueCount: 2
+    weights:
+    - 30
+    - 70
+  minCardsPerHolder: 2
+  maxCardsPerHolder: 5

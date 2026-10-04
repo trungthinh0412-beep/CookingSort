@@ -17,12 +17,24 @@ public class KingdomHomeDecorTarget
 
 public class PopupHome : Popup
 {
+    private const string RightButtonGroupPath = "Container/Group_btn_Right";
+    private const string LeftButtonGroupPath = "Container/Group_btn_Left";
+    private const string HelpKingButtonName = "Btn_Help King";
+    private const string RelicHuntButtonName = "Btn_Relic_Hunt";
+
     [SerializeField] private GameObject btnRemoveAds;
+    [SerializeField] private GameObject btnBoartRace;
+    [SerializeField] private bool hideSideButtonGroups = true;
     [SerializeField] private RectTransform homebackground;
     [SerializeField] private CustomButton playButton;
     [SerializeField] private CustomButton taskButton;
+    [SerializeField, Min(1)] private int taskUnlockLevel = 2;
+    [SerializeField] private GameObject taskNotification;
+    [SerializeField] private TextMeshProUGUI taskNotificationText;
     [SerializeField] private TextMeshProUGUI levelText;
-    [SerializeField] private HomeAlbumPictureView albumPicture;
+    [SerializeField] private bool showProgressMission;
+    [SerializeField] private GameObject progressMission;
+    [SerializeField, Min(1)] private int progressMissionUnlockLevel = 12;
     [SerializeField] private CustomButton helpKingButton;
     [Header("Kingdom Decor Targets")]
     [Tooltip("Images in Home that receive decor built in PopupKingdomBuild.")]
@@ -40,18 +52,44 @@ public class PopupHome : Popup
     protected override void OnEnable()
     {
         base.OnEnable();
+        ApplySideButtonGroupVisibility();
 
         AttachClockAnimator();
+        BindTaskNotification();
 
         Observer.LevelChanged += UpdateLevelText;
+        Observer.StarChangedDone += RefreshTaskNotification;
         UpdateLevelText(
             Data.PlayerData != null
                 ? Data.PlayerData.CurrentLevelIndex
                 : 1
         );
 
+        RefreshTaskNotification();
         SetHomeInputEnabled(homeViewState == HomeViewState.Home);
-        if (albumPicture != null) albumPicture.Refresh();
+    }
+
+    private void ApplySideButtonGroupVisibility()
+    {
+        SetButtonGroupActive(
+            RightButtonGroupPath,
+            !hideSideButtonGroups
+        );
+        SetButtonGroupActive(
+            LeftButtonGroupPath,
+            !hideSideButtonGroups
+        );
+    }
+
+    private void SetButtonGroupActive(string groupPath, bool isActive)
+    {
+        Transform buttonGroup = transform.Find(groupPath);
+
+        if (buttonGroup != null &&
+            buttonGroup.gameObject.activeSelf != isActive)
+        {
+            buttonGroup.gameObject.SetActive(isActive);
+        }
     }
 
     private void AttachClockAnimator()
@@ -63,11 +101,17 @@ public class PopupHome : Popup
     protected override void OnDisable()
     {
         Observer.LevelChanged -= UpdateLevelText;
+        Observer.StarChangedDone -= RefreshTaskNotification;
         ClearKingdomRoomVisual();
+
+        // Home can be hidden while its entrance animation is still moving
+        // controls in from outside the screen (for example when GoodJob is
+        // dismissed quickly). Always restore the authored positions so the
+        // next Show does not reuse a partially animated layout.
+        homeEntranceAnimator?.RestoreHomeState();
 
         if (homeViewState != HomeViewState.Home)
         {
-            homeEntranceAnimator?.RestoreHomeState();
             activeKingdomBuildPopup = null;
             homeViewState = HomeViewState.Home;
         }
@@ -77,20 +121,71 @@ public class PopupHome : Popup
 
     private void UpdateLevelText(int level)
     {
+        int safeLevel = Mathf.Max(1, level);
+
         if (levelText != null)
         {
-            levelText.text = $"Level {Mathf.Max(1, level)}";
+            levelText.text = $"Level {safeLevel}";
+        }
+
+        ApplyProgressMissionVisibility(safeLevel);
+        ApplyTaskButtonVisibility(safeLevel);
+    }
+
+    private void ApplyTaskButtonVisibility(int level)
+    {
+        if (taskButton == null)
+        {
+            Transform taskButtonTransform =
+                transform.Find("Container/Btn_Task");
+
+            if (taskButtonTransform != null)
+                taskButton = taskButtonTransform.GetComponent<CustomButton>();
+        }
+
+        if (taskButton != null)
+        {
+            taskButton.gameObject.SetActive(
+                level >= Mathf.Max(1, taskUnlockLevel)
+            );
+        }
+    }
+
+    private void ApplyProgressMissionVisibility(int level)
+    {
+        if (progressMission == null)
+        {
+            Transform progressTransform =
+                transform.Find("Container/Topbar/Progress_Mission") ??
+                transform.Find("Container/Topbar/Progress_");
+
+            if (progressTransform != null)
+                progressMission = progressTransform.gameObject;
+        }
+
+        if (progressMission != null)
+        {
+            progressMission.SetActive(
+                showProgressMission &&
+                level >= Mathf.Max(1, progressMissionUnlockLevel)
+            );
         }
     }
 
     protected override void OnInstantiate()
     {
         base.OnInstantiate();
+        ApplySideButtonGroupVisibility();
 
         homeEntranceAnimator = GetComponent<HomeEntranceAnimator>();
 
         BindHelpKingButton();
         BindTaskButton();
+        BindTaskNotification();
+        AttachButtonShines(RightButtonGroupPath);
+        AttachButtonShines(LeftButtonGroupPath);
+        AttachMineIconChop();
+        AttachRelicHuntIconBounce();
 
         if (playButton == null)
         {
@@ -174,6 +269,188 @@ public class PopupHome : Popup
             taskButton.Click.AddListener(OnClickTask);
     }
 
+    private void BindTaskNotification()
+    {
+        if (taskButton == null)
+        {
+            Transform taskButtonTransform =
+                transform.Find("Container/Btn_Task");
+
+            if (taskButtonTransform != null)
+                taskButton = taskButtonTransform.GetComponent<CustomButton>();
+        }
+
+        if (taskNotification == null && taskButton != null)
+        {
+            foreach (Transform child in taskButton.transform)
+            {
+                if (!string.Equals(
+                        child.name,
+                        "noti",
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                taskNotification = child.gameObject;
+                break;
+            }
+        }
+
+        if (taskNotificationText == null && taskNotification != null)
+        {
+            taskNotificationText =
+                taskNotification.GetComponentInChildren<TextMeshProUGUI>(true);
+        }
+    }
+
+    public void RefreshTaskNotification()
+    {
+        BindTaskNotification();
+
+        if (taskNotification == null)
+            return;
+
+        PopupKingdomBuild buildPopup =
+            PopupController.Instance?.Get<PopupKingdomBuild>() as PopupKingdomBuild;
+        int affordableBuildCount = buildPopup != null
+            ? buildPopup.GetAffordableBuildCountForCurrentRoom()
+            : 0;
+
+        if (taskNotificationText != null)
+            taskNotificationText.text = affordableBuildCount.ToString();
+
+        taskNotification.SetActive(affordableBuildCount > 0);
+    }
+
+    private void AttachButtonShines(string buttonGroupPath)
+    {
+        Transform buttonGroup = transform.Find(buttonGroupPath);
+
+        if (buttonGroup == null)
+            return;
+
+        foreach (CustomButton button in
+                 buttonGroup.GetComponentsInChildren<CustomButton>(true))
+        {
+            if (IsInsideHelpKingButton(button.transform, buttonGroup))
+                continue;
+
+            Image shineTarget = FindButtonShineTarget(button);
+
+            if (shineTarget == null)
+                continue;
+
+            if (shineTarget.GetComponent<HomeButtonDiagonalShine>() == null)
+                shineTarget.gameObject.AddComponent<HomeButtonDiagonalShine>();
+        }
+    }
+
+    private void AttachMineIconChop()
+    {
+        Transform leftButtonGroup = transform.Find(LeftButtonGroupPath);
+
+        if (leftButtonGroup == null)
+            return;
+
+        Transform mineButton = leftButtonGroup.Find("Btn_Mine");
+
+        if (mineButton == null)
+            return;
+
+        Image mineIcon = FindImageTarget(mineButton);
+
+        if (mineIcon != null &&
+            mineIcon.GetComponent<HomeMineIconChop>() == null)
+        {
+            mineIcon.gameObject.AddComponent<HomeMineIconChop>();
+        }
+    }
+
+    private Image FindButtonShineTarget(CustomButton button)
+    {
+        if (button == null)
+            return null;
+
+        foreach (Image image in button.GetComponentsInChildren<Image>(true))
+        {
+            if (image.transform == button.transform)
+                continue;
+
+            if (image.name == "Icon" || image.name == "Image")
+                return image;
+        }
+
+        foreach (Image image in button.GetComponentsInChildren<Image>(true))
+        {
+            if (image.transform != button.transform)
+                return image;
+        }
+
+        return null;
+    }
+
+    private void AttachRelicHuntIconBounce()
+    {
+        Transform rightButtonGroup = transform.Find(RightButtonGroupPath);
+
+        if (rightButtonGroup == null)
+            return;
+
+        Transform relicButton = rightButtonGroup.Find(RelicHuntButtonName);
+
+        if (relicButton == null)
+            return;
+
+        Image shineTarget = FindButtonShineTarget(
+            relicButton.GetComponent<CustomButton>()
+        );
+
+        if (shineTarget == null)
+            shineTarget = FindImageTarget(relicButton);
+
+        if (shineTarget == null)
+            return;
+
+        if (shineTarget.GetComponent<HomeRelicHuntIconBounce>() == null)
+            shineTarget.gameObject.AddComponent<HomeRelicHuntIconBounce>();
+    }
+
+    private Image FindImageTarget(Transform root)
+    {
+        foreach (Image image in root.GetComponentsInChildren<Image>(true))
+        {
+            if (image.transform == root)
+                continue;
+
+            if (image.name == "Icon" || image.name == "Image")
+                return image;
+        }
+
+        foreach (Image image in root.GetComponentsInChildren<Image>(true))
+        {
+            if (image.transform != root)
+                return image;
+        }
+
+        return null;
+    }
+
+    private bool IsInsideHelpKingButton(Transform target, Transform stopAt)
+    {
+        Transform current = target;
+
+        while (current != null && current != stopAt)
+        {
+            if (current.name == HelpKingButtonName)
+                return true;
+
+            current = current.parent;
+        }
+
+        return false;
+    }
+
     private void BindHelpKingButton()
     {
         if (helpKingButton == null)
@@ -181,7 +458,7 @@ public class PopupHome : Popup
             foreach (CustomButton button in
                      GetComponentsInChildren<CustomButton>(true))
             {
-                if (button.name != "Btn_Help King")
+                if (button.name != HelpKingButtonName)
                     continue;
 
                 helpKingButton = button;
@@ -224,11 +501,15 @@ public class PopupHome : Popup
             PopupController.Instance?.Get<PopupKingdomBuild>() as PopupKingdomBuild;
 
         if (buildPopup == null)
+        {
+            RefreshTaskNotification();
             return;
+        }
 
         buildPopup.PrepareRoomForHome();
         buildPopup.ApplyBuiltDecorationsToHome(this);
         buildPopup.CopyBuiltRoomDecorToHome(this);
+        RefreshTaskNotification();
     }
 
     public void SetKingdomRoomBackground(Sprite sprite)
@@ -370,6 +651,13 @@ public class PopupHome : Popup
         if (homeViewState != HomeViewState.Home)
             return;
 
+        if (Data.PlayerData == null ||
+            Data.PlayerData.CurrentLevelIndex <
+            Mathf.Max(1, taskUnlockLevel))
+        {
+            return;
+        }
+
         PopupController popupController = PopupController.Instance;
 
         if (popupController == null)
@@ -378,16 +666,76 @@ public class PopupHome : Popup
             return;
         }
 
-        if (popupController.Get<PictureCollectionPopup>() == null)
+        PopupKingdomBuild buildPopup =
+            popupController.Get<PopupKingdomBuild>() as PopupKingdomBuild;
+
+        if (buildPopup == null)
         {
             Debug.LogWarning(
-                "[PopupHome] PictureCollectionPopup is not registered in PopupConfig."
+                "[PopupHome] PopupKingdomBuild is not registered in PopupConfig."
             );
             return;
         }
 
-        if (popupController.ShowPictureCollectionFromHome())
+        if (buildPopup.TryGetPendingRoomUnlock(
+                out int pendingRoomIndex,
+                out string pendingRoomId))
+        {
+            PopupUnlockRoom unlockPopup =
+                popupController.Get<PopupUnlockRoom>() as PopupUnlockRoom;
+
+            if (unlockPopup == null)
+            {
+                Debug.LogWarning(
+                    "[PopupHome] PopupUnlockRoom is not registered in PopupConfig."
+                );
+                return;
+            }
+
             PlayClickSound();
+            unlockPopup.Configure(
+                this,
+                buildPopup,
+                pendingRoomIndex,
+                pendingRoomId
+            );
+            popupController.Show<PopupUnlockRoom>(PopupAnimation.ScaleFade);
+            return;
+        }
+
+        PlayClickSound();
+        BeginEnterKingdomBuildView(buildPopup);
+    }
+
+    private void BeginEnterKingdomBuildView(PopupKingdomBuild buildPopup)
+    {
+        if (homeViewState != HomeViewState.Home || buildPopup == null)
+            return;
+
+        homeViewState = HomeViewState.EnteringKingdomBuild;
+        activeKingdomBuildPopup = buildPopup;
+
+        if (taskButton != null)
+            taskButton.Interactable = false;
+
+        SetHomeInputEnabled(false);
+
+        // Preserve the current room/progress. This only prepares its existing
+        // visual state and does not reset or select another room.
+        buildPopup.OpenFromHomeView();
+
+        if (homeEntranceAnimator == null)
+            homeEntranceAnimator = GetComponent<HomeEntranceAnimator>();
+
+        if (homeEntranceAnimator == null)
+        {
+            CompleteEnterKingdomBuildView();
+            return;
+        }
+
+        homeEntranceAnimator.PlayExitToKingdom(
+            CompleteEnterKingdomBuildView
+        );
     }
 
     public void ExitKingdomBuildView()
@@ -510,16 +858,23 @@ public class PopupHome : Popup
 
     public void OnClickBooster()
     {
-        if (Data.PlayerData.CurrentHeart <= 0)
+        bool hasPlayableHeart = HeartController.Instance != null
+            ? HeartController.Instance.HasPlayableHeart
+            : Data.PlayerData != null &&
+              (Data.PlayerData.IsInfiniteHeart() ||
+               Data.PlayerData.CurrentHeart > 0);
+
+        if (!hasPlayableHeart)
         {
             PopupController.Instance.Show<PopupMoreLife>();
             return;
         }
 
-        PlayClickSound();
-
-        // Keep the existing prefab's OnClickBooster binding; Play now starts the level directly.
-        GameManager.Instance.PlayCurrentLevel(usePopupTransition: true);
+        PlayMenuBarSound();
+        
+        PopupController.Instance.Show<PopupBooster>(
+            PopupAnimation.None
+        );
     }
 
     public void OnClickDebug()
@@ -530,7 +885,7 @@ public class PopupHome : Popup
 
     public void OnClickSetting()
     {
-        PlayClickSound();
+        PlayMenuBarSound();
 
         PopupController.Instance.Show<PopupSetting>(
             PopupAnimation.None
@@ -544,6 +899,67 @@ public class PopupHome : Popup
         PopupController.Instance.Show<PopupHelpKing>(
             PopupAnimation.None
         );
+    }
+
+    public bool IsBoartRaceActive()
+    {
+        if (btnBoartRace == null)
+        {
+            foreach (Transform child in GetComponentsInChildren<Transform>(true))
+            {
+                if (child.name == "Btn_Boart_Race")
+                {
+                    btnBoartRace = child.gameObject;
+                    break;
+                }
+            }
+        }
+
+        if (btnBoartRace == null)
+            return false;
+
+        Transform current = btnBoartRace.transform;
+        while (current != null && current != transform)
+        {
+            if (!current.gameObject.activeSelf)
+                return false;
+            current = current.parent;
+        }
+
+        return true;
+    }
+
+    public void OnClickMineEvent()
+    {
+        PlayClickSound();
+        ShowEventPopup<PopupMineEvent>();
+    }
+
+    public void OnClickBoartRaceEvent()
+    {
+        PlayClickSound();
+        ShowEventPopup<PopupBoartRace>();
+    }
+
+    public void OnClickRelicHuntEvent()
+    {
+        PlayClickSound();
+        ShowEventPopup<PopupRelicHuntEvent>();
+    }
+
+    private void ShowEventPopup<T>() where T : Popup
+    {
+        PopupController popupController = PopupController.Instance;
+
+        if (popupController == null)
+            return;
+
+        // The current play session can predate an imported event popup.
+        // Re-initializing is safe: PopupController keeps registered instances.
+        if (popupController.Get<T>() == null)
+            popupController.Initialize();
+
+        popupController.Show<T>(PopupAnimation.None);
     }
 
     public void OnClickDailyReward()
@@ -602,8 +1018,8 @@ public class PopupHome : Popup
 
     public void OnClickProfile()
     {
-        PlayClickSound();
-        PopupController.Instance.Show<ProfilePopup>();
+        PlayMenuBarSound();
+        PopupController.Instance.Show<PopupAvatar>();
     }
 
     private void OpenPopup<T>() where T : Popup
@@ -616,6 +1032,13 @@ public class PopupHome : Popup
     {
         SoundController.Instance.PlayFX(
             SoundName.ClickButton
+        );
+    }
+
+    private static void PlayMenuBarSound()
+    {
+        SoundController.Instance?.PlayFX(
+            SoundName.MenuBar
         );
     }
 }

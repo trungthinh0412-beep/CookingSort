@@ -1,5 +1,7 @@
 using CustomTween;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class GameManager : SingletonDontDestroy<GameManager>
@@ -7,13 +9,12 @@ public class GameManager : SingletonDontDestroy<GameManager>
     public LevelController levelController;
     public GameState gameState;
     public LoseReason loseReason;
-    [SerializeField] private FeatureConfig featureConfig;
     Sequence _sequence;
+    private Coroutine _lowMemoryCleanupRoutine;
     private int _startGameRequestVersion;
-    private PicturePlaySession pictureSession;
-    public bool IsPictureReplay => pictureSession != null && pictureSession.IsReplay;
-    public bool CanClaimLevelReward => pictureSession == null || pictureSession.CanClaimReward;
-    public int ActiveLevelNumber => pictureSession != null ? pictureSession.LevelNumber : Data.PlayerData.CurrentLevelIndex;
+    private bool _lifeConsumedForCurrentAttempt;
+    private readonly List<CardType> _pendingPreLevelCards =
+        new List<CardType>();
 
     protected override void Awake()
     {
@@ -24,13 +25,31 @@ public class GameManager : SingletonDontDestroy<GameManager>
         // CustomButton tween mau ve normalColor (1,1,1,1) tren cac graphic von da trang
         // -> spam warning "endValue equals to the current animated value". Vo hai.
         CustomTweenConfig.warnEndValueEqualsCurrent = false;
+        Application.lowMemory += HandleLowMemory;
     }
 
     void Start()
     {
-        if (levelController.PictureCollection != null && levelController.PictureCollection.MigrateProgress(Data.PlayerData))
-            Data.SaveData();
-        ReturnHome();
+#if UNITY_EDITOR
+        int requestedLevel = UnityEditor.SessionState.GetInt(Level.EditorPlayLevelKey, 0);
+        UnityEditor.SessionState.EraseInt(Level.EditorPlayLevelKey);
+        if (requestedLevel > 0)
+        {
+            Data.PlayerData.CurrentLevelIndex = requestedLevel;
+            Time.timeScale = 1f;
+            PrepareLevel();
+            StartGame();
+            return;
+        }
+#endif
+        if (Data.PlayerData.CurrentLevelIndex <= 1)
+        {
+            PlayCurrentLevel(true);
+        }
+        else
+        {
+            ReturnHome();
+        }
     }
 
     public void PlayCurrentLevel(
@@ -38,11 +57,8 @@ public class GameManager : SingletonDontDestroy<GameManager>
         bool usePopupTransition = false
     )
     {
-        _sequence.Stop();
-        pictureSession = null;
-        if (Data.PlayerData.CurrentHeart <= 0)
+        if (!EnsurePlayableHeart())
         {
-            Observer.Notify?.Invoke("Not enough heart!", Vector3.zero);
             return;
         }
 
@@ -52,17 +68,13 @@ public class GameManager : SingletonDontDestroy<GameManager>
 
     public void PrepareLevel()
     {
-        levelController.currentLevel?.SetVisible(false);
         gameState = GameState.PrepareGame;
-        if (IsPictureReplay) _ = levelController.PreparePictureLevelAsync(pictureSession.Entry, true);
-        else levelController.PrepareLevel();
+        levelController.PrepareLevel();
         loseReason = LoseReason.Normal;
     }
 
     public void ReturnHome(bool playHomeEntrance = false)
     {
-        if (IsPictureReplay) { ExitPictureReplay(); return; }
-        _sequence.Stop();
         // Huy quyen bat dau cua mot request Addressables con dang cho.
         ++_startGameRequestVersion;
 
@@ -116,10 +128,8 @@ public class GameManager : SingletonDontDestroy<GameManager>
 
     public void ReplayGame()
     {
-        _sequence.Stop();
-        if (!IsPictureReplay && Data.PlayerData.CurrentHeart <= 0)
+        if (!EnsurePlayableHeart())
         {
-            Observer.Notify?.Invoke("Not enough heart!", Vector3.zero);
             return;
         }
 
@@ -128,11 +138,19 @@ public class GameManager : SingletonDontDestroy<GameManager>
         StartGame();
     }
 
-    public async void ReplayGamePausedWithPopupBoosterQuit()
+    public void ReplayGamePausedWithPopupBoosterQuit()
     {
-        if (IsPictureReplay) { Time.timeScale = 1; ReplayGame(); return; }
+        ConsumeLifeForCurrentAttempt();
         Time.timeScale = 0f;
         PopupController.Instance.HideAll();
+
+        if (!HasPlayableHeart())
+        {
+            Time.timeScale = 1f;
+            ReturnHome();
+            PopupController.Instance.Show<PopupMoreLife>(PopupAnimation.None);
+            return;
+        }
 
         if (PopupController.Instance.Get<PopupBoosterQuit>() is PopupBoosterQuit popupBoosterQuit)
         {
@@ -152,10 +170,8 @@ public class GameManager : SingletonDontDestroy<GameManager>
 
     public void BackLevel()
     {
-        if (IsPictureReplay) return;
-        if (Data.PlayerData.CurrentHeart <= 0)
+        if (!EnsurePlayableHeart())
         {
-            Observer.Notify?.Invoke("Not enough heart!", Vector3.zero);
             return;
         }
 
@@ -168,10 +184,8 @@ public class GameManager : SingletonDontDestroy<GameManager>
 
     public void NextLevel()
     {
-        if (IsPictureReplay) return;
-        if (Data.PlayerData.CurrentHeart <= 0)
+        if (!EnsurePlayableHeart())
         {
-            Observer.Notify?.Invoke("Not enough heart!", Vector3.zero);
             return;
         }
 
@@ -186,7 +200,6 @@ public class GameManager : SingletonDontDestroy<GameManager>
     public async void StartGame(bool usePopupTransition = false)
     {
         int requestVersion = ++_startGameRequestVersion;
-        int mainLevel = Data.PlayerData.CurrentLevelIndex;
 
         PopupTransition transition =
             usePopupTransition && PopupController.Instance != null
@@ -208,18 +221,13 @@ public class GameManager : SingletonDontDestroy<GameManager>
         {
             // Neu PrepareLevel da bat dau load thi lenh nay se cho dung operation do.
             // Neu chua co level, no tu load Addressable tuong ung.
-            level = IsPictureReplay
-                ? await levelController.PreparePictureLevelAsync(pictureSession.Entry)
-                : await levelController.PrepareLevelAsync(false);
+            level = await levelController.PrepareLevelAsync(false);
         }
         catch (Exception exception)
         {
             Debug.LogError($"[GameManager] Load level that bai: {exception.Message}");
             if (requestVersion == _startGameRequestVersion)
-            {
                 transition?.PlayReveal();
-                if (IsPictureReplay) ExitPictureReplay("Could not load this picture. Please try again.");
-            }
             return;
         }
 
@@ -235,17 +243,8 @@ public class GameManager : SingletonDontDestroy<GameManager>
                 $"[GameManager] Khong load duoc Level {Data.PlayerData.CurrentLevelIndex} " +
                 "(kiem tra Addressables group Levels va address 'Level X').");
             if (requestVersion == _startGameRequestVersion)
-            {
                 transition?.PlayReveal();
-                if (IsPictureReplay) ExitPictureReplay("Could not load this picture. Please try again.");
-            }
             return;
-        }
-
-        if (!IsPictureReplay)
-        {
-            var entry = levelController.LoadedPictureEntry;
-            pictureSession = new PicturePlaySession(levelController.PictureCollection?.FindAlbum(entry), entry, mainLevel, false);
         }
 
         if (transition != null)
@@ -270,6 +269,7 @@ public class GameManager : SingletonDontDestroy<GameManager>
         PopupTransition transition = null
     )
     {
+        _lifeConsumedForCurrentAttempt = false;
         gameState = GameState.PlayingGame;
 
         // Doi popup TRUOC khi ban Observer.StartLevel.
@@ -285,87 +285,89 @@ public class GameManager : SingletonDontDestroy<GameManager>
         PopupController.Instance.Show<PopupInGame>();
         level.gameObject.SetActive(true);
 
+        // Apply synchronously, then reuse the same list for the next level.
+        // Creating a copy here caused avoidable managed allocations each time
+        // a level started.
+        try
+        {
+            level.ApplySelectedPreLevelCards(_pendingPreLevelCards);
+        }
+        finally
+        {
+            _pendingPreLevelCards.Clear();
+        }
+
         Observer.StartLevel?.Invoke(level);
-        level.BeginLevel(
-            () => OnWinGame(),
-            () => OnLoseGame(0.5f, LoseReason.OutMove, allowContinue: false));
         //FirebaseController.Instance.TrackingStartLevel(levelController.currentLevel.name);
 
-        // Check if this level unlocks a new feature
-        if (!IsPictureReplay) CheckAndShowNewFeature();
     }
 
-    public void PlayPictureReplay(PictureAlbumData album, PictureLevelEntry entry)
+    public bool ConsumeLifeForCurrentAttempt()
     {
-        var collection = levelController.PictureCollection;
-        if (PopupController.Instance.IsPicturePageSliding || collection == null || album == null || entry == null ||
-            !collection.albums.Contains(album) || !album.levels.Contains(entry) || !entry.IsPlayable ||
-            !Data.PlayerData.HasCompletedPicture(entry.levelId)) return;
-        _sequence.Stop();
-        Time.timeScale = 1;
-        pictureSession = new PicturePlaySession(album, entry, entry.levelNumber, true);
-        PrepareLevel();
-        StartGame(true);
+        if (_lifeConsumedForCurrentAttempt)
+            return true;
+
+        HeartController heartController = HeartController.Instance;
+        if (heartController == null || !heartController.TryConsumeHeart())
+            return false;
+
+        _lifeConsumedForCurrentAttempt = true;
+        return true;
     }
 
-    public void ExitPictureReplay(string message = "")
+    private static bool HasPlayableHeart()
     {
-        if (!IsPictureReplay) return;
-        ++_startGameRequestVersion;
-        _sequence.Stop();
-        var session = pictureSession;
-        pictureSession = null;
-        gameState = GameState.PrepareGame;
-        Time.timeScale = 1;
-        levelController.currentLevel?.SetPaused(true);
-        levelController.currentLevel?.SetVisible(false);
-        TransitionManager.Instance?.ResetImmediately();
-        SoundController.Instance.PlayBackground(SoundName.HomeBackgroundMusic);
-        PopupController.Instance.ShowPictureReplayReturn(session.Album, session.Entry, message);
+        return HeartController.Instance != null
+            ? HeartController.Instance.HasPlayableHeart
+            : Data.PlayerData != null &&
+              (Data.PlayerData.IsInfiniteHeart() ||
+               Data.PlayerData.CurrentHeart > 0);
     }
 
-    private void CheckAndShowNewFeature()
+    private static bool EnsurePlayableHeart()
     {
-        if (featureConfig == null) return;
+        if (HasPlayableHeart())
+            return true;
 
-        int currentLevel = Data.PlayerData.CurrentLevelIndex;
-        FeatureData featureData = featureConfig.GetFeatureDataAtLevel(currentLevel);
+        Observer.Notify?.Invoke("Not enough heart!", Vector3.zero);
+        if (PopupController.Instance != null)
+            PopupController.Instance.Show<PopupMoreLife>(PopupAnimation.None);
 
-        if (featureData == null) return;
-
-        if (PopupController.Instance.Get<PopupNewFeature>() is PopupNewFeature popup)
-        {
-            popup.Setup(featureData);
-            popup.Show(PopupAnimation.ScaleFade);
-        }
-        else
-        {
-            Debug.LogWarning("[GameManager] PopupNewFeature chua co trong PopupConfig.");
-        }
+        return false;
     }
-    public void OnWinGame(float delayPopupShowTime = 2.5f)
+
+    public void QueuePreLevelCards(IEnumerable<CardType> cardTypes)
+    {
+        if (cardTypes == null)
+            return;
+
+        foreach (CardType cardType in cardTypes)
+            _pendingPreLevelCards.Add(cardType);
+    }
+
+    public void OnWinGame(float delayPopupShowTime = 1f)
     {
         if (gameState == GameState.WaitingResult || gameState == GameState.LoseGame || gameState == GameState.WinGame) return;
         gameState = GameState.WinGame;
-        int resultVersion = _startGameRequestVersion;
-        if (IsPictureReplay)
-        {
-            _sequence = Sequence.Create().ChainDelay(.6f).ChainCallback(() =>
-            {
-                if (resultVersion == _startGameRequestVersion) ExitPictureReplay("Completed! Replay anytime.");
-            });
-            return;
-        }
+
+        PopupInGame popupInGame = PopupController.Instance != null
+            ? PopupController.Instance.Get<PopupInGame>() as PopupInGame
+            : null;
+        popupInGame?.HideSettingsButtonForWin();
+
         Observer.WinLevel?.Invoke(levelController.currentLevel);
+        Data.PlayerData.CountShowInterAds++;
         //FirebaseController.Instance.TrackingWinLevel(levelController.currentLevel.name);
-        pictureSession?.Complete(Data.PlayerData);
+        Data.PlayerData.CurrentLevelIndex++;
         Data.SaveData();
         // Data.PlayerData.SavingReward = new RewardData(10, 0);
         _sequence = Sequence.Create().ChainDelay(delayPopupShowTime).ChainCallback(() =>
         {
-            if (resultVersion != _startGameRequestVersion) return;
             PopupController.Instance.HideAll();
-            PopupController.Instance.Show<PopupWin>();
+            if (PopupController.Instance.Get<PopupWin>() is PopupWin popupWin)
+            {
+                popupWin.Show();
+            }
         });
     }
 
@@ -376,22 +378,14 @@ public class GameManager : SingletonDontDestroy<GameManager>
     {
         if (gameState == GameState.WaitingResult || gameState == GameState.LoseGame || gameState == GameState.WinGame) return;
         gameState = GameState.LoseGame;
+        SoundController.Instance?.PauseBackground();
+        SoundController.Instance?.PlayFX(SoundName.LoseLevel);
         this.loseReason = loseReason;
-        int resultVersion = _startGameRequestVersion;
-        if (IsPictureReplay)
-        {
-            _sequence = Sequence.Create().ChainDelay(.5f).ChainCallback(() =>
-            {
-                if (resultVersion == _startGameRequestVersion) ExitPictureReplay("Try again — replay is free.");
-            });
-            return;
-        }
         Observer.LoseLevel?.Invoke(levelController.currentLevel);
         Data.PlayerData.CountShowInterAds++;
         //FirebaseController.Instance.TrackingLoseLevel(levelController.currentLevel.name);
         _sequence = Sequence.Create().ChainDelay(delayPopupShowTime).ChainCallback(() =>
         {
-            if (resultVersion != _startGameRequestVersion) return;
             if (!allowContinue ||
                 Data.PlayerData.CurrentLevelIndex <= 4)
             {
@@ -411,21 +405,28 @@ public class GameManager : SingletonDontDestroy<GameManager>
         if (gameState != GameState.PlayingGame)
             return;
 
-        Level level = levelController != null
-            ? levelController.currentLevel
+        gameState = GameState.WaitingResult;
+
+        PopupInGame popupInGame = PopupController.Instance != null
+            ? PopupController.Instance.Get<PopupInGame>() as PopupInGame
             : null;
 
-        if (!PopupContinue.HasAvailableOption(level))
+        if (popupInGame != null &&
+            popupInGame.PlayOutOfMoveTransition(
+                ShowContinuePopupAfterOutOfMove
+            ))
         {
-            OnLoseGame(
-                0f,
-                LoseReason.OutMove,
-                allowContinue: false
-            );
             return;
         }
 
-        gameState = GameState.WaitingResult;
+        ShowContinuePopupAfterOutOfMove();
+    }
+
+    private void ShowContinuePopupAfterOutOfMove()
+    {
+        if (gameState != GameState.WaitingResult)
+            return;
+
         PopupController.Instance.Hide<PopupInGame>();
         PopupController.Instance.Show<PopupContinue>();
     }
@@ -451,6 +452,7 @@ public class GameManager : SingletonDontDestroy<GameManager>
     public void CallResume()
     {
         gameState = GameState.PlayingGame;
+        SoundController.Instance?.PlayBackground(SoundName.InGameBackgroundMusic);
         PopupController.Instance.Show<PopupInGame>();
     }
     public void CallAddBombAndResume()
@@ -472,6 +474,31 @@ public class GameManager : SingletonDontDestroy<GameManager>
     {
         _sequence.Stop();
     }
+
+    private void OnDestroy()
+    {
+        Application.lowMemory -= HandleLowMemory;
+    }
+
+    private void HandleLowMemory()
+    {
+        if (_lowMemoryCleanupRoutine == null)
+            _lowMemoryCleanupRoutine = StartCoroutine(RecoverFromLowMemory());
+    }
+
+    private IEnumerator RecoverFromLowMemory()
+    {
+        // Let the current UI update complete before releasing hidden popup objects.
+        yield return null;
+
+        PopupController popupController = PopupController.Instance;
+        if (popupController != null)
+            popupController.ReleaseInactivePopups();
+
+        yield return Resources.UnloadUnusedAssets();
+        GC.Collect();
+        _lowMemoryCleanupRoutine = null;
+    }
 }
 
 public enum GameState
@@ -486,4 +513,5 @@ public enum LoseReason
 {
     Normal,
     OutMove,
+    BoardFull,
 }

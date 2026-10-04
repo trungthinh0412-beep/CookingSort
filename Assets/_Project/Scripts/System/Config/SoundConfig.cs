@@ -53,7 +53,10 @@ public class SoundData
 {
     [EnumExtend] public SoundName name;
     public float delayTime;
+    [Min(0f)] public float volumeScale = 1f;
     public List<AudioClip> clips;
+
+    public float VolumeScale => volumeScale > 0f ? volumeScale : 1f;
 
     public AudioClip GetRandomAudioClip()
     {
@@ -83,4 +86,17 @@ public enum SoundName
     IceBreak,
     ShowWinPopup,
     Teleport,
+    StackCardComplete,
+    MoveOneCard,
+    DealCard,
+    DealCardStartLevel,
+    DealManyCards,
+    MenuBar,
+    MoveTwoCards,
+    WinLevel,
+    LoseLevel,
+    SmallWin,
+    WinCleanupCoinCollect,
+    GaslighterFireBurn,
+    GaslighterOpen,
 }

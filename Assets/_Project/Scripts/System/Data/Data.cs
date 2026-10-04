@@ -16,7 +16,9 @@ public static class Data
         // Encrypt the JSON data
         string encryptedData = EncryptionHelper.Encrypt(jsonData);
         File.WriteAllText(SavePath, encryptedData);
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
         Debug.Log("<color=green>Save player data (encrypted) succeed</color>");
+#endif
     }
 
     public static void LoadData()
@@ -29,23 +31,41 @@ public static class Data
             string decryptedData = EncryptionHelper.Decrypt(encryptedData);
             PlayerData = JsonConvert.DeserializeObject<PlayerData>(decryptedData);
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             Debug.Log("<color=green>Load player data (decrypted) succeed</color>");
+#endif
         }
         else
         {
             PlayerData = new PlayerData();
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             Debug.Log("<color=green>Create new player data ... </color>");
+#endif
         }
+
+        CollectionManager.ValidatePlayerProgress();
+        Observer.CollectionChanged?.Invoke();
     }
 
     public static void ClearData()
     {
         int previousStar = PlayerData == null ? 0 : PlayerData.CurrentStar;
 
+        StoryIntroState.ResetWatchedState();
+        BonusTrayTutorialState.ResetSeenState();
+        RewardTrayTutorialState.ResetSeenState();
+        WildCardTutorialState.ResetSeenState();
+        DowngradeCardTutorialState.ResetSeenState();
+        IronCardTutorialState.ResetSeenState();
+        DarkKingCardTutorialState.ResetSeenState();
+        FrozenCardTutorialState.ResetSeenState();
+
         if (File.Exists(SavePath))
         {
             File.Delete(SavePath);
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
             Debug.Log("<color=green>Clear player data succeed </color>");
+#endif
         }
         else
         {
@@ -61,14 +81,18 @@ public static class Data
             Observer.StarChanged?.Invoke(-previousStar);
 
         Observer.StarChangedDone?.Invoke();
+        Observer.CollectionChanged?.Invoke();
     }
 
     public static async Task UpdateData(string jsonContent)
     {
-        Debug.Log(Application.persistentDataPath);
         string encryptedData = EncryptionHelper.Encrypt(jsonContent);
         await File.WriteAllTextAsync(SavePath, encryptedData);
         PlayerData = JsonConvert.DeserializeObject<PlayerData>(jsonContent);
+        CollectionManager.ValidatePlayerProgress();
+        Observer.CollectionChanged?.Invoke();
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
         Debug.Log("<color=green>Update player data succeed </color>");
+#endif
     }
 }

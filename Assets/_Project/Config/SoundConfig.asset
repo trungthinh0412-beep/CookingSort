@@ -15,61 +15,141 @@ MonoBehaviour:
   soundData:
   - name: 0
     delayTime: 0
+    volumeScale: 1.25
     clips:
-    - {fileID: 8300000, guid: 3f147b5f863d6f5469b2933254840c7f, type: 3}
+    - {fileID: 8300000, guid: 29fa6646448649fdba8bbd0822828ed6, type: 3}
   - name: 1
     delayTime: 0
+    volumeScale: 1.25
     clips:
-    - {fileID: 8300000, guid: 43eadeb9775ce7742a4c04da93ee96dc, type: 3}
+    - {fileID: 8300000, guid: 29fa6646448649fdba8bbd0822828ed6, type: 3}
   - name: 2
     delayTime: 0
+    volumeScale: 1
     clips:
-    - {fileID: 8300000, guid: c9ca8135582370a46a5ba0f6dcb65499, type: 3}
+    - {fileID: 8300000, guid: 8e614a8d0e24f2145887b6f2e1f7d0f9, type: 3}
   - name: 3
     delayTime: 0
+    volumeScale: 1
     clips:
     - {fileID: 8300000, guid: 3351374e9b19d7a4cbdb139022a09c5f, type: 3}
   - name: 4
     delayTime: 0
+    volumeScale: 1
     clips:
     - {fileID: 8300000, guid: 8a8f76499e840b54eac0a6f54cc3d061, type: 3}
   - name: 5
     delayTime: 0
+    volumeScale: 1
     clips:
     - {fileID: 8300000, guid: 1ac10ca27abb2be409d1fdccba55e7f7, type: 3}
   - name: 6
     delayTime: 0
+    volumeScale: 1
     clips:
     - {fileID: 8300000, guid: 278d5117426a5294398f7dd9c25725b9, type: 3}
   - name: 7
     delayTime: 0
+    volumeScale: 1
     clips:
     - {fileID: 8300000, guid: b65e71cdb30de7543b6efe91b1a1fc75, type: 3}
   - name: 8
     delayTime: 0
+    volumeScale: 1
     clips:
     - {fileID: 8300000, guid: 27d957a3013978a419d5a1658d6e06d1, type: 3}
   - name: 9
     delayTime: 0.05
+    volumeScale: 1
     clips:
-    - {fileID: 8300000, guid: c5b9de9a932435b41909033ec449dda6, type: 3}
+    - {fileID: 8300000, guid: d5d65442eccfa3548921d7156b6d821a, type: 3}
   - name: 10
     delayTime: 0
+    volumeScale: 1
     clips:
     - {fileID: 8300000, guid: d5d65442eccfa3548921d7156b6d821a, type: 3}
   - name: 11
     delayTime: 0
+    volumeScale: 1
     clips:
     - {fileID: 8300000, guid: 094980a24779cc64a870be3bc2c710c9, type: 3}
   - name: 12
     delayTime: 0
+    volumeScale: 1
     clips:
     - {fileID: 8300000, guid: 2bd248d14036cad42b344e2afd48db3c, type: 3}
   - name: 13
     delayTime: 0
+    volumeScale: 1
     clips:
     - {fileID: 8300000, guid: d06a82bfc1a78524ba53b9740e8142fd, type: 3}
   - name: 14
     delayTime: 0
+    volumeScale: 1
     clips:
     - {fileID: 8300000, guid: 0afd7faf5425a2d429eafee9536b6461, type: 3}
+  - name: 15
+    delayTime: 0
+    volumeScale: 1.5
+    clips:
+    - {fileID: 8300000, guid: 73bdb34e535c4bffb012039547b17377, type: 3}
+  - name: 16
+    delayTime: 0
+    volumeScale: 1
+    clips:
+    - {fileID: 8300000, guid: c0c4e08788d14efa847f02730cf96117, type: 3}
+  - name: 17
+    delayTime: 0
+    volumeScale: 2
+    clips:
+    - {fileID: 8300000, guid: 8413afd933d54e2080c8a8459189d4e9, type: 3}
+  - name: 18
+    delayTime: 0
+    volumeScale: 1.5
+    clips:
+    - {fileID: 8300000, guid: 7ed8321be59f4e99ae918845dd21d3c8, type: 3}
+  - name: 19
+    delayTime: 0
+    volumeScale: 2.5
+    clips:
+    - {fileID: 8300000, guid: 00b8035fe583440b87649ed7bc6a2bc2, type: 3}
+  - name: 20
+    delayTime: 0
+    volumeScale: 0.75
+    clips:
+    - {fileID: 8300000, guid: 6a21e7c08b3d4c7e916f52f08b9a34d1, type: 3}
+  - name: 21
+    delayTime: 0
+    volumeScale: 1
+    clips:
+    - {fileID: 8300000, guid: b4380eb14f6c4c85a2bf9274910d637e, type: 3}
+  - name: 22
+    delayTime: 0
+    volumeScale: 1
+    clips:
+    - {fileID: 8300000, guid: dc8a35bcd01345a5a798801c29ad489e, type: 3}
+  - name: 23
+    delayTime: 0
+    volumeScale: 1
+    clips:
+    - {fileID: 8300000, guid: 0e5769678bc079d4bb4a037ad744891e, type: 3}
+  - name: 24
+    delayTime: 0
+    volumeScale: 1.2
+    clips:
+    - {fileID: 8300000, guid: 4a74753641834b8c922a528c6268b329, type: 3}
+  - name: 25
+    delayTime: 0
+    volumeScale: 1.3
+    clips:
+    - {fileID: 8300000, guid: 437b0ac1841d415da98efadf76ca88c8, type: 3}
+  - name: 26
+    delayTime: 0
+    volumeScale: 1
+    clips:
+    - {fileID: 8300000, guid: 346fc393980d4e8aa33d48b73abc7439, type: 3}
+  - name: 27
+    delayTime: 0
+    volumeScale: 1
+    clips:
+    - {fileID: 8300000, guid: eb6e0a07deb74b299c0f2a352ffb56dd, type: 3}

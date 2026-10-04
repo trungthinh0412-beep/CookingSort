@@ -143,15 +143,7 @@ public class FirebaseController : SingletonDontDestroy<FirebaseController>
 
     private void SetDataRemote()
     {
-        try
-        {
-            Debug.Log("<color=green> Set data from remote succeed </color>");
-        }
-        catch (Exception e)
-        {
-            Debug.Log("<color=red> Set data from remote failed </color>");
-            throw;
-        }
+        Debug.Log("<color=green> Set data from remote succeed </color>");
     }
 
     #region Event

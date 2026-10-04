@@ -88,7 +88,7 @@ public class ProfilePopup : Popup
 
     private void UpdateNameDisplay()
     {
-        string displayName = PlayerData.NormalizeName(_currentName);
+        string displayName = PlayerData.GetDisplayName(_currentName);
 
         // Keep the legacy input's internal value in sync for prefabs that
         // still contain it, but never allow it to receive user input here.

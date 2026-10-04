@@ -65,6 +65,7 @@ public class PopupQuit : Popup
     protected override void BeforeShow()
     {
         base.BeforeShow();
+        PlayMenuBarSound();
         CacheViewState();
         ResetViewState();
     }
@@ -77,6 +78,7 @@ public class PopupQuit : Popup
 
     protected override void BeforeHide()
     {
+        PlayMenuBarSound();
         StopStateTweens();
         base.BeforeHide();
     }
@@ -89,10 +91,6 @@ public class PopupQuit : Popup
 
     public void OnClickResume()
     {
-        SoundController.Instance.PlayFX(
-            SoundName.ClickButton
-        );
-
         Hide();
 
         if (_pauseMenu != null &&
@@ -108,20 +106,22 @@ public class PopupQuit : Popup
 
     public void OnClickQuit()
     {
-        SoundController.Instance.PlayFX(
-            SoundName.ClickButton
-        );
-
         _quitClickCount++;
 
         if (_quitClickCount == 1)
         {
+            SoundController.Instance?.PlayFX(
+                SoundName.ClickButton
+            );
             ShowQuitState();
             return;
         }
 
         if (_quitClickCount < 2)
             return;
+
+        SoundController.Instance?.PauseBackground();
+        SoundController.Instance?.PlayFX(SoundName.LoseLevel);
 
         Hide(PopupAnimation.None);
 
@@ -290,6 +290,9 @@ public class PopupQuit : Popup
 
     private void ShowQuitState()
     {
+        if (_hasEnteredQuitState)
+            return;
+
         _hasEnteredQuitState = true;
         StopStateTweens();
 
@@ -448,5 +451,10 @@ public class PopupQuit : Popup
             canvasGroup = target.AddComponent<CanvasGroup>();
 
         return canvasGroup;
+    }
+
+    private static void PlayMenuBarSound()
+    {
+        SoundController.Instance?.PlayFX(SoundName.MenuBar);
     }
 }

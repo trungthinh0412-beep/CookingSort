@@ -54,10 +54,6 @@ public class TransitionManager : MonoBehaviour
 
     [SerializeField] private float contentMinScale = 0.02f;
 
-    [Header("Close Squash And Stretch")]
-    [SerializeField] private float closeStretchAmount = 0.035f;
-    [SerializeField] private float closeStretchFrequency = 1.5f;
-
     private static readonly int RadiusId =
         Shader.PropertyToID("_Radius");
 
@@ -420,30 +416,8 @@ public class TransitionManager : MonoBehaviour
                 );
         }
 
-        float squashWave =
-            Mathf.Sin(
-                progress *
-                Mathf.PI *
-                4f
-            );
-
-        float squash =
-            squashWave *
-            0.018f *
-            (1f - progress);
-
-        float scaleX =
-            scale + squash;
-
-        float scaleY =
-            scale - squash;
-
         transitionLogo.localScale =
-            new Vector3(
-                scaleX,
-                scaleY,
-                1f
-            );
+            Vector3.one * scale;
     }
 
     private void OnSceneLoaded(
@@ -591,38 +565,10 @@ public class TransitionManager : MonoBehaviour
                 fadeProgress
             );
 
-        float stretchWave =
-            Mathf.Sin(
-                scaleProgress *
-                Mathf.PI *
-                closeStretchFrequency
-            );
-
-        float stretch =
-            closeStretchAmount *
-            (1f - scaleProgress) *
-            stretchWave;
-
-        float scaleX =
-            Mathf.Max(
-                contentMinScale,
-                scale + stretch
-            );
-
-        float scaleY =
-            Mathf.Max(
-                contentMinScale,
-                scale - stretch
-            );
-
         if (transitionLogo != null)
         {
             transitionLogo.localScale =
-                new Vector3(
-                    scaleX,
-                    scaleY,
-                    1f
-                );
+                Vector3.one * scale;
         }
 
         if (loadingText != null)

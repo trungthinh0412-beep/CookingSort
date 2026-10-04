@@ -193,10 +193,15 @@ public sealed class BuildRevealController : MonoBehaviour
         activeCompleteCallback = null;
         isCompleting = false;
 
+        if (activeTarget != null)
+        {
+            RestoreTargetPosition();
+            RefreshActiveBounds();
+            ApplyRevealProgress(1f);
+        }
+
         if (activeVfx != null)
             activeVfx.StopAndDestroy();
-
-        RestoreTargetPosition();
 
         if (activeShadow != null)
             activeShadow.DestroyShadow();

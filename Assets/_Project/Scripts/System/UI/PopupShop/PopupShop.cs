@@ -18,7 +18,7 @@ public class PopupShop : Popup
     [SerializeField] private GameObject contentRemoveAds;
 
 
-    private void Awake()
+    protected virtual void Awake()
     {
         SetupShopPackTabs();
         CheckRemoveAds();
@@ -38,6 +38,31 @@ public class PopupShop : Popup
         base.AfterShown();
         SetupShopPackTabs();
         ShowDefaultShopPack();
+    }
+
+    public void ShowGoldPackages()
+    {
+        SetupShopPackTabs();
+
+        if (_offerPackPanel != null && _offerPackTab != null)
+            ShowShopPack(_offerPackPanel, _offerPackTab);
+        else
+            ResetShopScrollPosition();
+
+        ScrollToGoldPackages();
+    }
+
+    private void ScrollToGoldPackages()
+    {
+        UnityEngine.UI.ScrollRect scrollRect = offerPackScrollRect;
+        if (scrollRect == null || scrollRect.content == null)
+            return;
+
+        Canvas.ForceUpdateCanvases();
+        scrollRect.StopMovement();
+        scrollRect.velocity = Vector2.zero;
+        scrollRect.horizontalNormalizedPosition = 0f;
+        scrollRect.verticalNormalizedPosition = 0f;
     }
 
     private void ShowDefaultShopPack()
@@ -80,7 +105,7 @@ public class PopupShop : Popup
         return offerPackScrollRect;
     }
 
-    private void OnDestroy()
+    protected virtual void OnDestroy()
     {
         Observer.PurchasePackComplete -= CheckRemoveAds;
     }
@@ -731,14 +756,50 @@ public class PopupShop : Popup
         PurchasePack(PackName.RemoveAds);
     }
 
+    public void OnClickPurchaseSuperDeal()
+    {
+        PurchasePack(PackName.SuperDeal);
+    }
+
+    public void OnClickPurchaseStarterBenefits()
+    {
+        PurchasePack(PackName.StarterBenefits);
+    }
+
+    public void OnClickPurchaseVIPPack()
+    {
+        PurchasePack(PackName.VIPPack);
+    }
+
+    public void OnClickPurchaseProPack()
+    {
+        PurchasePack(PackName.ProPack);
+    }
+
+    public void OnClickPurchaseChampionPack()
+    {
+        PurchasePack(PackName.ChampionPack);
+    }
+
+    public void OnClickPurchaseMasterPack()
+    {
+        PurchasePack(PackName.MasterPack);
+    }
+
+    public void OnClickPurchaseCardMasterPack()
+    {
+        PurchasePack(PackName.CardMasterPack);
+    }
+
+    // Keep legacy UnityEvent bindings working on older prefab instances.
     public void OnClickPurchaseSmallBundle()
     {
-        PurchasePack(PackName.SmallBundle);
+        OnClickPurchaseSuperDeal();
     }
 
     public void OnClickPurchaseBigBundle()
     {
-        PurchasePack(PackName.BigBundle);
+        OnClickPurchaseStarterBenefits();
     }
 
     public void OnClickPurchaseGold1()

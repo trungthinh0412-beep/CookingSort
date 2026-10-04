@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using CustomTween;
 using TMPro;
@@ -18,12 +19,35 @@ public class PopupKingdomBuild : Popup
     [Tooltip("Cost text shown next to the currency icon inside the shared BuildMarker.")]
     [SerializeField] private TextMeshProUGUI buildCostText;
     [SerializeField] private TextMeshProUGUI progressText;
+    [SerializeField] private Image progressBuildFill;
     [SerializeField] private GameObject completedState;
     [SerializeField] private CanvasGroup buildMarkerCanvasGroup;
+    [Tooltip("Image inside the circular area of BuildButton that shows the next slot's Build Icon.")]
+    [SerializeField] private Image buildButtonItemIcon;
     [SerializeField] private Color buildMarkerTextColor = new Color32(155, 74, 71, 255);
     [SerializeField] private BuildRevealController buildRevealController;
     [Tooltip("Looping dust and sparkle shown around BuildButton while the current cost is affordable.")]
     [SerializeField] private BuildButtonAvailabilityVFX buildButtonAvailabilityVfx;
+    [Tooltip("Material applied to BuildButton images while the player cannot afford the current slot.")]
+    [SerializeField] private Material buildButtonDisableMaterial;
+
+    [Header("Available build icon pulse")]
+    [SerializeField] [Min(0f)] private float buildIconPulseMinScale = .65f;
+    [SerializeField] [Min(0f)] private float buildIconPulseMaxScale = .8f;
+    [SerializeField] [Min(.01f)] private float buildIconPulseHalfDuration = .4f;
+
+    [Header("Build marker intro")]
+    [SerializeField] private RectTransform tagBuildButton;
+    [SerializeField] private CanvasGroup tagBuildButtonCanvasGroup;
+    [SerializeField] [Min(0f)] private float tagBuildIntroDelay;
+    [SerializeField] [Min(0f)] private float tagBuildMoveDuration = .15f;
+    [SerializeField] [Min(0f)] private float tagBuildFadeDuration = .2f;
+    [SerializeField] [Min(0f)] private float tagBuildHiddenOffset = 220f;
+
+    [Header("Room complete popup")]
+    [SerializeField] private Transform completionSourceChest;
+    [SerializeField] private List<Sprite> completionRewardSprites = new List<Sprite>();
+    [SerializeField] [Min(0f)] private float completionSourceChestShrinkDuration = .18f;
 
     [Header("Resource transfer")]
     [SerializeField] private ResourceTransferAnimator resourceTransferAnimator;
@@ -31,14 +55,37 @@ public class PopupKingdomBuild : Popup
     [SerializeField] private BuildHandler resourceHandler;
     [Tooltip("Gem icon inside BuildButton. Gems are aimed here before the marker is consumed.")]
     [SerializeField] private RectTransform buildButtonGemIcon;
+    [Tooltip("Object that punches scale whenever one flying Gem arrives. Assign it manually; leave empty to disable the target scale feedback.")]
+    [SerializeField] private Transform arrivalScaleTarget;
     [Tooltip("Micro punch applied to the requirement number when one Gem arrives.")]
     [SerializeField] [Range(1f, 1.1f)] private float requirementTextPunchScale = 1.06f;
     [SerializeField] [Min(0f)] private float requirementTextPunchUpDuration = .03f;
     [SerializeField] [Min(0f)] private float requirementTextPunchDownDuration = .04f;
+    [Tooltip("Scale punch applied to the destination Gem icon whenever one flying Gem arrives.")]
+    [SerializeField] [Range(1f, 1.3f)] private float arrivalTargetPunchScale = 1.14f;
+    [SerializeField] [Min(0f)] private float arrivalTargetPunchUpDuration = .035f;
+    [SerializeField] [Min(0f)] private float arrivalTargetPunchDownDuration = .065f;
+
+    [Header("Build Progress Trail")]
+    [Tooltip("Particle/Trail prefab spawned after an item finishes building. Leave empty to skip this step.")]
+    [SerializeField] private GameObject progressTrailPrefab;
+    [Tooltip("Parent used to spawn and move the trail. Assign a transform under the popup Canvas.")]
+    [SerializeField] private RectTransform progressTrailRoot;
+    [Tooltip("Destination of the trail, normally the Progress bar or its icon.")]
+    [SerializeField] private RectTransform progressTrailTarget;
+    [SerializeField] [Min(.01f)] private float progressTrailDuration = .45f;
+    [Tooltip("Control-point offset in Progress Trail Root local units. Positive X bends the flight to the right; negative X bends it to the left.")]
+    [SerializeField] private Vector2 progressTrailCurveOffset = new Vector2(80f, 100f);
+    [SerializeField] private bool rotateProgressTrailAlongPath;
+    [SerializeField] private float progressTrailRotationOffset;
+    [Tooltip("Keeps emitted particles alive briefly after reaching progress. Progress updates immediately on arrival.")]
+    [SerializeField] [Min(0f)] private float progressTrailTailDuration = .12f;
     [SerializeField] [Range(.65f, .95f)] private float consumeShrinkScale = .85f;
     [SerializeField] [Range(1f, 1.1f)] private float consumeReboundScale = 1.03f;
     [SerializeField] [Min(0f)] private float consumeShrinkDuration = .08f;
     [SerializeField] [Min(0f)] private float consumeReboundDuration = .06f;
+    [Tooltip("Time used to fade and scale the consumed BuildButton smoothly to zero.")]
+    [SerializeField] [Min(0f)] private float consumeFadeOutDuration = .12f;
     [SerializeField] [Min(0f)] private float afterConsumeBuildDelay = .04f;
 
     [Header("Room viewport")]
@@ -66,6 +113,11 @@ public class PopupKingdomBuild : Popup
     [SerializeField] [Min(0f)] private float insufficientCurrencyPunchDuration = .18f;
     [SerializeField] [Min(0f)] private float insufficientCurrencyPunchScale = .08f;
 
+    [Header("Completed room view")]
+    [SerializeField] [Min(0f)] private float roomViewRevealStartDelay = .15f;
+    [SerializeField] [Min(.01f)] private float roomViewRevealDuration = .32f;
+    [SerializeField] [Min(0f)] private float roomViewRevealInterval = .08f;
+
     private int currentRoomIndex = -1;
     private bool isBuilding;
     private bool isShowingNextMarker;
@@ -74,14 +126,40 @@ public class PopupKingdomBuild : Popup
     private bool resetRoomScrollOnNextRefresh = true;
     private Sequence markerSequence;
     private Sequence requirementFeedbackSequence;
+    private Sequence arrivalTargetFeedbackSequence;
     private Tween markerFeedbackTween;
+    private Coroutine progressTrailRoutine;
+    private GameObject activeProgressTrail;
     private Vector3 buildButtonInitialScale = Vector3.one;
     private bool buildButtonScaleCached;
     private Vector3 buildCostTextInitialScale = Vector3.one;
     private bool buildCostTextScaleCached;
+    private Transform arrivalTargetTransform;
+    private Vector3 arrivalTargetInitialScale = Vector3.one;
     private BuildSlot pendingBuildSlot;
     private KingdomRoom pendingBuildRoom;
     private bool openedFromHomeView;
+    private bool isRoomViewMode;
+    private int roomIndexBeforeView = -1;
+    private bool restoreRoomIndexAfterView;
+    private int roomViewRevealVersion;
+    private Sequence roomViewRevealDelaySequence;
+    private readonly List<BuildSlot> roomViewRevealSlots =
+        new List<BuildSlot>();
+    private bool resourceHandlerActiveStateCached;
+    private bool resourceHandlerWasActive;
+    private Coroutine completionPopupRoutine;
+    private Vector3 completionSourceChestInitialScale = Vector3.one;
+    private bool completionSourceChestScaleCached;
+    private Vector2 tagBuildShownPosition;
+    private bool tagBuildPositionCached;
+    private Tween tagBuildMoveTween;
+    private Tween tagBuildFadeTween;
+    private Tween buildIconPulseTween;
+    private Vector3 buildIconInitialScale = Vector3.one;
+    private bool buildIconScaleCached;
+    private readonly List<Image> buildButtonVisualImages = new List<Image>();
+    private readonly List<Material> buildButtonNormalMaterials = new List<Material>();
 
     public int CurrentRoomIndex => currentRoomIndex;
 
@@ -90,6 +168,8 @@ public class PopupKingdomBuild : Popup
     public KingdomRoomState CurrentRoomState => GetRoomState(GetCurrentRoom());
 
     public bool IsOpenedFromHomeView => openedFromHomeView;
+
+    public bool IsRoomViewMode => isRoomViewMode;
 
     protected override void OnEnable()
     {
@@ -106,7 +186,11 @@ public class PopupKingdomBuild : Popup
         if (roomScrollRect != null)
             roomScrollRect.onValueChanged.RemoveListener(OnRoomScrollChanged);
 
+        StopRoomViewReveal(true);
         StopBuildTween();
+        StopTagBuildIntro();
+        RestoreTagBuildIntroState();
+        StopCompletionPopupRoutine();
         isBuilding = false;
         SetBuildButtonAvailabilityVfx(false);
         resetRoomScrollOnNextRefresh = true;
@@ -118,6 +202,13 @@ public class PopupKingdomBuild : Popup
 
             homePopup?.NotifyKingdomBuildViewHidden(this);
         }
+
+        if (restoreRoomIndexAfterView)
+            currentRoomIndex = roomIndexBeforeView;
+
+        isRoomViewMode = false;
+        roomIndexBeforeView = -1;
+        restoreRoomIndexAfterView = false;
 
         base.OnDisable();
     }
@@ -154,23 +245,42 @@ public class PopupKingdomBuild : Popup
 
         resetRoomScrollOnNextRefresh = true;
         RefreshCurrentRoom();
+        ApplyRoomModeUi();
+
+        PrepareTagBuildIntro();
+
+        if (isRoomViewMode)
+            PrepareRoomViewReveal();
     }
 
     protected override void AfterShown()
     {
         base.AfterShown();
 
-        // BeforeShow is called while the popup is still inactive. At that
-        // point BuildButton.activeInHierarchy is false, so the availability
-        // effect must be refreshed once the popup has actually entered the
-        // hierarchy and is visible.
-        RefreshBuildButtonAvailabilityVfx();
+        if (isRoomViewMode)
+        {
+            StartRoomViewReveal();
+        }
+        else
+        {
+            // BeforeShow is called while the popup is still inactive. At that
+            // point BuildButton.activeInHierarchy is false, so the availability
+            // effect must be refreshed once the popup has actually entered the
+            // hierarchy and is visible.
+            RefreshBuildButtonAvailabilityVfx();
+            PlayTagBuildIntro();
+        }
     }
 
     public void OpenRoom(int roomIndex)
     {
         if (isBuilding)
             return;
+
+        StopRoomViewReveal(true);
+        isRoomViewMode = false;
+        roomIndexBeforeView = -1;
+        restoreRoomIndexAfterView = false;
 
         if (rooms == null || rooms.Count == 0)
         {
@@ -203,7 +313,68 @@ public class PopupKingdomBuild : Popup
         currentRoomIndex = Mathf.Clamp(roomIndex, 0, rooms.Count - 1);
 
         if (isActiveAndEnabled)
+        {
             RefreshCurrentRoom();
+            ApplyRoomModeUi();
+        }
+    }
+
+    public bool OpenRoomView(int roomIndex)
+    {
+        if (isBuilding ||
+            rooms == null ||
+            roomIndex < 0 ||
+            roomIndex >= rooms.Count ||
+            !CanOpenRoom(roomIndex) ||
+            !IsRoomCompleted(roomIndex))
+        {
+            return false;
+        }
+
+        StopRoomViewReveal(true);
+        StopBuildTween();
+
+        roomIndexBeforeView = currentRoomIndex;
+        restoreRoomIndexAfterView = true;
+        isRoomViewMode = true;
+        openedFromHomeView = false;
+        resetRoomScrollOnNextRefresh = true;
+        currentRoomIndex = roomIndex;
+
+        if (isActiveAndEnabled)
+        {
+            RefreshCurrentRoom();
+            ApplyRoomModeUi();
+            PrepareRoomViewReveal();
+        }
+
+        return true;
+    }
+
+    public void OpenCompletedRoomViewFromComplete(int roomIndex)
+    {
+        if (rooms == null ||
+            roomIndex < 0 ||
+            roomIndex >= rooms.Count ||
+            !IsRoomCompleted(roomIndex))
+        {
+            return;
+        }
+
+        StopRoomViewReveal(true);
+        StopBuildTween();
+
+        roomIndexBeforeView = currentRoomIndex;
+        restoreRoomIndexAfterView = true;
+        isRoomViewMode = true;
+        resetRoomScrollOnNextRefresh = true;
+        currentRoomIndex = roomIndex;
+
+        RestoreCompletionSourceChestScale();
+        RefreshCurrentRoom();
+        ApplyRoomModeUi();
+        PrepareRoomViewReveal();
+        StartRoomViewReveal();
     }
 
     public bool CanOpenRoom(int roomIndex)
@@ -216,7 +387,79 @@ public class PopupKingdomBuild : Popup
         if (!AreRoomSlotsValid(room))
             return false;
 
-        return roomIndex == 0 || IsRoomCompleted(roomIndex - 1);
+        // Room 1 is available from the beginning. Completed rooms stay
+        // viewable for save-data compatibility; every later unfinished room
+        // must be explicitly confirmed through PopupUnlockRoom.
+        return roomIndex == 0 ||
+               IsRoomCompleted(roomIndex) ||
+               Data.PlayerData != null &&
+               Data.PlayerData.IsKingdomRoomUnlocked(GetRoomId(room));
+    }
+
+    public bool TryGetPendingRoomUnlock(
+        out int roomIndex,
+        out string roomId)
+    {
+        roomIndex = -1;
+        roomId = string.Empty;
+
+        if (rooms == null || Data.PlayerData == null)
+            return false;
+
+        for (int i = 1; i < rooms.Count; i++)
+        {
+            KingdomRoom room = rooms[i];
+
+            if (!CanUnlockRoom(i) ||
+                Data.PlayerData.IsKingdomRoomUnlocked(GetRoomId(room)))
+            {
+                continue;
+            }
+
+            roomIndex = i;
+            roomId = GetRoomId(room);
+            return true;
+        }
+
+        return false;
+    }
+
+    public bool TryUnlockRoom(string roomId)
+    {
+        if (rooms == null || Data.PlayerData == null ||
+            string.IsNullOrWhiteSpace(roomId))
+        {
+            return false;
+        }
+
+        string safeRoomId = roomId.Trim();
+
+        for (int i = 0; i < rooms.Count; i++)
+        {
+            KingdomRoom room = rooms[i];
+
+            if (room == null || GetRoomId(room) != safeRoomId)
+                continue;
+
+            if (i > 0 && !CanUnlockRoom(i))
+                return false;
+
+            Data.PlayerData.SetKingdomRoomUnlocked(safeRoomId);
+            Data.SaveData();
+
+            currentRoomIndex = i;
+            resetRoomScrollOnNextRefresh = true;
+
+            if (isActiveAndEnabled)
+                RefreshCurrentRoom();
+
+            return true;
+        }
+
+        Debug.LogWarning(
+            $"[PopupKingdomBuild] Cannot unlock missing Room ID '{safeRoomId}'."
+        );
+        return false;
     }
 
     public bool IsRoomCompleted(int roomIndex)
@@ -225,6 +468,75 @@ public class PopupKingdomBuild : Popup
             return false;
 
         return GetRoomState(rooms[roomIndex]) == KingdomRoomState.Completed;
+    }
+
+    public bool TryGetRoomProgress(
+        int roomIndex,
+        out int builtSlotCount,
+        out int totalSlotCount)
+    {
+        builtSlotCount = 0;
+        totalSlotCount = 0;
+
+        if (rooms == null || roomIndex < 0 || roomIndex >= rooms.Count)
+            return false;
+
+        KingdomRoom room = rooms[roomIndex];
+        List<BuildSlot> slots = room?.BuildSlots;
+
+        if (slots == null || slots.Count == 0)
+            return false;
+
+        totalSlotCount = slots.Count;
+
+        foreach (BuildSlot slot in slots)
+        {
+            if (slot != null && IsSlotCompleted(room, slot))
+                builtSlotCount++;
+        }
+
+        return true;
+    }
+
+    public int GetAffordableBuildCountForCurrentRoom()
+    {
+        if (Data.PlayerData == null || rooms == null || rooms.Count == 0)
+            return 0;
+
+        int roomIndex = currentRoomIndex;
+        bool currentRoomCanBeBuilt =
+            roomIndex >= 0 &&
+            roomIndex < rooms.Count &&
+            CanOpenRoom(roomIndex) &&
+            !IsRoomCompleted(roomIndex);
+
+        if (!currentRoomCanBeBuilt)
+            roomIndex = GetFirstUnlockedIncompleteRoomIndex();
+
+        if (roomIndex < 0 || roomIndex >= rooms.Count)
+            return 0;
+
+        KingdomRoom room = rooms[roomIndex];
+
+        if (!AreRoomSlotsValid(room))
+            return 0;
+
+        int remainingGem = Mathf.Max(0, Data.PlayerData.CurrentStar);
+        int affordableBuildCount = 0;
+
+        foreach (BuildSlot slot in room.BuildSlots)
+        {
+            if (slot == null || IsSlotCompleted(room, slot))
+                continue;
+
+            if (remainingGem < slot.Cost)
+                break;
+
+            remainingGem -= slot.Cost;
+            affordableBuildCount++;
+        }
+
+        return affordableBuildCount;
     }
 
     public void OpenRoom(string roomId)
@@ -250,6 +562,10 @@ public class PopupKingdomBuild : Popup
 
     public void OpenFromHomeView()
     {
+        StopRoomViewReveal(true);
+        isRoomViewMode = false;
+        roomIndexBeforeView = -1;
+        restoreRoomIndexAfterView = false;
         openedFromHomeView = true;
         PrepareRoomForHome();
     }
@@ -283,7 +599,7 @@ public class PopupKingdomBuild : Popup
 
     public void OnClickBuild()
     {
-        if (isBuilding || isShowingNextMarker)
+        if (isRoomViewMode || isBuilding || isShowingNextMarker)
             return;
 
         KingdomRoom room = GetCurrentRoom();
@@ -454,20 +770,30 @@ public class PopupKingdomBuild : Popup
                 : room.Id.Trim();
         }
 
-        if (buildCostText != null)
-            buildCostText.text = nextSlot == null ? string.Empty : nextSlot.Cost.ToString();
+        UpdateBuildMarkerContent(nextSlot);
 
         if (progressText != null)
             progressText.text = $"{builtSlotCount}/{totalSlotCount}";
 
+        if (progressBuildFill != null)
+        {
+            progressBuildFill.type = Image.Type.Filled;
+            progressBuildFill.fillMethod = Image.FillMethod.Horizontal;
+            progressBuildFill.fillOrigin = (int)Image.OriginHorizontal.Left;
+            progressBuildFill.fillAmount = totalSlotCount > 0
+                ? Mathf.Clamp01((float)builtSlotCount / totalSlotCount)
+                : 0f;
+        }
+
         if (completedState != null)
-            completedState.SetActive(isRoomCompleted);
+            completedState.SetActive(isRoomCompleted && !isRoomViewMode);
 
         if (buildButton != null)
         {
             SetBuildButtonPosition(nextSlot);
 
             bool canShowMarker =
+                !isRoomViewMode &&
                 !isRoomCompleted &&
                 room != null &&
                 nextSlot != null &&
@@ -600,10 +926,199 @@ public class PopupKingdomBuild : Popup
         slot.TargetImage.rectTransform.localScale = Vector3.one;
     }
 
+    private void ApplyRoomModeUi()
+    {
+        if (resourceHandler != null)
+        {
+            bool showResourceHandler =
+                !isRoomViewMode && resourceHandlerWasActive;
+            resourceHandler.gameObject.SetActive(showResourceHandler);
+        }
+
+        if (!isRoomViewMode)
+            return;
+
+        HideBuildMarkerInstant();
+
+        if (completedState != null)
+            completedState.SetActive(false);
+    }
+
+    private void PrepareRoomViewReveal()
+    {
+        StopRoomViewReveal(true);
+        roomViewRevealSlots.Clear();
+
+        KingdomRoom room = GetCurrentRoom();
+
+        if (!isRoomViewMode || room?.BuildSlots == null)
+            return;
+
+        foreach (BuildSlot slot in room.BuildSlots)
+        {
+            if (slot?.TargetImage == null ||
+                slot.Sprite == null ||
+                !IsSlotCompleted(room, slot))
+            {
+                continue;
+            }
+
+            Image targetImage = slot.TargetImage;
+            targetImage.sprite = slot.Sprite;
+            targetImage.enabled = false;
+            SetImageAlpha(targetImage, 1f);
+            targetImage.rectTransform.localScale = Vector3.one;
+            roomViewRevealSlots.Add(slot);
+        }
+    }
+
+    private void StartRoomViewReveal()
+    {
+        if (!isRoomViewMode || roomViewRevealSlots.Count == 0)
+            return;
+
+        int revealVersion = ++roomViewRevealVersion;
+        ScheduleRoomViewReveal(
+            0,
+            Mathf.Max(0f, roomViewRevealStartDelay),
+            revealVersion
+        );
+    }
+
+    private void ScheduleRoomViewReveal(
+        int slotIndex,
+        float delay,
+        int revealVersion)
+    {
+        if (!CanContinueRoomViewReveal(slotIndex, revealVersion))
+            return;
+
+        if (delay <= 0f)
+        {
+            PlayRoomViewReveal(slotIndex, revealVersion);
+            return;
+        }
+
+        if (roomViewRevealDelaySequence.isAlive)
+            roomViewRevealDelaySequence.Stop();
+
+        roomViewRevealDelaySequence = Sequence.Create(
+            useUnscaledTime: useUnscaledTime
+        )
+            .ChainDelay(delay)
+            .ChainCallback(() =>
+            {
+                roomViewRevealDelaySequence = default;
+                PlayRoomViewReveal(slotIndex, revealVersion);
+            });
+    }
+
+    private void PlayRoomViewReveal(int slotIndex, int revealVersion)
+    {
+        if (!CanContinueRoomViewReveal(slotIndex, revealVersion))
+            return;
+
+        BuildSlot slot = roomViewRevealSlots[slotIndex];
+
+        if (slot?.TargetImage == null || slot.Sprite == null)
+        {
+            ScheduleNextRoomViewReveal(slotIndex, revealVersion);
+            return;
+        }
+
+        Image targetImage = slot.TargetImage;
+        targetImage.sprite = slot.Sprite;
+        targetImage.enabled = true;
+        SetImageAlpha(targetImage, 1f);
+        targetImage.rectTransform.localScale = Vector3.one;
+
+        if (buildRevealController == null)
+        {
+            ScheduleNextRoomViewReveal(slotIndex, revealVersion);
+            return;
+        }
+
+        buildRevealController.PlayBuild(
+            targetImage.transform,
+            Mathf.Max(.01f, roomViewRevealDuration),
+            () => ScheduleNextRoomViewReveal(slotIndex, revealVersion)
+        );
+    }
+
+    private void ScheduleNextRoomViewReveal(
+        int currentSlotIndex,
+        int revealVersion)
+    {
+        if (revealVersion != roomViewRevealVersion || !isRoomViewMode)
+            return;
+
+        int nextSlotIndex = currentSlotIndex + 1;
+
+        if (nextSlotIndex >= roomViewRevealSlots.Count)
+            return;
+
+        ScheduleRoomViewReveal(
+            nextSlotIndex,
+            Mathf.Max(0f, roomViewRevealInterval),
+            revealVersion
+        );
+    }
+
+    private bool CanContinueRoomViewReveal(
+        int slotIndex,
+        int revealVersion)
+    {
+        return isRoomViewMode &&
+               isActiveAndEnabled &&
+               revealVersion == roomViewRevealVersion &&
+               slotIndex >= 0 &&
+               slotIndex < roomViewRevealSlots.Count;
+    }
+
+    private void StopRoomViewReveal(bool showAllBuiltSlots)
+    {
+        roomViewRevealVersion++;
+
+        if (roomViewRevealDelaySequence.isAlive)
+            roomViewRevealDelaySequence.Stop();
+
+        roomViewRevealDelaySequence = default;
+
+        if (buildRevealController != null)
+            buildRevealController.StopBuild();
+
+        if (showAllBuiltSlots)
+        {
+            KingdomRoom room = GetCurrentRoom();
+
+            if (room?.BuildSlots != null)
+            {
+                foreach (BuildSlot slot in room.BuildSlots)
+                {
+                    if (slot != null && IsSlotCompleted(room, slot))
+                        ApplyBuiltVisual(slot);
+                }
+            }
+        }
+
+        roomViewRevealSlots.Clear();
+    }
+
     public void PrepareRoomForHome()
     {
         if (rooms == null || rooms.Count == 0)
             return;
+
+        int buildableRoomIndex = GetFirstUnlockedIncompleteRoomIndex();
+        bool currentRoomUnavailable = currentRoomIndex < 0 ||
+                                      currentRoomIndex >= rooms.Count ||
+                                      !CanOpenRoom(currentRoomIndex);
+
+        if (buildableRoomIndex >= 0 &&
+            (currentRoomUnavailable || IsRoomCompleted(currentRoomIndex)))
+        {
+            currentRoomIndex = buildableRoomIndex;
+        }
 
         if (currentRoomIndex < 0 || currentRoomIndex >= rooms.Count ||
             !CanOpenRoom(currentRoomIndex))
@@ -716,6 +1231,32 @@ public class PopupKingdomBuild : Popup
         return -1;
     }
 
+    private int GetFirstUnlockedIncompleteRoomIndex()
+    {
+        if (rooms == null)
+            return -1;
+
+        for (int i = 0; i < rooms.Count; i++)
+        {
+            if (CanOpenRoom(i) && !IsRoomCompleted(i))
+                return i;
+        }
+
+        return -1;
+    }
+
+    private bool CanUnlockRoom(int roomIndex)
+    {
+        if (rooms == null || roomIndex <= 0 || roomIndex >= rooms.Count ||
+            !AreRoomSlotsValid(rooms[roomIndex]))
+        {
+            return false;
+        }
+
+        return IsRoomCompleted(roomIndex - 1) &&
+               !IsRoomCompleted(roomIndex);
+    }
+
     private KingdomRoomState GetRoomState(KingdomRoom room)
     {
         if (room == null || room.BuildSlots == null || room.BuildSlots.Count == 0)
@@ -807,6 +1348,7 @@ public class PopupKingdomBuild : Popup
 
         requirementFeedbackSequence = default;
         ResetBuildCostTextScale();
+        StopArrivalTargetFeedback(true);
 
         if (buildButton == null)
         {
@@ -821,9 +1363,12 @@ public class PopupKingdomBuild : Popup
         Transform markerTransform = buildButton.transform;
         float safeShrinkDuration = Mathf.Max(0f, consumeShrinkDuration);
         float safeReboundDuration = Mathf.Max(0f, consumeReboundDuration);
+        float safeFadeOutDuration = Mathf.Max(0f, consumeFadeOutDuration);
         float safeAfterConsumeDelay = Mathf.Max(0f, afterConsumeBuildDelay);
 
-        if (safeShrinkDuration <= 0f && safeReboundDuration <= 0f)
+        if (safeShrinkDuration <= 0f &&
+            safeReboundDuration <= 0f &&
+            safeFadeOutDuration <= 0f)
         {
             SetBuildMarkerInactive();
             StartObjectBuildAfterConsumeDelay();
@@ -840,7 +1385,7 @@ public class PopupKingdomBuild : Popup
                     .95f
                 ),
                 safeShrinkDuration,
-                Ease.InQuad))
+                Ease.OutCubic))
             .Chain(Tween.Scale(
                 markerTransform,
                 buildButtonInitialScale * Mathf.Clamp(
@@ -854,7 +1399,18 @@ public class PopupKingdomBuild : Popup
                     1.1f
                 ),
                 safeReboundDuration,
-                Ease.OutBack))
+                Ease.OutCubic))
+            .Chain(Tween.Scale(
+                markerTransform,
+                buildButtonInitialScale * Mathf.Clamp(
+                    consumeReboundScale,
+                    1f,
+                    1.1f
+                ),
+                Vector3.zero,
+                safeFadeOutDuration,
+                Ease.InCubic))
+            .Group(CreateMarkerFadeTween(0f, safeFadeOutDuration))
             .ChainCallback(SetBuildMarkerInactive)
             .ChainDelay(safeAfterConsumeDelay)
             .ChainCallback(() =>
@@ -883,6 +1439,7 @@ public class PopupKingdomBuild : Popup
 
         RectTransform resourceIcon = FindResourceGemIcon();
         RectTransform targetGemIcon = FindBuildButtonGemIcon(resourceIcon);
+        PrepareArrivalTargetFeedback(arrivalScaleTarget);
         SetBuildCostDisplay(slot.Cost);
 
         if (resourceIcon == null)
@@ -905,7 +1462,12 @@ public class PopupKingdomBuild : Popup
 
     private void PlayRequirementArrivalFeedback(int _)
     {
-        if (buildCostText == null || !isBuilding ||
+        if (!isBuilding)
+            return;
+
+        PlayArrivalTargetFeedback();
+
+        if (buildCostText == null ||
             !buildCostText.gameObject.activeInHierarchy)
         {
             return;
@@ -945,6 +1507,64 @@ public class PopupKingdomBuild : Popup
                 safeScaleDownDuration,
                 Ease.InQuad))
             .ChainCallback(() => requirementFeedbackSequence = default);
+    }
+
+    private void PrepareArrivalTargetFeedback(Transform target)
+    {
+        StopArrivalTargetFeedback(true);
+        arrivalTargetTransform = target;
+
+        if (arrivalTargetTransform != null)
+            arrivalTargetInitialScale = arrivalTargetTransform.localScale;
+    }
+
+    private void PlayArrivalTargetFeedback()
+    {
+        if (arrivalTargetTransform == null ||
+            !arrivalTargetTransform.gameObject.activeInHierarchy)
+        {
+            return;
+        }
+
+        if (arrivalTargetFeedbackSequence.isAlive)
+            arrivalTargetFeedbackSequence.Stop();
+
+        Transform target = arrivalTargetTransform;
+        Vector3 peakScale = arrivalTargetInitialScale * Mathf.Clamp(
+            arrivalTargetPunchScale,
+            1f,
+            1.3f
+        );
+        float upDuration = Mathf.Max(0f, arrivalTargetPunchUpDuration);
+        float downDuration = Mathf.Max(0f, arrivalTargetPunchDownDuration);
+
+        arrivalTargetFeedbackSequence = Sequence.Create(
+            useUnscaledTime: useUnscaledTime
+        )
+            .Group(Tween.Scale(
+                target,
+                target.localScale,
+                peakScale,
+                upDuration,
+                Ease.OutQuad))
+            .Chain(Tween.Scale(
+                target,
+                peakScale,
+                arrivalTargetInitialScale,
+                downDuration,
+                Ease.InQuad))
+            .ChainCallback(() => arrivalTargetFeedbackSequence = default);
+    }
+
+    private void StopArrivalTargetFeedback(bool restoreScale)
+    {
+        if (arrivalTargetFeedbackSequence.isAlive)
+            arrivalTargetFeedbackSequence.Stop();
+
+        arrivalTargetFeedbackSequence = default;
+
+        if (restoreScale && arrivalTargetTransform != null)
+            arrivalTargetTransform.localScale = arrivalTargetInitialScale;
     }
 
     private RectTransform FindResourceGemIcon()
@@ -1045,12 +1665,16 @@ public class PopupKingdomBuild : Popup
         if (buildMarkerCanvasGroup == null)
             return Tween.Delay(duration);
 
+        Ease fadeEase = targetAlpha >= buildMarkerCanvasGroup.alpha
+            ? Ease.OutCubic
+            : Ease.InCubic;
+
         return Tween.Alpha(
             buildMarkerCanvasGroup,
             buildMarkerCanvasGroup.alpha,
             targetAlpha,
             duration,
-            Ease.InQuad
+            fadeEase
         );
     }
 
@@ -1112,7 +1736,7 @@ public class PopupKingdomBuild : Popup
         if (buildRevealController == null)
         {
             CommitBuiltSlot();
-            FinishBuildFlow();
+            StartProgressTrailOrFinish();
             return;
         }
 
@@ -1126,7 +1750,147 @@ public class PopupKingdomBuild : Popup
     private void OnBuildRevealCompleted()
     {
         CommitBuiltSlot();
+        StartProgressTrailOrFinish();
+    }
+
+    private void StartProgressTrailOrFinish()
+    {
+        StopProgressTrail();
+
+        RectTransform source = pendingBuildSlot?.TargetImage != null
+            ? pendingBuildSlot.TargetImage.rectTransform
+            : null;
+
+        if (source == null || progressTrailPrefab == null ||
+            progressTrailRoot == null || progressTrailTarget == null)
+        {
+            FinishBuildFlow();
+            return;
+        }
+
+        progressTrailRoutine = StartCoroutine(
+            PlayProgressTrailRoutine(source)
+        );
+    }
+
+    private IEnumerator PlayProgressTrailRoutine(RectTransform source)
+    {
+        Transform root = progressTrailRoot;
+        Vector3 start = root.InverseTransformPoint(
+            source.TransformPoint(source.rect.center)
+        );
+        Vector3 end = root.InverseTransformPoint(
+            progressTrailTarget.TransformPoint(progressTrailTarget.rect.center)
+        );
+        Vector3 control = (start + end) * .5f +
+                          new Vector3(
+                              progressTrailCurveOffset.x,
+                              progressTrailCurveOffset.y,
+                              0f
+                          );
+
+        activeProgressTrail = Instantiate(
+            progressTrailPrefab,
+            progressTrailRoot,
+            false
+        );
+
+        if (activeProgressTrail == null)
+        {
+            progressTrailRoutine = null;
+            FinishBuildFlow();
+            yield break;
+        }
+
+        activeProgressTrail.SetActive(true);
+        Transform visual = activeProgressTrail.transform;
+        Quaternion initialRotation = visual.localRotation;
+        visual.localPosition = start;
+
+        float elapsed = 0f;
+        float duration = Mathf.Max(.01f, progressTrailDuration);
+
+        while (elapsed < duration && visual != null)
+        {
+            elapsed += useUnscaledTime
+                ? Time.unscaledDeltaTime
+                : Time.deltaTime;
+
+            float progress = Mathf.Clamp01(elapsed / duration);
+            float eased = Mathf.SmoothStep(0f, 1f, progress);
+            float inverse = 1f - eased;
+            visual.localPosition = inverse * inverse * start +
+                                   2f * inverse * eased * control +
+                                   eased * eased * end;
+
+            if (rotateProgressTrailAlongPath)
+            {
+                Vector3 tangent = 2f * inverse * (control - start) +
+                                  2f * eased * (end - control);
+                if (tangent.sqrMagnitude > .0001f)
+                {
+                    float angle = Mathf.Atan2(tangent.y, tangent.x) *
+                                  Mathf.Rad2Deg +
+                                  progressTrailRotationOffset;
+                    visual.localRotation = Quaternion.Euler(0f, 0f, angle);
+                }
+            }
+            else
+            {
+                visual.localRotation = initialRotation;
+            }
+
+            yield return null;
+        }
+
+        if (visual != null)
+            visual.localPosition = end;
+
+        // The saved slot is already committed, but its progress UI has not been
+        // refreshed yet. Update it exactly when the trail reaches the target.
         FinishBuildFlow();
+
+        if (activeProgressTrail != null)
+        {
+            ParticleSystem[] particles =
+                activeProgressTrail.GetComponentsInChildren<ParticleSystem>(true);
+            for (int i = 0; i < particles.Length; i++)
+            {
+                particles[i].Stop(
+                    true,
+                    ParticleSystemStopBehavior.StopEmitting
+                );
+            }
+        }
+
+        float tailElapsed = 0f;
+        float tailDuration = Mathf.Max(0f, progressTrailTailDuration);
+        while (tailElapsed < tailDuration)
+        {
+            tailElapsed += useUnscaledTime
+                ? Time.unscaledDeltaTime
+                : Time.deltaTime;
+            yield return null;
+        }
+
+        if (activeProgressTrail != null)
+            Destroy(activeProgressTrail);
+
+        activeProgressTrail = null;
+        progressTrailRoutine = null;
+    }
+
+    private void StopProgressTrail()
+    {
+        if (progressTrailRoutine != null)
+            StopCoroutine(progressTrailRoutine);
+
+        progressTrailRoutine = null;
+
+        if (activeProgressTrail != null)
+            Destroy(activeProgressTrail);
+
+        activeProgressTrail = null;
     }
 
     private void CommitBuiltSlot()
@@ -1167,6 +1931,7 @@ public class PopupKingdomBuild : Popup
         PopupKingdom kingdomPopup =
             PopupController.Instance?.Get<PopupKingdom>() as PopupKingdom;
 
+        kingdomPopup?.RefreshKingdomState();
         kingdomPopup?.RefreshRoomViewButtonStates();
 
         pendingBuildSlot = null;
@@ -1180,6 +1945,7 @@ public class PopupKingdomBuild : Popup
             isShowingNextMarker = false;
             HideBuildMarkerInstant();
             RefreshCurrentRoom();
+            ShowCompletePopupForCurrentRoom();
             return;
         }
 
@@ -1196,8 +1962,9 @@ public class PopupKingdomBuild : Popup
             return;
         }
 
+        StopMarkerAnimation();
         SetBuildButtonPosition(nextSlot);
-        UpdateBuildMarkerCost(nextSlot);
+        UpdateBuildMarkerContent(nextSlot);
         buildButton.gameObject.SetActive(true);
         SetBuildButtonAvailabilityVfx(false);
         SetBuildMarkerRaycastState(false);
@@ -1219,14 +1986,13 @@ public class PopupKingdomBuild : Popup
             return;
         }
 
-        StopMarkerAnimation();
         markerSequence = Sequence.Create(useUnscaledTime: useUnscaledTime)
             .Group(Tween.Scale(
                 markerTransform,
                 Vector3.zero,
                 buildButtonInitialScale,
                 safeShowDuration,
-                Ease.OutBack))
+                Ease.OutCubic))
             .Group(CreateMarkerFadeTween(1f, safeShowDuration))
             .ChainCallback(() =>
             {
@@ -1245,7 +2011,7 @@ public class PopupKingdomBuild : Popup
             return;
 
         SetBuildButtonPosition(nextSlot);
-        UpdateBuildMarkerCost(nextSlot);
+        UpdateBuildMarkerContent(nextSlot);
         buildButton.gameObject.SetActive(true);
         buildButton.transform.localScale = buildButtonInitialScale;
 
@@ -1290,6 +2056,7 @@ public class PopupKingdomBuild : Popup
         KingdomRoom room = GetCurrentRoom();
         BuildSlot nextSlot = GetNextBuildSlot(room);
         bool canShowMarker =
+            !isRoomViewMode &&
             room != null &&
             nextSlot != null &&
             !IsRoomCompleted(currentRoomIndex) &&
@@ -1309,6 +2076,7 @@ public class PopupKingdomBuild : Popup
             Data.PlayerData.CurrentStar >= nextSlot.Cost;
 
         bool shouldPlay =
+            !isRoomViewMode &&
             canShowMarker &&
             hasEnoughGem &&
             !isBuilding &&
@@ -1323,6 +2091,93 @@ public class PopupKingdomBuild : Popup
     {
         if (buildButtonAvailabilityVfx != null)
             buildButtonAvailabilityVfx.SetAvailable(enabled);
+
+        ApplyBuildButtonMaterial(enabled);
+
+        if (enabled)
+            StartBuildIconPulse();
+        else
+            StopBuildIconPulse(true);
+    }
+
+    private void StartBuildIconPulse()
+    {
+        if (buildButtonItemIcon == null || buildIconPulseTween.isAlive)
+            return;
+
+        float minScale = Mathf.Min(
+            buildIconPulseMinScale,
+            buildIconPulseMaxScale
+        );
+        float maxScale = Mathf.Max(
+            buildIconPulseMinScale,
+            buildIconPulseMaxScale
+        );
+
+        Vector3 maxValue = Vector3.one * maxScale;
+        Vector3 minValue = Vector3.one * minScale;
+        buildButtonItemIcon.transform.localScale = maxValue;
+
+        buildIconPulseTween = Tween.Scale(
+            buildButtonItemIcon.transform,
+            maxValue,
+            minValue,
+            Mathf.Max(.01f, buildIconPulseHalfDuration),
+            Ease.InOutSine,
+            cycles: -1,
+            cycleMode: CycleMode.Yoyo,
+            useUnscaledTime: useUnscaledTime
+        );
+    }
+
+    private void StopBuildIconPulse(bool restoreScale)
+    {
+        if (buildIconPulseTween.isAlive)
+            buildIconPulseTween.Stop();
+
+        buildIconPulseTween = default;
+
+        if (restoreScale && buildButtonItemIcon != null &&
+            buildIconScaleCached)
+        {
+            buildButtonItemIcon.transform.localScale = buildIconInitialScale;
+        }
+    }
+
+    private void CacheBuildButtonVisuals()
+    {
+        if (buildButton == null || buildButtonVisualImages.Count > 0)
+            return;
+
+        foreach (Image image in
+                 buildButton.GetComponentsInChildren<Image>(true))
+        {
+            if (image == null ||
+                image.name.StartsWith("BuildButtonUi", StringComparison.Ordinal))
+            {
+                continue;
+            }
+
+            buildButtonVisualImages.Add(image);
+            buildButtonNormalMaterials.Add(image.material);
+        }
+    }
+
+    private void ApplyBuildButtonMaterial(bool available)
+    {
+        CacheBuildButtonVisuals();
+
+        for (int index = 0; index < buildButtonVisualImages.Count; index++)
+        {
+            Image image = buildButtonVisualImages[index];
+
+            if (image == null)
+                continue;
+
+            image.material = available || buildButtonDisableMaterial == null
+                ? buildButtonNormalMaterials[index]
+                : buildButtonDisableMaterial;
+        }
     }
 
     private void SetBuildMarkerRaycastState(bool enabled)
@@ -1371,6 +2226,18 @@ public class PopupKingdomBuild : Popup
         }
     }
 
+    private void UpdateBuildMarkerContent(BuildSlot nextSlot)
+    {
+        UpdateBuildMarkerCost(nextSlot);
+
+        if (buildButtonItemIcon == null)
+            return;
+
+        Sprite icon = nextSlot?.BuildIcon;
+        buildButtonItemIcon.sprite = icon;
+        buildButtonItemIcon.enabled = icon != null;
+    }
+
     private void ApplyBuildMarkerTextColor()
     {
         if (buildCostText == null)
@@ -1400,6 +2267,7 @@ public class PopupKingdomBuild : Popup
     private void StopBuildTween()
     {
         RefundPendingResourceIfNeeded();
+        StopProgressTrail();
 
         if (resourceTransferAnimator != null)
             resourceTransferAnimator.StopTransfer();
@@ -1411,6 +2279,7 @@ public class PopupKingdomBuild : Popup
 
         requirementFeedbackSequence = default;
         ResetBuildCostTextScale();
+        StopArrivalTargetFeedback(true);
 
         if (buildRevealController != null)
             buildRevealController.StopBuild();
@@ -1428,6 +2297,98 @@ public class PopupKingdomBuild : Popup
         RestoreBuildMarkerState();
     }
 
+    private void ShowCompletePopupForCurrentRoom()
+    {
+        if (isRoomViewMode || currentRoomIndex < 0)
+            return;
+
+        StopCompletionPopupRoutine();
+        completionPopupRoutine = StartCoroutine(
+            ShowCompletePopupRoutine(currentRoomIndex)
+        );
+    }
+
+    private IEnumerator ShowCompletePopupRoutine(int completedRoomIndex)
+    {
+        if (completionSourceChest != null)
+        {
+            CacheCompletionSourceChestScale();
+            Vector3 fromScale = completionSourceChest.localScale;
+            float duration = Mathf.Max(0f, completionSourceChestShrinkDuration);
+
+            if (duration <= 0f)
+            {
+                completionSourceChest.localScale = Vector3.zero;
+            }
+            else
+            {
+                float elapsed = 0f;
+                while (elapsed < duration)
+                {
+                    elapsed += useUnscaledTime
+                        ? Time.unscaledDeltaTime
+                        : Time.deltaTime;
+
+                    float progress = Mathf.Clamp01(elapsed / duration);
+                    float eased = progress * progress * progress;
+                    completionSourceChest.localScale =
+                        Vector3.LerpUnclamped(fromScale, Vector3.zero, eased);
+
+                    yield return null;
+                }
+
+                completionSourceChest.localScale = Vector3.zero;
+            }
+        }
+
+        PopupKingdomBuildComplete completePopup =
+            PopupController.Instance?.Get<PopupKingdomBuildComplete>() as
+                PopupKingdomBuildComplete;
+
+        if (completePopup == null)
+        {
+            Debug.LogWarning(
+                "[PopupKingdomBuild] PopupKingdomBuildComplete is not registered in PopupConfig."
+            );
+            completionPopupRoutine = null;
+            yield break;
+        }
+
+        completePopup.Configure(this, completedRoomIndex);
+        completePopup.ConfigureRewards(completionRewardSprites);
+        PopupController.Instance.Show<PopupKingdomBuildComplete>(
+            PopupAnimation.None
+        );
+
+        completionPopupRoutine = null;
+    }
+
+    private void StopCompletionPopupRoutine()
+    {
+        if (completionPopupRoutine == null)
+            return;
+
+        StopCoroutine(completionPopupRoutine);
+        completionPopupRoutine = null;
+    }
+
+    private void CacheCompletionSourceChestScale()
+    {
+        if (completionSourceChest == null || completionSourceChestScaleCached)
+            return;
+
+        completionSourceChestInitialScale = completionSourceChest.localScale;
+        completionSourceChestScaleCached = true;
+    }
+
+    private void RestoreCompletionSourceChestScale()
+    {
+        if (completionSourceChest == null || !completionSourceChestScaleCached)
+            return;
+
+        completionSourceChest.localScale = completionSourceChestInitialScale;
+    }
+
     private void RestoreBuildMarkerState()
     {
         ResetBuildCostTextScale();
@@ -1440,6 +2401,78 @@ public class PopupKingdomBuild : Popup
 
         if (buildMarkerCanvasGroup != null)
             buildMarkerCanvasGroup.alpha = 1f;
+    }
+
+    private void PrepareTagBuildIntro()
+    {
+        StopTagBuildIntro();
+        RestoreTagBuildIntroState();
+
+        if (isRoomViewMode || tagBuildButton == null ||
+            buildButton == null || !buildButton.gameObject.activeSelf)
+        {
+            return;
+        }
+
+        Vector2 hiddenPosition = tagBuildShownPosition;
+        hiddenPosition.x -= Mathf.Max(0f, tagBuildHiddenOffset);
+        tagBuildButton.anchoredPosition = hiddenPosition;
+
+        if (tagBuildButtonCanvasGroup != null)
+            tagBuildButtonCanvasGroup.alpha = 0f;
+    }
+
+    private void PlayTagBuildIntro()
+    {
+        if (isRoomViewMode || tagBuildButton == null ||
+            !tagBuildButton.gameObject.activeInHierarchy)
+        {
+            return;
+        }
+
+        float moveDuration = Mathf.Max(0f, tagBuildMoveDuration);
+        float fadeDuration = Mathf.Max(0f, tagBuildFadeDuration);
+        float delay = Mathf.Max(0f, tagBuildIntroDelay);
+        Vector2 hiddenPosition = tagBuildShownPosition;
+        hiddenPosition.x -= Mathf.Max(0f, tagBuildHiddenOffset);
+
+        tagBuildMoveTween = Tween.UIAnchoredPosition(
+            tagBuildButton,
+            hiddenPosition,
+            tagBuildShownPosition,
+            moveDuration,
+            Ease.OutCubic,
+            startDelay: delay,
+            useUnscaledTime: useUnscaledTime
+        );
+
+        if (tagBuildButtonCanvasGroup != null)
+        {
+            tagBuildFadeTween = Tween.Alpha(
+                tagBuildButtonCanvasGroup,
+                0f,
+                1f,
+                fadeDuration,
+                Ease.OutQuad,
+                startDelay: delay,
+                useUnscaledTime: useUnscaledTime
+            );
+        }
+    }
+
+    private void StopTagBuildIntro()
+    {
+        tagBuildMoveTween.Stop();
+        tagBuildFadeTween.Stop();
+    }
+
+    private void RestoreTagBuildIntroState()
+    {
+        if (tagBuildButton != null && tagBuildPositionCached)
+            tagBuildButton.anchoredPosition = tagBuildShownPosition;
+
+        if (tagBuildButtonCanvasGroup != null)
+            tagBuildButtonCanvasGroup.alpha = 1f;
     }
 
     private void RefundPendingResourceIfNeeded()
@@ -1459,6 +2492,12 @@ public class PopupKingdomBuild : Popup
         if (resourceHandler == null)
             resourceHandler = GetComponentInChildren<BuildHandler>(true);
 
+        if (resourceHandler != null && !resourceHandlerActiveStateCached)
+        {
+            resourceHandlerWasActive = resourceHandler.gameObject.activeSelf;
+            resourceHandlerActiveStateCached = true;
+        }
+
         if (resourceTransferAnimator == null)
             resourceTransferAnimator = GetComponent<ResourceTransferAnimator>();
 
@@ -1473,6 +2512,41 @@ public class PopupKingdomBuild : Popup
 
         if (buildButton == null)
             buildButton = FindNamedComponent<CustomButton>("BuildButton");
+
+        if (tagBuildButton == null)
+            tagBuildButton = FindNamedComponent<RectTransform>("Tagbuild_Btn");
+
+        if (tagBuildButton != null)
+        {
+            if (tagBuildButtonCanvasGroup == null)
+            {
+                tagBuildButtonCanvasGroup =
+                    tagBuildButton.GetComponent<CanvasGroup>();
+
+                if (tagBuildButtonCanvasGroup == null)
+                {
+                    tagBuildButtonCanvasGroup =
+                        tagBuildButton.gameObject.AddComponent<CanvasGroup>();
+                }
+            }
+
+            if (!tagBuildPositionCached)
+            {
+                tagBuildShownPosition = tagBuildButton.anchoredPosition;
+                tagBuildPositionCached = true;
+            }
+        }
+
+        if (buildButtonItemIcon == null)
+            buildButtonItemIcon = FindNamedComponent<Image>("Build_Slot_icon");
+
+        if (buildButtonItemIcon != null && !buildIconScaleCached)
+        {
+            buildIconInitialScale = buildButtonItemIcon.transform.localScale;
+            buildIconScaleCached = true;
+        }
+
+        CacheBuildButtonVisuals();
 
         if (buildButton != null)
         {
@@ -1524,6 +2598,9 @@ public class PopupKingdomBuild : Popup
         if (progressText == null)
             progressText = FindNamedComponent<TextMeshProUGUI>("ProgressText");
 
+        if (progressBuildFill == null)
+            progressBuildFill = FindNamedComponent<Image>("Progress_build_fill");
+
         if (completedState == null)
             completedState = FindNamedGameObject("CompletedState");
 
@@ -1540,6 +2617,15 @@ public class PopupKingdomBuild : Popup
             buildButtonInitialScale = buildButton.transform.localScale;
             buildButtonScaleCached = true;
         }
+
+        if (completionSourceChest == null)
+        {
+            Transform chest = FindNamedTransform("Chest");
+            if (chest != null)
+                completionSourceChest = chest;
+        }
+
+        CacheCompletionSourceChestScale();
 
         if (roomScrollRect == null)
             roomScrollRect = FindNamedComponent<ScrollRect>("RoomScrollView");
@@ -1627,5 +2713,11 @@ public class PopupKingdomBuild : Popup
         }
 
         return null;
+    }
+
+    private Transform FindNamedTransform(string objectName)
+    {
+        GameObject namedGameObject = FindNamedGameObject(objectName);
+        return namedGameObject != null ? namedGameObject.transform : null;
     }
 }

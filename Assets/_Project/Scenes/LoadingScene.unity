@@ -252,7 +252,7 @@ MonoBehaviour:
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
   m_ReferenceResolution: {x: 1080, y: 1920}
-  m_ScreenMatchMode: 0
+  m_ScreenMatchMode: 1
   m_MatchWidthOrHeight: 0
   m_PhysicalUnit: 3
   m_FallbackScreenDPI: 96
@@ -318,7 +318,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 838, y: 402}
+  m_SizeDelta: {x: 614, y: 409}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &799788438
 MonoBehaviour:
@@ -342,7 +342,7 @@ MonoBehaviour:
       m_Calls: []
   m_Sprite: {fileID: 21300000, guid: c1291753e6562d941a678afc7fd204c1, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -422,8 +422,6 @@ MonoBehaviour:
   contentCloseStartProgress: 0.3
   contentFadeStartProgress: 0.48
   contentMinScale: 0.02
-  closeStretchAmount: 0.035
-  closeStretchFrequency: 1.5
 --- !u!4 &946555597
 Transform:
   m_ObjectHideFlags: 0
@@ -1285,10 +1283,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: IAPController
       objectReference: {fileID: 0}
-    - target: {fileID: 1219155875758953375, guid: 2400ca8cebd4c38458c5ee0353dcc7a1, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 6221876852614255928, guid: 2400ca8cebd4c38458c5ee0353dcc7a1, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -1547,11 +1541,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2663888547895087308, guid: fc089dcc557cae3498cccb762296c409, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 838
+      value: 614
       objectReference: {fileID: 0}
     - target: {fileID: 2663888547895087308, guid: fc089dcc557cae3498cccb762296c409, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 402
+      value: 409
       objectReference: {fileID: 0}
     - target: {fileID: 2663888547895087308, guid: fc089dcc557cae3498cccb762296c409, type: 3}
       propertyPath: m_LocalScale.x

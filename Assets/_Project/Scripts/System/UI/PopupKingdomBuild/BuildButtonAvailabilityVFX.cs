@@ -11,15 +11,15 @@ public sealed class BuildButtonAvailabilityVFX : MonoBehaviour
     [SerializeField] private ParticleSystem sparkle;
 
     [Header("Emission")]
-    [SerializeField] [Min(0f)] private float dustEmissionRate = 14f;
-    [SerializeField] [Min(0f)] private float sparkleEmissionRate = 5f;
-    [SerializeField] [Min(0f)] private float borderPadding = 10f;
+    [SerializeField] [Min(0f)] private float dustEmissionRate = 450f;
+    [SerializeField] [Min(0f)] private float sparkleEmissionRate = 150f;
+    [SerializeField] [Min(0f)] private float borderPadding = 3f;
 
     [Header("Style")]
-    [SerializeField] private Color dustColor = new Color(1f, .72f, .2f, .88f);
+    [SerializeField] private Color dustColor = new Color(1f, .78f, .24f, 1f);
     [SerializeField] private Color sparkleColor = new Color(1f, .96f, .55f, 1f);
-    [SerializeField] [Min(0f)] private float dustSizeRatio = .045f;
-    [SerializeField] [Min(0f)] private float sparkleSizeRatio = .065f;
+    [SerializeField] [Min(0f)] private float dustSizeRatio = .065f;
+    [SerializeField] [Min(0f)] private float sparkleSizeRatio = .1f;
 
     [Header("Renderer")]
     [SerializeField] private Material dustMaterial;
@@ -33,13 +33,18 @@ public sealed class BuildButtonAvailabilityVFX : MonoBehaviour
 
     [Header("Screen-space UI fallback")]
     [Tooltip("Screen-space overlay canvases cannot draw a ParticleSystemRenderer above UI reliably. These pooled UI sprites provide the same dust/sparkle effect in that case.")]
-    [SerializeField] [Min(0)] private int uiDustCount = 34;
-    [SerializeField] [Min(0)] private int uiSparkleCount = 10;
-    [SerializeField] [Min(0f)] private float uiParticlePadding = 16f;
+    [SerializeField] [Min(0)] private int uiDustCount = 700;
+    [SerializeField] [Min(0)] private int uiSparkleCount = 200;
+    [SerializeField] [Min(0f)] private float uiParticlePadding = 3f;
 
     private bool isAvailable;
     private bool isConfigured;
     private Vector2 lastRectSize;
+    private Vector2 lastRectCenter;
+    private Vector2 roundButtonCenter;
+    private Vector2 roundButtonSize;
+    private Vector2 ovalButtonCenter;
+    private Vector2 ovalButtonSize;
     private RectTransform uiParticleRoot;
     private float uiAnimationTime;
     private readonly List<UiParticle> uiParticles = new List<UiParticle>();
@@ -55,6 +60,7 @@ public sealed class BuildButtonAvailabilityVFX : MonoBehaviour
         public RectTransform RectTransform;
         public Image Image;
         public bool IsSparkle;
+        public bool IsRoundButtonPath;
         public float Perimeter;
         public float Phase;
         public float Duration;
@@ -69,6 +75,9 @@ public sealed class BuildButtonAvailabilityVFX : MonoBehaviour
     private void Awake()
     {
         EnsureParticleSystems();
+        // A serialized ParticleSystem can begin playing during instantiation
+        // before this component's Awake runs. Stop it before changing duration.
+        StopParticles();
         ConfigureParticleSystems();
         EnsureUiParticleVisuals();
         RefreshParticleShapeIfNeeded(force: true);
@@ -141,10 +150,10 @@ public sealed class BuildButtonAvailabilityVFX : MonoBehaviour
         // Give the effect a visible first beat instead of waiting for the
         // first rate-over-time tick after the marker becomes available.
         if (dust != null)
-            dust.Emit(Mathf.Clamp(Mathf.RoundToInt(dustEmissionRate * .18f), 2, 5));
+            dust.Emit(Mathf.Clamp(Mathf.RoundToInt(dustEmissionRate * .18f), 12, 90));
 
         if (sparkle != null)
-            sparkle.Emit(Mathf.Clamp(Mathf.RoundToInt(sparkleEmissionRate * .2f), 1, 2));
+            sparkle.Emit(Mathf.Clamp(Mathf.RoundToInt(sparkleEmissionRate * .2f), 5, 40));
     }
 
     public void StopEffect()
@@ -167,12 +176,11 @@ public sealed class BuildButtonAvailabilityVFX : MonoBehaviour
             rootObject.layer = gameObject.layer;
             uiParticleRoot = rootObject.AddComponent<RectTransform>();
             uiParticleRoot.SetParent(transform, false);
-            uiParticleRoot.anchorMin = Vector2.zero;
-            uiParticleRoot.anchorMax = Vector2.one;
+            uiParticleRoot.anchorMin = new Vector2(.5f, .5f);
+            uiParticleRoot.anchorMax = new Vector2(.5f, .5f);
             uiParticleRoot.anchoredPosition = Vector2.zero;
             uiParticleRoot.sizeDelta = Vector2.zero;
             uiParticleRoot.pivot = new Vector2(.5f, .5f);
-            uiParticleRoot.SetAsLastSibling();
         }
 
         int requiredCount = GetConfiguredUiParticleCount();
@@ -208,7 +216,9 @@ public sealed class BuildButtonAvailabilityVFX : MonoBehaviour
             });
         }
 
-        uiParticleRoot.SetAsLastSibling();
+        // Keep every glow particle behind Tagbuild_Btn, the round button image,
+        // and Build_Slot_icon while still inheriting the BuildButton movement.
+        uiParticleRoot.SetAsFirstSibling();
     }
 
     private int GetConfiguredUiParticleCount()
@@ -222,6 +232,10 @@ public sealed class BuildButtonAvailabilityVFX : MonoBehaviour
 
         int dustCount = Mathf.Max(0, uiDustCount);
         int activeCount = Mathf.Min(uiParticles.Count, GetConfiguredUiParticleCount());
+        float roundPerimeter = GetEllipsePerimeter(roundButtonSize);
+        float ovalPerimeter = GetCapsulePerimeter(ovalButtonSize);
+        float roundShare = roundPerimeter /
+            Mathf.Max(.01f, roundPerimeter + ovalPerimeter);
 
         for (int i = 0; i < uiParticles.Count; i++)
         {
@@ -236,7 +250,29 @@ public sealed class BuildButtonAvailabilityVFX : MonoBehaviour
             if (!active)
                 continue;
 
-            particle.Perimeter = Random.value;
+            int typeIndex = particle.IsSparkle ? i - dustCount : i;
+            int typeCount = particle.IsSparkle
+                ? Mathf.Max(0, activeCount - dustCount)
+                : Mathf.Min(dustCount, activeCount);
+            int roundCount = Mathf.Clamp(
+                Mathf.RoundToInt(typeCount * roundShare),
+                1,
+                Mathf.Max(1, typeCount - 1)
+            );
+            particle.IsRoundButtonPath = typeIndex < roundCount;
+            int pathIndex = particle.IsRoundButtonPath
+                ? typeIndex
+                : typeIndex - roundCount;
+            int pathCount = particle.IsRoundButtonPath
+                ? roundCount
+                : Mathf.Max(1, typeCount - roundCount);
+
+            particle.Perimeter = pathCount > 0
+                ? Mathf.Repeat(
+                    (float)pathIndex / pathCount + Random.Range(-.002f, .002f),
+                    1f
+                )
+                : 0f;
             particle.Duration = particle.IsSparkle
                 ? Random.Range(1.15f, 1.7f)
                 : Random.Range(.9f, 1.45f);
@@ -276,9 +312,6 @@ public sealed class BuildButtonAvailabilityVFX : MonoBehaviour
         uiAnimationTime += Mathf.Max(0f, deltaTime);
 
         int activeCount = Mathf.Min(uiParticles.Count, GetConfiguredUiParticleCount());
-        float width = Mathf.Max(1f, lastRectSize.x + uiParticlePadding * 2f);
-        float height = Mathf.Max(1f, lastRectSize.y + uiParticlePadding * 2f);
-
         for (int i = 0; i < uiParticles.Count; i++)
         {
             UiParticle particle = uiParticles[i];
@@ -295,12 +328,29 @@ public sealed class BuildButtonAvailabilityVFX : MonoBehaviour
                 ? Mathf.Lerp(.72f, 1.16f, Mathf.Sin(progress * Mathf.PI))
                 : Mathf.Lerp(.72f, 1f, lifeFade);
 
-            Vector2 point = GetPerimeterPoint(
-                particle.Perimeter + progress * (particle.IsSparkle ? .035f : .075f),
-                width,
-                height,
-                out Vector2 normal
-            );
+            float pathPosition = particle.Perimeter +
+                progress * (particle.IsSparkle ? .09f : .16f);
+            Vector2 point;
+            Vector2 normal;
+
+            if (particle.IsRoundButtonPath)
+            {
+                point = GetEllipsePoint(
+                    pathPosition,
+                    roundButtonSize + Vector2.one * (uiParticlePadding * 2f),
+                    out normal
+                );
+                point += roundButtonCenter - lastRectCenter;
+            }
+            else
+            {
+                point = GetCapsulePoint(
+                    pathPosition,
+                    ovalButtonSize + Vector2.one * (uiParticlePadding * 2f),
+                    out normal
+                );
+                point += ovalButtonCenter - lastRectCenter;
+            }
 
             float outwardMotion = particle.IsSparkle
                 ? Mathf.Sin(progress * Mathf.PI) * 2.5f
@@ -366,6 +416,88 @@ public sealed class BuildButtonAvailabilityVFX : MonoBehaviour
         distance -= width;
         normal = Vector2.left;
         return new Vector2(-halfWidth, -halfHeight + distance);
+    }
+
+    private static Vector2 GetEllipsePoint(
+        float normalizedPosition,
+        Vector2 size,
+        out Vector2 normal
+    )
+    {
+        float angle = Mathf.Repeat(normalizedPosition, 1f) * Mathf.PI * 2f;
+        float radiusX = Mathf.Max(.5f, size.x * .5f);
+        float radiusY = Mathf.Max(.5f, size.y * .5f);
+        float cos = Mathf.Cos(angle);
+        float sin = Mathf.Sin(angle);
+        normal = new Vector2(cos / radiusX, sin / radiusY).normalized;
+        return new Vector2(cos * radiusX, sin * radiusY);
+    }
+
+    private static Vector2 GetCapsulePoint(
+        float normalizedPosition,
+        Vector2 size,
+        out Vector2 normal
+    )
+    {
+        float width = Mathf.Max(1f, size.x);
+        float height = Mathf.Max(1f, size.y);
+
+        if (width <= height)
+            return GetEllipsePoint(normalizedPosition, size, out normal);
+
+        float radius = height * .5f;
+        float straightLength = width - height;
+        float arcLength = Mathf.PI * radius;
+        float perimeter = straightLength * 2f + arcLength * 2f;
+        float distance = Mathf.Repeat(normalizedPosition, 1f) * perimeter;
+        float halfStraight = straightLength * .5f;
+
+        if (distance <= straightLength)
+        {
+            normal = Vector2.up;
+            return new Vector2(-halfStraight + distance, radius);
+        }
+
+        distance -= straightLength;
+
+        if (distance <= arcLength)
+        {
+            float angle = Mathf.PI * .5f - distance / radius;
+            normal = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
+            return new Vector2(halfStraight, 0f) + normal * radius;
+        }
+
+        distance -= arcLength;
+
+        if (distance <= straightLength)
+        {
+            normal = Vector2.down;
+            return new Vector2(halfStraight - distance, -radius);
+        }
+
+        distance -= straightLength;
+        float leftAngle = -Mathf.PI * .5f - distance / radius;
+        normal = new Vector2(Mathf.Cos(leftAngle), Mathf.Sin(leftAngle));
+        return new Vector2(-halfStraight, 0f) + normal * radius;
+    }
+
+    private static float GetEllipsePerimeter(Vector2 size)
+    {
+        float a = Mathf.Max(.5f, size.x * .5f);
+        float b = Mathf.Max(.5f, size.y * .5f);
+        return Mathf.PI * (3f * (a + b) -
+            Mathf.Sqrt((3f * a + b) * (a + 3f * b)));
+    }
+
+    private static float GetCapsulePerimeter(Vector2 size)
+    {
+        float width = Mathf.Max(1f, size.x);
+        float height = Mathf.Max(1f, size.y);
+
+        if (width <= height)
+            return GetEllipsePerimeter(size);
+
+        return (width - height) * 2f + Mathf.PI * height;
     }
 
     private ParticleSystem FindOrCreateParticleSystem(
@@ -461,7 +593,7 @@ public sealed class BuildButtonAvailabilityVFX : MonoBehaviour
         main.playOnAwake = false;
         main.simulationSpace = ParticleSystemSimulationSpace.Local;
         main.useUnscaledTime = useUnscaledTime;
-        main.maxParticles = 64;
+        main.maxParticles = 1024;
         main.startLifetime = new ParticleSystem.MinMaxCurve(
             lifetimeMin,
             lifetimeMax
@@ -541,29 +673,64 @@ public sealed class BuildButtonAvailabilityVFX : MonoBehaviour
     private void RefreshParticleShapeIfNeeded(bool force = false)
     {
         RectTransform rectTransform = transform as RectTransform;
-        Vector2 rectSize = rectTransform != null
-            ? rectTransform.rect.size
-            : new Vector2(300f, 100f);
+        GetVisualBounds(rectTransform, out Vector2 rectCenter, out Vector2 rectSize);
+        GetChildBounds(
+            rectTransform,
+            "Image",
+            rectCenter,
+            rectSize,
+            out Vector2 currentRoundCenter,
+            out Vector2 currentRoundSize
+        );
+        GetChildBounds(
+            rectTransform,
+            "Tagbuild_Btn",
+            rectCenter,
+            rectSize,
+            out Vector2 currentOvalCenter,
+            out Vector2 currentOvalSize
+        );
 
         if (rectSize.x <= .01f || rectSize.y <= .01f)
             rectSize = new Vector2(300f, 100f);
 
-        if (!force && (rectSize - lastRectSize).sqrMagnitude < .01f)
+        if (!force && (rectSize - lastRectSize).sqrMagnitude < .01f &&
+            (rectCenter - lastRectCenter).sqrMagnitude < .01f &&
+            (currentRoundCenter - roundButtonCenter).sqrMagnitude < .01f &&
+            (currentRoundSize - roundButtonSize).sqrMagnitude < .01f &&
+            (currentOvalCenter - ovalButtonCenter).sqrMagnitude < .01f &&
+            (currentOvalSize - ovalButtonSize).sqrMagnitude < .01f)
+        {
             return;
+        }
 
         lastRectSize = rectSize;
+        lastRectCenter = rectCenter;
+        roundButtonCenter = currentRoundCenter;
+        roundButtonSize = currentRoundSize;
+        ovalButtonCenter = currentOvalCenter;
+        ovalButtonSize = currentOvalSize;
         float smallestSide = Mathf.Max(1f, Mathf.Min(rectSize.x, rectSize.y));
         float padding = Mathf.Max(2f, borderPadding);
+
+        if (uiParticleRoot != null)
+        {
+            uiParticleRoot.anchoredPosition = rectCenter;
+            uiParticleRoot.sizeDelta = rectSize;
+            uiParticleRoot.SetAsFirstSibling();
+        }
 
         SetParticleShape(
             dust,
             rectSize.x + padding * 2f,
-            rectSize.y + padding * 2f
+            rectSize.y + padding * 2f,
+            rectCenter
         );
         SetParticleShape(
             sparkle,
             rectSize.x + padding * 2.4f,
-            rectSize.y + padding * 2.4f
+            rectSize.y + padding * 2.4f,
+            rectCenter
         );
 
         SetParticleSize(
@@ -586,6 +753,83 @@ public sealed class BuildButtonAvailabilityVFX : MonoBehaviour
         SetEmissionRate(sparkle, sparkleEmissionRate * perimeterRatio);
 
         RefreshUiParticleLayout(rectSize, smallestSide);
+    }
+
+    private void GetVisualBounds(
+        RectTransform root,
+        out Vector2 center,
+        out Vector2 size
+    )
+    {
+        if (root == null)
+        {
+            center = Vector2.zero;
+            size = new Vector2(300f, 100f);
+            return;
+        }
+
+        bool foundVisual = false;
+        Vector2 min = Vector2.positiveInfinity;
+        Vector2 max = Vector2.negativeInfinity;
+
+        for (int index = 0; index < root.childCount; index++)
+        {
+            RectTransform child = root.GetChild(index) as RectTransform;
+
+            if (child == null || child == uiParticleRoot ||
+                (dust != null && child == dust.transform) ||
+                (sparkle != null && child == sparkle.transform))
+            {
+                continue;
+            }
+
+            Bounds bounds = RectTransformUtility.CalculateRelativeRectTransformBounds(
+                root,
+                child
+            );
+            min = Vector2.Min(min, bounds.min);
+            max = Vector2.Max(max, bounds.max);
+            foundVisual = true;
+        }
+
+        if (!foundVisual)
+        {
+            center = root.rect.center;
+            size = root.rect.size;
+            return;
+        }
+
+        center = (min + max) * .5f;
+        size = max - min;
+    }
+
+    private static void GetChildBounds(
+        RectTransform root,
+        string childName,
+        Vector2 fallbackCenter,
+        Vector2 fallbackSize,
+        out Vector2 center,
+        out Vector2 size
+    )
+    {
+        Transform childTransform = root != null
+            ? root.Find(childName)
+            : null;
+        RectTransform child = childTransform as RectTransform;
+
+        if (root == null || child == null)
+        {
+            center = fallbackCenter;
+            size = fallbackSize;
+            return;
+        }
+
+        Bounds bounds = RectTransformUtility.CalculateRelativeRectTransformBounds(
+            root,
+            child
+        );
+        center = bounds.center;
+        size = bounds.size;
     }
 
     private void RefreshUiParticleLayout(Vector2 rectSize, float smallestSide)
@@ -613,13 +857,15 @@ public sealed class BuildButtonAvailabilityVFX : MonoBehaviour
     private static void SetParticleShape(
         ParticleSystem particleSystem,
         float width,
-        float height
+        float height,
+        Vector2 center
     )
     {
         if (particleSystem == null)
             return;
 
         ParticleSystem.ShapeModule shape = particleSystem.shape;
+        shape.position = new Vector3(center.x, center.y, 0f);
         shape.scale = new Vector3(
             Mathf.Max(1f, width),
             Mathf.Max(1f, height),

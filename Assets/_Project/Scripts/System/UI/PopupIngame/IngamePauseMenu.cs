@@ -265,6 +265,11 @@ public class InGamePauseMenu : MonoBehaviour
 
     private void RefreshUIOrder()
     {
+        // Dark_Bg is also reused by the out-of-move transition, which can
+        // move it to the top of the PopupInGame hierarchy. Keep the whole
+        // pause menu above that shared overlay so its buttons receive input.
+        transform.SetAsLastSibling();
+
         for (int i = pauseButtons.Count - 1;
              i >= 0;
              i--)
@@ -1421,16 +1426,6 @@ public class InGamePauseMenu : MonoBehaviour
 
     public void OnClickExit()
     {
-        if (GameManager.Instance.IsPictureReplay)
-        {
-            CloseImmediately();
-            GameManager.Instance.ExitPictureReplay();
-            return;
-        }
-        SoundController.Instance.PlayFX(
-            SoundName.ClickButton
-        );
-
         var popupQuit =
             PopupController.Instance
                 .Get<PopupQuit>() as PopupQuit;

@@ -44,6 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ffd5e6e5a2076c8428c3aadad7804256, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  collectionConfig: {fileID: 11400000, guid: 2357592e5d3e4a93af13698273fcb44c, type: 2}
   playerDataReader:
     isFirstPlaying: 1
     currentLevelIndex: 1

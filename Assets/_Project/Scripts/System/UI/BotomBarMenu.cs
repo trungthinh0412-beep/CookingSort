@@ -929,10 +929,6 @@ public class BottomBarMenu : MonoBehaviour
 
         isOpening = true;
 
-        SoundController.Instance.PlayFX(
-            SoundName.ClickButton
-        );
-
         OpenPopup(index);
     }
 

@@ -193,7 +193,7 @@ namespace custom.find.reference
 			{
 				foreach (var instId in instSet)
 				{
-					refs.Add(instId, new CustomSceneRef(0, EditorUtility.InstanceIDToObject(int.Parse(instId))));
+                    refs.Add(instId, new CustomSceneRef(0, EditorUtility.EntityIdToObject(int.Parse(instId))));
 				}	
 			}
 			else

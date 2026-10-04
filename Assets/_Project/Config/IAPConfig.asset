@@ -13,21 +13,273 @@ MonoBehaviour:
   m_Name: IAPConfig
   m_EditorClassIdentifier: Assembly-CSharp::IAPConfig
   packData:
-  - packName: 0
-    packId: com.gamme.packingmaster.removeads
   - packName: 1
-    packId: com.gamme.packingmaster.smallbundle
+    packId: com.gamme.packingmaster.removeads
+    productType: 1
+    displayName: Remove Ads
+    description: Remove ads permanently
+    icon: {fileID: 0}
+    sortOrder: 0
+    badgeText: 
+    price: 0
+    currencyCode: USD
+    rewards:
+    - type: 7
+      amount: 100
+    - type: 0
+      amount: 2000
+    - type: 3
+      amount: 1
+    - type: 4
+      amount: 1
+    - type: 5
+      amount: 1
+    - type: 8
+      amount: 1
+    - type: 9
+      amount: 1
+    - type: 10
+      amount: 1
   - packName: 2
-    packId: com.gamme.packingmaster.bigbundle
+    packId: com.gamme.packingmaster.superdeal
+    productType: 0
+    displayName: Super Deal
+    description: Super Deal bundle
+    icon: {fileID: 0}
+    sortOrder: 1
+    badgeText: 
+    price: 0
+    currencyCode: USD
+    rewards:
+    - type: 7
+      amount: 100
+    - type: 0
+      amount: 2000
+    - type: 3
+      amount: 1
+    - type: 4
+      amount: 1
+    - type: 5
+      amount: 1
+    - type: 8
+      amount: 1
+    - type: 9
+      amount: 1
+    - type: 10
+      amount: 1
   - packName: 3
-    packId: com.gamme.packingmaster.goldpack1
+    packId: com.gamme.packingmaster.starterbenefits
+    productType: 0
+    displayName: Starter Benefits
+    description: Starter Benefits bundle
+    icon: {fileID: 0}
+    sortOrder: 2
+    badgeText: Best Value
+    price: 0
+    currencyCode: USD
+    rewards:
+    - type: 7
+      amount: 100
+    - type: 0
+      amount: 5000
+    - type: 3
+      amount: 1
+    - type: 4
+      amount: 1
+    - type: 5
+      amount: 1
+    - type: 8
+      amount: 1
+    - type: 9
+      amount: 1
+    - type: 10
+      amount: 1
   - packName: 4
-    packId: com.gamme.packingmaster.goldpack2
+    packId: com.gamme.packingmaster.vippack
+    productType: 0
+    displayName: VIP Pack
+    description: VIP Pack bundle
+    icon: {fileID: 0}
+    sortOrder: 3
+    badgeText: 
+    price: 1.99
+    currencyCode: USD
+    rewards:
+    - type: 7
+      amount: 100
+    - type: 0
+      amount: 10000
+    - type: 3
+      amount: 3
+    - type: 4
+      amount: 3
+    - type: 5
+      amount: 3
+    - type: 8
+      amount: 12
+    - type: 9
+      amount: 12
+    - type: 10
+      amount: 12
   - packName: 5
-    packId: com.gamme.packingmaster.goldpack3
+    packId: com.gamme.packingmaster.propack
+    productType: 0
+    displayName: Pro Pack
+    description: Pro Pack bundle
+    icon: {fileID: 0}
+    sortOrder: 4
+    badgeText: 
+    price: 0
+    currencyCode: USD
+    rewards:
+    - type: 7
+      amount: 100
+    - type: 0
+      amount: 25000
+    - type: 3
+      amount: 6
+    - type: 4
+      amount: 6
+    - type: 5
+      amount: 6
+    - type: 8
+      amount: 24
+    - type: 9
+      amount: 24
+    - type: 10
+      amount: 24
+    - type: 6
+      amount: 6
   - packName: 6
-    packId: com.gamme.packingmaster.goldpack4
+    packId: com.gamme.packingmaster.championpack
+    productType: 0
+    displayName: Champion Pack
+    description: Champion Pack bundle
+    icon: {fileID: 0}
+    sortOrder: 5
+    badgeText: Popular
+    price: 0
+    currencyCode: USD
+    rewards:
+    - type: 7
+      amount: 100
+    - type: 0
+      amount: 50000
+    - type: 3
+      amount: 12
+    - type: 4
+      amount: 12
+    - type: 5
+      amount: 12
+    - type: 8
+      amount: 72
+    - type: 9
+      amount: 72
+    - type: 10
+      amount: 72
+    - type: 6
+      amount: 12
   - packName: 7
-    packId: com.gamme.packingmaster.goldpack5
+    packId: com.gamme.packingmaster.masterpack
+    productType: 0
+    displayName: Master Pack
+    description: Master Pack bundle
+    icon: {fileID: 0}
+    sortOrder: 6
+    badgeText: 
+    price: 0
+    currencyCode: USD
+    rewards:
+    - type: 7
+      amount: 100
+    - type: 0
+      amount: 80000
+    - type: 3
+      amount: 16
+    - type: 4
+      amount: 16
+    - type: 5
+      amount: 16
+    - type: 8
+      amount: 100
+    - type: 9
+      amount: 100
+    - type: 10
+      amount: 100
+    - type: 6
+      amount: 24
   - packName: 8
-    packId: com.gamme.packingmaster.goldpack6
+    packId: com.gamme.packingmaster.cardmasterpack
+    productType: 0
+    displayName: Card Master Pack
+    description: Card Master Pack bundle
+    icon: {fileID: 0}
+    sortOrder: 7
+    badgeText: 
+    price: 0
+    currencyCode: USD
+    rewards:
+    - type: 0
+      amount: 2000
+    - type: 7
+      amount: 100
+  - packName: 9
+    packId: com.gamme.packingmaster.goldpack1
+    productType: 0
+    displayName: Gold Pack 1
+    description: 5000 Gold
+    icon: {fileID: 0}
+    sortOrder: 8
+    badgeText: Best Value
+    price: 0
+    currencyCode: USD
+    rewards:
+    - type: 7
+      amount: 100
+    - type: 0
+      amount: 5000
+  - packName: 10
+    packId: com.gamme.packingmaster.goldpack2
+    productType: 0
+    displayName: Gold Pack 2
+    description: 10000 Gold
+    icon: {fileID: 0}
+    sortOrder: 9
+    badgeText: Best Value
+    price: 0
+    currencyCode: USD
+    rewards:
+    - type: 7
+      amount: 100
+    - type: 0
+      amount: 10000
+  - packName: 11
+    packId: com.gamme.packingmaster.goldpack3
+    productType: 0
+    displayName: Gold Pack 3
+    description: 25000 Gold
+    icon: {fileID: 0}
+    sortOrder: 10
+    badgeText: Best Value
+    price: 0
+    currencyCode: USD
+    rewards:
+    - type: 7
+      amount: 100
+    - type: 0
+      amount: 25000
+  - packName: 12
+    packId: com.gamme.packingmaster.goldpack4
+    productType: 0
+    displayName: Gold Pack 4
+    description: 50000 Gold
+    icon: {fileID: 0}
+    sortOrder: 11
+    badgeText: Best Value
+    price: 0
+    currencyCode: USD
+    rewards:
+    - type: 7
+      amount: 100
+    - type: 0
+      amount: 50000

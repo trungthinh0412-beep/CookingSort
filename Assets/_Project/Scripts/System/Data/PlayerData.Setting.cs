@@ -5,6 +5,7 @@ public partial class PlayerData
     [SerializeField] private bool musicState = true;
     [SerializeField] private bool soundState = true;
     [SerializeField] private bool vibrationState = true;
+    [SerializeField] private bool notificationState = true;
     [SerializeField] private bool fastGameSpeed;
 
     public bool MusicState
@@ -35,6 +36,12 @@ public partial class PlayerData
             vibrationState = value;
             Observer.VibrationChanged?.Invoke();
         }
+    }
+
+    public bool NotificationState
+    {
+        get => notificationState;
+        set => notificationState = value;
     }
 
     public bool FastGameSpeed

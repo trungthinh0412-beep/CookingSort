@@ -4,5 +4,5 @@ using UnityEngine;
 public class HeartConfig : ScriptableObject
 {
     public int maxHeart = 5;
-    public int refillTimeInSeconds = 600; // 10 minutes
+    public int refillTimeInSeconds = 1800; // 30 minutes
 }

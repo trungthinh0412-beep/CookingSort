@@ -13,9 +13,14 @@ MonoBehaviour:
   m_Name: LevelEditorSetting
   m_EditorClassIdentifier: 
   windowMinSize: {x: 440, y: 560}
-  levelDirectory: Assets/_Project/Legacy/LoopSort/Levels
-  levelBasePrefab: {fileID: 2893437418720635755, guid: f6775d9c9e42e83488540c32e69e4d51, type: 3}
-  loopPrefab: {fileID: 4255066306815791093, guid: 14f5673405aa6c4478cceaf14b30eea8, type: 3}
-  cubePrefab: {fileID: 1766176708095034905, guid: a6b7bde017e26ef45a70b792f276acdd, type: 3}
-  containerPrefab: {fileID: 954195162397908598, guid: d1da93db0f6782b4785ce963dec80c19, type: 3}
-  colorDatabase: {fileID: 11400000, guid: 4928321238bf1b44eb020e6b3e0cf621, type: 2}
+  levelDirectory: Assets/_Project/Levels
+  cardConfig: {fileID: 11400000, guid: 20b6b60ed11e34ef6afb10267eefe4ec, type: 2}
+  clickBlockerPath: 
+  trayPrefabs:
+  - {fileID: 2301691268872526473, guid: d4d4f7bb5be6fb042aedac14f496bf72, type: 3}
+  - {fileID: 2631100960256013977, guid: 9c3f1d7e2a6b4c8f90de15a7b6e4c2d1, type: 3}
+  - {fileID: 2631100960256013977, guid: 3fe68a0ada4ccd047a483e9dc85bb210, type: 3}
+  - {fileID: 2631100960256013977, guid: b5a81c435eb178c4b96e56747394fa08, type: 3}
+  - {fileID: 2631100960256013977, guid: fd1fe06246cf11248acc0be090513f6a, type: 3}
+  - {fileID: 2631100960256013977, guid: a830d80cf9d52ca42a9915c8a2cb5e84, type: 3}
+  - {fileID: 2631100960256013977, guid: 84c18e7dbee21f24aafd043fb78e49b4, type: 3}

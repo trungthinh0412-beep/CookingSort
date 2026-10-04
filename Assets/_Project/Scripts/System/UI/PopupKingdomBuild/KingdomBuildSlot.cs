@@ -14,6 +14,8 @@ public class BuildSlot
     [SerializeField] private RectTransform markerAnchor;
     [Tooltip("Decor sprite assigned when this slot is built.")]
     [SerializeField] private Sprite sprite;
+    [Tooltip("Icon shown inside BuildButton for this slot. Falls back to Decor Sprite when empty.")]
+    [SerializeField] private Sprite buildIcon;
     [Tooltip("Optional ID of the Image target in PopupHome that receives this decor.")]
     [SerializeField] private string homeTargetId;
     [Tooltip("Build gems required to build this slot.")]
@@ -23,6 +25,7 @@ public class BuildSlot
     public Image TargetImage => targetImage;
     public RectTransform MarkerAnchor => markerAnchor;
     public Sprite Sprite => sprite;
+    public Sprite BuildIcon => buildIcon != null ? buildIcon : sprite;
     public string HomeTargetId => homeTargetId;
     public int Cost => Mathf.Max(0, cost);
 }

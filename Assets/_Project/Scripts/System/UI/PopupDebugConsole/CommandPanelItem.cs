@@ -56,7 +56,7 @@ public class CommandPanelItem : ConsolePanelItem
         }
     }
 
-    private async void ExecuteCommand(string str)
+    private void ExecuteCommand(string str)
     {
         try
         {

@@ -4,7 +4,7 @@ public abstract class SingletonDontDestroy<T> : MonoBehaviour where T : MonoBeha
 {
     static T _instance;
 
-    public static T Instance => _instance ??= FindObjectOfType<T>();
+    public static T Instance => _instance ??= FindAnyObjectByType<T>();
 
     protected virtual void Awake()
     {

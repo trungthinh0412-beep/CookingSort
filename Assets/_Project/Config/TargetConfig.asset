@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f3c4bb3491040a485cd71a3c20e81f9, type: 3}
+  m_Name: TargetConfig
+  m_EditorClassIdentifier: Assembly-CSharp::TargetConfig
+  spriteSheet: {fileID: 2800000, guid: ebf09ae68c1754345a9d3fdc6c8452d5, type: 3}
+  targets:
+  - cardType: 0
+    icon: {fileID: 3124214673561634541, guid: ebf09ae68c1754345a9d3fdc6c8452d5, type: 3}
+  - cardType: 1
+    icon: {fileID: 1293878969, guid: ebf09ae68c1754345a9d3fdc6c8452d5, type: 3}
+  - cardType: 2
+    icon: {fileID: -697914618, guid: ebf09ae68c1754345a9d3fdc6c8452d5, type: 3}
+  - cardType: 3
+    icon: {fileID: -1277137482, guid: ebf09ae68c1754345a9d3fdc6c8452d5, type: 3}
+  - cardType: 4
+    icon: {fileID: -761753478, guid: ebf09ae68c1754345a9d3fdc6c8452d5, type: 3}
+  - cardType: 5
+    icon: {fileID: -1427184970, guid: ebf09ae68c1754345a9d3fdc6c8452d5, type: 3}
+  - cardType: 6
+    icon: {fileID: 905009014, guid: ebf09ae68c1754345a9d3fdc6c8452d5, type: 3}
+  - cardType: 7
+    icon: {fileID: 1148153722, guid: ebf09ae68c1754345a9d3fdc6c8452d5, type: 3}
+  - cardType: 8
+    icon: {fileID: 312023101, guid: ebf09ae68c1754345a9d3fdc6c8452d5, type: 3}
+  - cardType: 9
+    icon: {fileID: 772588330, guid: ebf09ae68c1754345a9d3fdc6c8452d5, type: 3}
+  - cardType: 10
+    icon: {fileID: 1788093175, guid: ebf09ae68c1754345a9d3fdc6c8452d5, type: 3}
+  - cardType: 11
+    icon: {fileID: 1531119450, guid: ebf09ae68c1754345a9d3fdc6c8452d5, type: 3}
+  - cardType: 12
+    icon: {fileID: -426372746, guid: ebf09ae68c1754345a9d3fdc6c8452d5, type: 3}
+  - cardType: 13
+    icon: {fileID: -1611741740, guid: ebf09ae68c1754345a9d3fdc6c8452d5, type: 3}
+  - cardType: 14
+    icon: {fileID: -942899499, guid: ebf09ae68c1754345a9d3fdc6c8452d5, type: 3}
+  - cardType: 15
+    icon: {fileID: 435402602, guid: ebf09ae68c1754345a9d3fdc6c8452d5, type: 3}
+  - cardType: 16
+    icon: {fileID: -2015820566, guid: ebf09ae68c1754345a9d3fdc6c8452d5, type: 3}
+  - cardType: 17
+    icon: {fileID: -1499827824, guid: ebf09ae68c1754345a9d3fdc6c8452d5, type: 3}
+  - cardType: 18
+    icon: {fileID: 2002234886, guid: ebf09ae68c1754345a9d3fdc6c8452d5, type: 3}
+  - cardType: 19
+    icon: {fileID: -1117064490, guid: ebf09ae68c1754345a9d3fdc6c8452d5, type: 3}

@@ -14,12 +14,25 @@ public class PopupMoreLife : Popup
     }
     void Setup()
     {
-        btnAds.SetActive(Data.PlayerData.CurrentHeart < HeartController.Instance.MaxHeart);
-        btnCoin.gameObject.SetActive(Data.PlayerData.CurrentHeart < HeartController.Instance.MaxHeart);
+        if (Data.PlayerData == null || HeartController.Instance == null)
+            return;
+
+        bool canReceiveHeart =
+            !Data.PlayerData.IsInfiniteHeart() &&
+            Data.PlayerData.CurrentHeart < HeartController.Instance.MaxHeart;
+
+        if (btnAds != null && btnAds.activeSelf != canReceiveHeart)
+            btnAds.SetActive(canReceiveHeart);
+
+        if (btnCoin != null && btnCoin.gameObject.activeSelf != canReceiveHeart)
+            btnCoin.gameObject.SetActive(canReceiveHeart);
     }
     void Update()
     {
-        txtTime.text = HeartController.Instance.GetRemainingTime();
+        if (txtTime != null && HeartController.Instance != null)
+            txtTime.text = HeartController.Instance.GetRemainingTime();
+
+        Setup();
     }
     public void Close()
     {
@@ -41,6 +54,16 @@ public class PopupMoreLife : Popup
     public void OnClickBuyHeartByCoin()
     {
         SoundController.Instance.PlayFX(SoundName.ClickButton);
+        if (Data.PlayerData == null || HeartController.Instance == null)
+            return;
+
+        if (Data.PlayerData.IsInfiniteHeart() ||
+            Data.PlayerData.CurrentHeart >= HeartController.Instance.MaxHeart)
+        {
+            Setup();
+            return;
+        }
+
         if (Data.PlayerData.CurrentGold < goldFullHeart)
         {
             Observer.Notify?.Invoke("Not enough gold!", Vector3.zero);
@@ -48,17 +71,53 @@ public class PopupMoreLife : Popup
             return;
         }
         Data.PlayerData.CurrentGold -= goldFullHeart;
-        Data.PlayerData.CurrentHeart = 5;
+        if (HeartController.Instance.RefillHearts())
+        {
+            HideAfterReceivingHeart();
+            return;
+        }
+
+        // Keep the transaction atomic if the heart state changed before the
+        // purchase could be completed.
+        Data.PlayerData.CurrentGold += goldFullHeart;
         Setup();
     }
     public void OnClickBuyHeartByAds()
     {
         SoundController.Instance.PlayFX(SoundName.ClickButton);
+        if (Data.PlayerData == null || HeartController.Instance == null)
+            return;
+
+        if (Data.PlayerData.IsInfiniteHeart() ||
+            Data.PlayerData.CurrentHeart >= HeartController.Instance.MaxHeart)
+        {
+            Setup();
+            return;
+        }
+
         AdsController.Instance.ShowRewardAds(() =>
         {
-            Data.PlayerData.CurrentHeart++;
+            bool receivedHeart =
+                HeartController.Instance != null &&
+                HeartController.Instance.AddHeart();
+
+            if (receivedHeart)
+            {
+                HideAfterReceivingHeart();
+                return;
+            }
+
             Setup();
         }, placement: "PopupMoreLife_OnClickBuyHeartByAds");
+    }
+
+    private void HideAfterReceivingHeart()
+    {
+        if (!isActiveAndEnabled)
+            return;
+
+        AfterHiddenAction = RestoreHomeAfterClose;
+        Hide(PopupAnimation.None);
     }
 }
 

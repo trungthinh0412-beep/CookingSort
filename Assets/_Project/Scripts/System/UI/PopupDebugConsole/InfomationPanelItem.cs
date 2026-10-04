@@ -65,7 +65,7 @@ public class InfomationPanelItem : ConsolePanelItem
 
         // Display Information
         Resolution resolution = Screen.currentResolution;
-        refreshRateText.text = $"{resolution.refreshRate}Hz";
+        refreshRateText.text = $"{Mathf.RoundToInt((float)resolution.refreshRateRatio.value)}Hz";
         resolutionText.text = $"{resolution.width} x {resolution.height}";
         aspectRatioText.text = ((float)resolution.width / (float)resolution.height).ToString("0.00");
         dpiDisplayText.text =  $"{Screen.dpi} DPI";

@@ -12,10 +12,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f5c85b3b7f7c468439270aae26b9b12b, type: 3}
   m_Name: BoosterConfig
   m_EditorClassIdentifier: Assembly-CSharp::BoosterConfig
+  levelTutBomb: 4
+  levelTutShuffer: 2
   boosterData:
-  - boosterType: 0
-    sprite: {fileID: 216505355, guid: ee3c6f97064c9654a8b46cfc91665e18, type: 3}
+  - boosterType: 2
+    sprite: {fileID: -591604876, guid: 526a6adceaad68547abdd7a2f0f9a81d, type: 3}
     price: 180
-  - boosterType: 1
-    sprite: {fileID: 833916964, guid: ee3c6f97064c9654a8b46cfc91665e18, type: 3}
+  - boosterType: 3
+    sprite: {fileID: -2115887996, guid: 526a6adceaad68547abdd7a2f0f9a81d, type: 3}
+    price: 120
+  - boosterType: 4
+    sprite: {fileID: 1059388808, guid: 526a6adceaad68547abdd7a2f0f9a81d, type: 3}
+    price: 120
+  - boosterType: 5
+    sprite: {fileID: -591604876, guid: 526a6adceaad68547abdd7a2f0f9a81d, type: 3}
+    price: 120
+  - boosterType: 6
+    sprite: {fileID: -2115887996, guid: 526a6adceaad68547abdd7a2f0f9a81d, type: 3}
+    price: 120
+  - boosterType: 7
+    sprite: {fileID: 1059388808, guid: 526a6adceaad68547abdd7a2f0f9a81d, type: 3}
     price: 120

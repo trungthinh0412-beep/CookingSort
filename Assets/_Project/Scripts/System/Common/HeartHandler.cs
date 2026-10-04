@@ -10,6 +10,10 @@ public class HeartHandler : ResourceHandler
     [SerializeField] private GameObject heartBar;
     [SerializeField] private TextMeshProUGUI timeRemainText;
 
+    private int _lastRemainingSeconds = int.MinValue;
+    private int _lastHeartAmount = int.MinValue;
+    private bool _lastInfiniteHeart;
+
     protected override Resource Prefab => heartPrefab;
     protected override GameObject Target => heartTarget;
     protected override TextMeshProUGUI AmountText => heartText;
@@ -22,7 +26,7 @@ public class HeartHandler : ResourceHandler
     protected override void Awake()
     {
         base.Awake();
-        timeRemainText.text = HeartController.Instance.GetRemainingTime();
+        RefreshHeartDisplay();
     }
 
     protected override void SubscribeEvents()
@@ -53,15 +57,44 @@ public class HeartHandler : ResourceHandler
 
     private void Update()
     {
-        timeRemainText.text = HeartController.Instance.GetRemainingTime();
-        if (Data.PlayerData.IsInfiniteHeart())
+        RefreshHeartDisplay();
+    }
+
+    private void RefreshHeartDisplay()
+    {
+        HeartController controller = HeartController.Instance;
+        if (timeRemainText != null && controller != null)
+        {
+            int remainingSeconds = controller.GetRemainingDisplaySeconds();
+            if (remainingSeconds != _lastRemainingSeconds)
+            {
+                timeRemainText.text = controller.GetRemainingTime();
+                _lastRemainingSeconds = remainingSeconds;
+            }
+        }
+
+        if (heartText == null || Data.PlayerData == null)
+            return;
+
+        int currentHeart = Data.PlayerData.CurrentHeart;
+        bool infiniteHeart = Data.PlayerData.IsInfiniteHeart();
+        if (currentHeart == _lastHeartAmount &&
+            infiniteHeart == _lastInfiniteHeart)
+        {
+            return;
+        }
+
+        if (infiniteHeart)
         {
             heartText.text = "∞";
         }
         else
         {
-            heartText.text = Data.PlayerData.CurrentHeart.ToString();
+            heartText.text = currentHeart.ToString();
         }
+
+        _lastHeartAmount = currentHeart;
+        _lastInfiniteHeart = infiniteHeart;
     }
     public void OnClickShop()
     {

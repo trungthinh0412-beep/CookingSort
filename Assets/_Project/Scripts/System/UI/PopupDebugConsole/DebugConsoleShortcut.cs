@@ -11,7 +11,6 @@ public class DebugConsoleShortcut : MonoBehaviour
     private RectTransform _rectTransform;
     private Canvas _canvas;
     private Vector2 _fingerDownPos;
-    private bool _isDrag;
     private bool _isOverThisObject;
     private const float TapThreshold = 10f; // Distance threshold to detect a tap
 
@@ -79,8 +78,6 @@ public class DebugConsoleShortcut : MonoBehaviour
     // Called when a finger is dragged
     public void OnFingerDrag(LeanFinger finger)
     {
-        _isDrag = true;
-
         // Move object when dragging
         if (_isOverThisObject)
         {

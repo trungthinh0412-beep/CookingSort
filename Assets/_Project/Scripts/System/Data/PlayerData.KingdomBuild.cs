@@ -15,6 +15,9 @@ public partial class PlayerData
     private List<KingdomBuildSlotSaveData> completedKingdomBuildSlots =
         new List<KingdomBuildSlotSaveData>();
 
+    [SerializeField]
+    private List<string> unlockedKingdomRoomIds = new List<string>();
+
     public List<KingdomBuildSlotSaveData> CompletedKingdomBuildSlots
     {
         get
@@ -25,6 +28,55 @@ public partial class PlayerData
             return completedKingdomBuildSlots;
         }
         set => completedKingdomBuildSlots = value ?? new List<KingdomBuildSlotSaveData>();
+    }
+
+    public List<string> UnlockedKingdomRoomIds
+    {
+        get
+        {
+            if (unlockedKingdomRoomIds == null)
+                unlockedKingdomRoomIds = new List<string>();
+
+            return unlockedKingdomRoomIds;
+        }
+        set => unlockedKingdomRoomIds = value ?? new List<string>();
+    }
+
+    public bool HasBuiltAnyKingdomItem =>
+        CompletedKingdomBuildSlots.Count > 0;
+
+    public bool IsKingdomRoomUnlocked(string roomId)
+    {
+        string safeRoomId = NormalizeBuildId(roomId);
+
+        if (string.IsNullOrEmpty(safeRoomId))
+            return false;
+
+        foreach (string unlockedRoomId in UnlockedKingdomRoomIds)
+        {
+            if (string.Equals(
+                    NormalizeBuildId(unlockedRoomId),
+                    safeRoomId,
+                    StringComparison.Ordinal))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public void SetKingdomRoomUnlocked(string roomId)
+    {
+        string safeRoomId = NormalizeBuildId(roomId);
+
+        if (string.IsNullOrEmpty(safeRoomId) ||
+            IsKingdomRoomUnlocked(safeRoomId))
+        {
+            return;
+        }
+
+        UnlockedKingdomRoomIds.Add(safeRoomId);
     }
 
     public bool IsKingdomBuildSlotCompleted(string roomId, string slotId)

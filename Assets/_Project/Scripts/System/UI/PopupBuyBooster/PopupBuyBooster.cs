@@ -8,12 +8,20 @@ public class PopupBuyBooster : Popup
     [SerializeField] private TextMeshProUGUI description;
     [SerializeField] private TextMeshProUGUI priceText;
     [SerializeField] private BoosterConfig boosterConfig;
+    [SerializeField] private CardConfig preLevelCardConfig;
 
     private BoosterType _boosterType;
+    private CardType? _preLevelCardType;
 
     public void Init(BoosterType boosterType)
     {
         _boosterType = boosterType;
+        _preLevelCardType = null;
+    }
+
+    public void InitPreLevelCard(CardType cardType)
+    {
+        _preLevelCardType = cardType;
     }
 
     protected override void BeforeShow()
@@ -24,6 +32,12 @@ public class PopupBuyBooster : Popup
 
     private void Setup()
     {
+        if (_preLevelCardType.HasValue)
+        {
+            SetupPreLevelCard(_preLevelCardType.Value);
+            return;
+        }
+
         BoosterData data = boosterConfig.GetBoosterData(_boosterType);
 
         if (data == null)
@@ -45,17 +59,48 @@ public class PopupBuyBooster : Popup
         }
         else if (_boosterType == BoosterType.MoreDeal)
         {
-            description.text = "Get 1 free Deal!";
+            description.text = "Get 5 extra moves!";
         }
-        else if (_boosterType == BoosterType.MagicSwap)
+        else if (_boosterType == BoosterType.MagicMove)
         {
-            description.text = "Move a card stack to another tray!";
+            description.text = "Move matching cards onto a different tray!";
         }
         else if (_boosterType == BoosterType.Magnet)
         {
             description.text = "Collect matching cards into one tray!";
         }
+        else if (_boosterType == BoosterType.Lighter)
+        {
+            description.text = "Burn every card in one tray!";
+        }
+        else if (_boosterType == BoosterType.ExtraTray)
+        {
+            description.text = "Unlock an Extra Tray!";
+        }
+        else if (_boosterType == BoosterType.FreeMoves)
+        {
+            description.text = "Get 5 extra moves!";
+        }
         priceText.text = $"{data.price} <sprite name=\"gold\">";
+    }
+
+    private void SetupPreLevelCard(CardType cardType)
+    {
+        PreLevelCardData data =
+            GetPreLevelCardConfig()?.GetPreLevelCardData(cardType);
+        if (data == null)
+        {
+            Debug.LogWarning(
+                $"[PopupBuyBooster] Missing pre-level config for {cardType}."
+            );
+            return;
+        }
+
+        boosterIcon.sprite = GetPreLevelCardConfig()?.GetPreLevelIcon(cardType);
+        description.text = cardType == CardType.WildCard
+            ? "Start the level with a Wild Card!"
+            : $"Start the level with {cardType}!";
+        priceText.text = $"{data.preLevelPrice} <sprite name=\"gold\">";
     }
 
     public void OnClickBack()
@@ -80,9 +125,8 @@ public class PopupBuyBooster : Popup
     {
         SoundController.Instance.PlayFX(SoundName.ClickButton);
 
-        BoosterData data = boosterConfig.GetBoosterData(_boosterType);
-
-        if (data == null)
+        int price = GetCurrentPrice();
+        if (price < 0)
         {
             Observer.Notify?.Invoke(
                 "Booster is not configured.",
@@ -91,20 +135,32 @@ public class PopupBuyBooster : Popup
             return;
         }
 
-        if (Data.PlayerData.CurrentGold < data.price)
+        if (Data.PlayerData.CurrentGold < price)
         {
             Observer.Notify?.Invoke("Not enough gold!", Vector3.zero);
             PopupController.Instance.Show<PopupShopInGame>();
             return;
         }
 
-        Data.PlayerData.CurrentGold -= data.price;
+        Data.PlayerData.CurrentGold -= price;
         GiveBooster();
         UseBooster();
     }
 
     private void GiveBooster()
     {
+        if (_preLevelCardType.HasValue)
+        {
+            CardType cardType = _preLevelCardType.Value;
+            Data.PlayerData.SetPreLevelCardAmount(
+                cardType,
+                Data.PlayerData.GetPreLevelCardAmount(cardType) + 1
+            );
+            Data.SaveData();
+            Hide(PopupAnimation.ScaleFade);
+            return;
+        }
+
         switch (_boosterType)
         {
             case BoosterType.Shuffle:
@@ -118,11 +174,20 @@ public class PopupBuyBooster : Popup
             case BoosterType.MoreDeal:
                 Data.PlayerData.CurrentMoreDeal++;
                 break;
-            case BoosterType.MagicSwap:
+            case BoosterType.MagicMove:
                 Data.PlayerData.CurrentMagicSwap++;
                 break;
             case BoosterType.Magnet:
                 Data.PlayerData.CurrentMagnet++;
+                break;
+            case BoosterType.Lighter:
+                Data.PlayerData.CurrentLighter++;
+                break;
+            case BoosterType.ExtraTray:
+                Data.PlayerData.CurrentExtraTray++;
+                break;
+            case BoosterType.FreeMoves:
+                Data.PlayerData.CurrentFreeMoves++;
                 break;
         }
 
@@ -132,6 +197,9 @@ public class PopupBuyBooster : Popup
 
     private void UseBooster()
     {
+        if (_preLevelCardType.HasValue)
+            return;
+
         switch (_boosterType)
         {
             case BoosterType.Shuffle:
@@ -143,8 +211,11 @@ public class PopupBuyBooster : Popup
                 // LevelController.Instance.currentLevel.Bomb();
                 break;
             case BoosterType.MoreDeal:
-            case BoosterType.MagicSwap:
+            case BoosterType.MagicMove:
             case BoosterType.Magnet:
+            case BoosterType.Lighter:
+            case BoosterType.ExtraTray:
+            case BoosterType.FreeMoves:
                 Level level = GameManager.Instance != null &&
                               GameManager.Instance.levelController != null
                     ? GameManager.Instance.levelController.currentLevel
@@ -154,5 +225,33 @@ public class PopupBuyBooster : Popup
                     level.ActivateBooster(_boosterType);
                 break;
         }
+    }
+
+    private int GetCurrentPrice()
+    {
+        if (_preLevelCardType.HasValue)
+        {
+            PreLevelCardData data = GetPreLevelCardConfig()?.GetPreLevelCardData(
+                _preLevelCardType.Value
+            );
+            return data != null
+                ? data.preLevelPrice
+                : -1;
+        }
+
+        BoosterData boosterData = boosterConfig.GetBoosterData(_boosterType);
+        return boosterData != null ? boosterData.price : -1;
+    }
+
+    private CardConfig GetPreLevelCardConfig()
+    {
+        if (preLevelCardConfig != null)
+            return preLevelCardConfig;
+
+        Level level = GameManager.Instance != null &&
+                      GameManager.Instance.levelController != null
+            ? GameManager.Instance.levelController.currentLevel
+            : null;
+        return level != null ? level.CardConfig : null;
     }
 }

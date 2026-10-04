@@ -113,7 +113,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Frame_Collection_infor_blue
+      name: Frame_Collection_infor_blue_0
       rect:
         serializedVersion: 2
         x: 0
@@ -126,10 +126,54 @@ TextureImporter:
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 4a03819cb806551b0800000000000000
-      internalID: -5668518402485374812
+      spriteID: f0758ff226c080a4c9fa594b79b1e323
+      internalID: 1593883626
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Frame_Collection_infor_blue_1
+      rect:
+        serializedVersion: 2
+        x: 1017
+        y: 0
+        width: 1017
+        height: 1344
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6957f588f107b5645ac70019917c0895
+      internalID: 1561786001
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Frame_Collection_infor_blue_2
+      rect:
+        serializedVersion: 2
+        x: 2034
+        y: 0
+        width: 1017
+        height: 1344
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cf57a0ef6d3c2f04baf468fa45dfc41f
+      internalID: -425962383
       vertices: []
       indices: 
       edges: []
@@ -146,10 +190,13 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries: []
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":1017.0,"y":1344.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":1,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
-      Frame_0: -5668518402485374812
-      Frame_Collection_infor_blue: -5668518402485374812
+      Frame_Collection_infor_blue_0: 1593883626
+      Frame_Collection_infor_blue_1: 1561786001
+      Frame_Collection_infor_blue_2: -425962383
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

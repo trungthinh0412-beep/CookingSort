@@ -44,6 +44,6 @@ public class DisplayProfileUI : MonoBehaviour
         }
 
         if (txtPlayerName != null)
-            txtPlayerName.text = string.IsNullOrWhiteSpace(playerName) ? "Default" : playerName;
+            txtPlayerName.text = PlayerData.GetDisplayName(playerName);
     }
 }

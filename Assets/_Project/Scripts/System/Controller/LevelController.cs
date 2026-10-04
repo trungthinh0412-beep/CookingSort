@@ -8,18 +8,12 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 public class LevelController : SingletonDontDestroy<LevelController>
 {
     [SerializeField] private LevelConfig levelConfig;
-    [SerializeField] private PictureCollectionConfig pictureCollection;
-    public PictureCollectionConfig PictureCollection => pictureCollection;
-    public PictureLevelEntry LoadedPictureEntry { get; private set; }
     [SerializeField] private string levelAddressFormat = "Level {0}";
-    [Header("World level placement (assigned in GameplayScene)")]
-    [SerializeField] private Transform levelRoot;
-    [SerializeField] private Camera worldCamera;
     [ReadOnly] public Level currentLevel;
 
     private Task<Level> _prepareTask;
-    private string _preparingKey;
-    private string _loadedKey;
+    private int _preparingPlayerLevel = -1;
+    private int _loadedPlayerLevel = -1;
     private int _loadVersion;
     private bool _currentLevelIsAddressable;
 
@@ -31,49 +25,35 @@ public class LevelController : SingletonDontDestroy<LevelController>
     public Task<Level> PrepareLevelAsync(bool forceReload = true)
     {
         int playerLevel = Data.PlayerData.CurrentLevelIndex;
-        int assetLevel = GetAssetLevelIndex(playerLevel);
-        var entry = pictureCollection != null ? pictureCollection.FindLevel(assetLevel) : null;
-        object address = entry != null && entry.IsPlayable ? entry.levelPrefab.RuntimeKey : string.Format(levelAddressFormat, assetLevel);
-        return PrepareSelectedLevel(address, "main:" + playerLevel, playerLevel, entry, forceReload);
-    }
-
-    public Task<Level> PreparePictureLevelAsync(PictureLevelEntry entry, bool forceReload = false)
-    {
-        if (entry == null || !entry.IsPlayable) throw new ArgumentException("Picture level prefab is missing.");
-        return PrepareSelectedLevel(entry.levelPrefab.RuntimeKey, "replay:" + entry.levelId, entry.levelNumber, entry, forceReload);
-    }
-
-    private Task<Level> PrepareSelectedLevel(object address, string key, int playerLevel, PictureLevelEntry entry, bool forceReload)
-    {
 
         // Nhieu nut co the yeu cau load trong cung mot frame. Dung chung operation
         // dang chay de tranh instantiate cung mot level nhieu lan.
-        if (_prepareTask != null && _preparingKey == key)
+        if (_prepareTask != null && _preparingPlayerLevel == playerLevel)
         {
             return _prepareTask;
         }
 
-        if (!forceReload && currentLevel != null && _loadedKey == key)
+        if (!forceReload && currentLevel != null && _loadedPlayerLevel == playerLevel)
         {
             return Task.FromResult(currentLevel);
         }
 
         int version = ++_loadVersion;
-        _preparingKey = key;
-        _prepareTask = GenerateLevelAsync(address, key, playerLevel, entry, version);
+        _preparingPlayerLevel = playerLevel;
+        _prepareTask = GenerateLevelAsync(playerLevel, version);
         return _prepareTask;
     }
 
-    private async Task<Level> GenerateLevelAsync(object address, string key, int playerLevel, PictureLevelEntry entry, int version)
+    private async Task<Level> GenerateLevelAsync(int playerLevel, int version)
     {
+        int assetLevel = GetAssetLevelIndex(playerLevel);
+        string address = string.Format(levelAddressFormat, assetLevel);
         AsyncOperationHandle<GameObject> handle = default;
         GameObject instance = null;
 
         try
         {
-            if (levelRoot == null || worldCamera == null)
-                throw new InvalidOperationException("Assign Level Root and World Camera in GameplayScene.");
-            handle = Addressables.InstantiateAsync(address, levelRoot, false);
+            handle = Addressables.InstantiateAsync(address);
             await handle.Task;
 
             if (handle.Status != AsyncOperationStatus.Succeeded || handle.Result == null)
@@ -107,10 +87,8 @@ public class LevelController : SingletonDontDestroy<LevelController>
             ReleaseCurrentLevel();
 
             currentLevel = loadedLevel;
-            currentLevel.BindWorldCamera(worldCamera);
             _currentLevelIsAddressable = true;
-            _loadedKey = key;
-            LoadedPictureEntry = entry;
+            _loadedPlayerLevel = playerLevel;
             currentLevel.gameObject.SetActive(false);
             currentLevel.name = playerLevel > levelConfig.maxLevel
                 ? $"Level {playerLevel} - {currentLevel.name}"
@@ -137,7 +115,7 @@ public class LevelController : SingletonDontDestroy<LevelController>
             if (version == _loadVersion)
             {
                 _prepareTask = null;
-                _preparingKey = null;
+                _preparingPlayerLevel = -1;
             }
         }
     }
@@ -186,8 +164,7 @@ public class LevelController : SingletonDontDestroy<LevelController>
         }
 
         _currentLevelIsAddressable = false;
-        _loadedKey = null;
-        LoadedPictureEntry = null;
+        _loadedPlayerLevel = -1;
     }
 
     private void OnDestroy()

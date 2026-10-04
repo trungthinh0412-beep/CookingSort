@@ -37,6 +37,9 @@ public class StoryIntroController : MonoBehaviour
 
     [SerializeField] private float prepareTimeout = 15f;
 
+    [Header("Controls")]
+    [SerializeField] private CustomButton closeButton;
+
     private VideoPlayer _videoPlayer;
     private AsyncOperation _gameplaySceneOperation;
     private bool _videoPrepared;
@@ -44,6 +47,7 @@ public class StoryIntroController : MonoBehaviour
 
     private void Start()
     {
+        BindCloseButton();
         PreloadGameplayScene();
 
         if (StoryIntroState.HasBeenWatched)
@@ -53,6 +57,40 @@ public class StoryIntroController : MonoBehaviour
         }
 
         CreateAndPrepareVideoPlayer();
+    }
+
+    private void BindCloseButton()
+    {
+        if (closeButton == null)
+        {
+            closeButton = FindCloseButton();
+        }
+
+        if (closeButton == null)
+            return;
+
+        closeButton.Click.RemoveListener(SkipIntro);
+        closeButton.Click.AddListener(SkipIntro);
+    }
+
+    private CustomButton FindCloseButton()
+    {
+        CustomButton[] buttons =
+            FindObjectsByType<CustomButton>(
+                FindObjectsInactive.Include,
+                FindObjectsSortMode.None
+            );
+
+        foreach (CustomButton button in buttons)
+        {
+            if (button.name == "button_close" ||
+                button.name == "Button")
+            {
+                return button;
+            }
+        }
+
+        return null;
     }
 
     private void PreloadGameplayScene()
@@ -256,6 +294,11 @@ public class StoryIntroController : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (closeButton != null)
+        {
+            closeButton.Click.RemoveListener(SkipIntro);
+        }
+
         if (_videoPlayer == null)
             return;
 

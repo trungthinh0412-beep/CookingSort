@@ -9,9 +9,15 @@ public class HeartController : SingletonDontDestroy<HeartController>
 
     // Tracking online timer
     private float _timer;
+    // The refill timestamp is persisted for offline recovery. Updating it every
+    // frame creates a DateTime string allocation on every rendered frame.
+    private int _lastRecordedRemainingSeconds = int.MinValue;
     // Cache the max and refill time purely for shorter access
     public int MaxHeart => heartConfig != null ? heartConfig.maxHeart : 5;
-    public int RefillTimeInSeconds => heartConfig != null ? heartConfig.refillTimeInSeconds : 600;
+    public int RefillTimeInSeconds => heartConfig != null ? heartConfig.refillTimeInSeconds : 1800;
+    public bool HasPlayableHeart =>
+        Data.PlayerData != null &&
+        (Data.PlayerData.IsInfiniteHeart() || Data.PlayerData.CurrentHeart > 0);
 
     protected override void Awake()
     {
@@ -36,11 +42,15 @@ public class HeartController : SingletonDontDestroy<HeartController>
     {
         if (heartConfig == null || Data.PlayerData == null) return;
 
-        int currentHeart = Data.PlayerData.CurrentHeart;
+        int currentHeart = Mathf.Min(Data.PlayerData.CurrentHeart, MaxHeart);
+        if (currentHeart != Data.PlayerData.CurrentHeart)
+            Data.PlayerData.CurrentHeart = currentHeart;
+
         if (currentHeart >= MaxHeart)
         {
             UpdateRefillPointToNow();
             _timer = RefillTimeInSeconds;
+            _lastRecordedRemainingSeconds = RefillTimeInSeconds;
             return;
         }
 
@@ -67,12 +77,16 @@ public class HeartController : SingletonDontDestroy<HeartController>
                         int remainingSeconds = (int)(diff.TotalSeconds % RefillTimeInSeconds);
                         Data.PlayerData.RefillHeartPoint = DateTime.UtcNow.AddSeconds(-remainingSeconds).ToString(Utility.DateTimeFormat, CultureInfo.InvariantCulture);
                         _timer = RefillTimeInSeconds - remainingSeconds;
+                        _lastRecordedRemainingSeconds = Mathf.CeilToInt(_timer);
                     }
+
+                    Data.SaveData();
                 }
                 else
                 {
                     // No full heart added, just update timer visually based on passed time
                     _timer = RefillTimeInSeconds - (float)diff.TotalSeconds;
+                    _lastRecordedRemainingSeconds = Mathf.CeilToInt(_timer);
                 }
             }
         }
@@ -81,6 +95,7 @@ public class HeartController : SingletonDontDestroy<HeartController>
             // Fallback if parsing fails
             UpdateRefillPointToNow();
             _timer = RefillTimeInSeconds;
+            _lastRecordedRemainingSeconds = RefillTimeInSeconds;
         }
     }
 
@@ -100,16 +115,18 @@ public class HeartController : SingletonDontDestroy<HeartController>
 
         _timer -= Time.deltaTime;
 
-        // Frequently update the RefillHeartPoint to the exact current time (minus whatever progress we made in the current timer)
-        // so that if the app is abruptly closed, the PlayerDataController saves the correct timestamp.
-        float elapsedInCurrentInterval = RefillTimeInSeconds - _timer;
-        Data.PlayerData.RefillHeartPoint = DateTime.UtcNow.AddSeconds(-elapsedInCurrentInterval).ToString(Utility.DateTimeFormat, CultureInfo.InvariantCulture);
+        UpdateRefillPointForCurrentSecond();
 
         if (_timer <= 0)
         {
-            Data.PlayerData.CurrentHeart++;
+            Data.PlayerData.CurrentHeart = Mathf.Min(
+                Data.PlayerData.CurrentHeart + 1,
+                MaxHeart
+            );
             _timer = RefillTimeInSeconds;
             UpdateRefillPointToNow();
+            _lastRecordedRemainingSeconds = RefillTimeInSeconds;
+            Data.SaveData();
         }
     }
 
@@ -121,11 +138,101 @@ public class HeartController : SingletonDontDestroy<HeartController>
         }
     }
 
+    private void UpdateRefillPointForCurrentSecond()
+    {
+        int remainingSeconds = Mathf.Clamp(
+            Mathf.CeilToInt(_timer),
+            0,
+            RefillTimeInSeconds
+        );
+        if (remainingSeconds == _lastRecordedRemainingSeconds)
+            return;
+
+        float elapsedInCurrentInterval = RefillTimeInSeconds - _timer;
+        Data.PlayerData.RefillHeartPoint = DateTime.UtcNow
+            .AddSeconds(-elapsedInCurrentInterval)
+            .ToString(Utility.DateTimeFormat, CultureInfo.InvariantCulture);
+        _lastRecordedRemainingSeconds = remainingSeconds;
+    }
+
+    public int GetRemainingDisplaySeconds()
+    {
+        if (Data.PlayerData == null)
+            return int.MinValue;
+
+        if (Data.PlayerData.IsInfiniteHeart())
+        {
+            TimeSpan diff = Data.PlayerData.GetInfiniteHeartExpiry() - DateTime.UtcNow;
+            return Mathf.Max(0, Mathf.CeilToInt((float)diff.TotalSeconds));
+        }
+
+        return Data.PlayerData.CurrentHeart >= MaxHeart
+            ? -1
+            : Mathf.CeilToInt(_timer);
+    }
+
     public string GetHeartString()
     {
         if (Data.PlayerData == null) return "0/0";
         if (Data.PlayerData.IsInfiniteHeart()) return "∞";
         return $"{Data.PlayerData.CurrentHeart}/{MaxHeart}";
+    }
+
+    public bool TryConsumeHeart()
+    {
+        if (Data.PlayerData == null)
+            return false;
+
+        if (Data.PlayerData.IsInfiniteHeart())
+            return true;
+
+        if (Data.PlayerData.CurrentHeart <= 0)
+            return false;
+
+        bool wasFull = Data.PlayerData.CurrentHeart >= MaxHeart;
+        Data.PlayerData.CurrentHeart--;
+
+        if (wasFull)
+        {
+            _timer = RefillTimeInSeconds;
+            UpdateRefillPointToNow();
+        }
+
+        Data.SaveData();
+        return true;
+    }
+
+    public bool AddHeart(int amount = 1)
+    {
+        if (Data.PlayerData == null || amount <= 0)
+            return false;
+
+        int currentHeart = Mathf.Min(Data.PlayerData.CurrentHeart, MaxHeart);
+        int newHeart = Mathf.Min(currentHeart + amount, MaxHeart);
+        if (newHeart <= currentHeart)
+            return false;
+
+        Data.PlayerData.CurrentHeart = newHeart;
+        if (newHeart >= MaxHeart)
+        {
+            _timer = RefillTimeInSeconds;
+            UpdateRefillPointToNow();
+        }
+
+        Data.SaveData();
+        return true;
+    }
+
+    public bool RefillHearts()
+    {
+        if (Data.PlayerData == null || Data.PlayerData.CurrentHeart >= MaxHeart)
+            return false;
+
+        Data.PlayerData.CurrentHeart = MaxHeart;
+        _timer = RefillTimeInSeconds;
+        UpdateRefillPointToNow();
+        Data.SaveData();
+        return true;
     }
 
     public string GetRemainingTime()
@@ -153,6 +260,6 @@ public class HeartController : SingletonDontDestroy<HeartController>
     [Button]
     public void Test()
     {
-        Data.PlayerData.CurrentHeart -= 1;
+        TryConsumeHeart();
     }
 }

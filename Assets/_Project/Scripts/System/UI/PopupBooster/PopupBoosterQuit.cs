@@ -4,7 +4,8 @@ public class PopupBoosterQuit : PopupBooster
 {
     public override void OnClickClose()
     {
-        PlayClickSound();
+        PlayMenuBarSound();
+        RefundSelectedPreLevelCards();
 
         // PopupBoosterQuit duoc mo khi game dang pause. Ve Home phai huy
         // toan bo popup gameplay va tra lai timeScale binh thuong.
@@ -31,7 +32,8 @@ public class PopupBoosterQuit : PopupBooster
 
     public override void OnClickPlay()
     {
-        PlayClickSound();
+        PlayMenuBarSound();
+        QueueSelectedPreLevelCards();
 
         if (PopupController.Instance != null)
             PopupController.Instance.Hide<PopupBoosterQuit>(PopupAnimation.None);

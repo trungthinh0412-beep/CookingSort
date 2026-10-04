@@ -76,10 +76,7 @@ public class LoadingController : MonoBehaviour
 
     private void StartLoading()
     {
-        string nextScene =
-            StoryIntroState.HasBeenWatched
-                ? GameplaySceneStr
-                : StoryIntroSceneStr;
+        string nextScene = GetNextScene();
 
         _sceneOperation =
             SceneManager.LoadSceneAsync(
@@ -115,22 +112,28 @@ public class LoadingController : MonoBehaviour
         });
     }
 
+    private string GetNextScene()
+    {
+#if UNITY_EDITOR
+        if (UnityEditor.SessionState.GetInt(
+                Level.EditorPlayLevelKey,
+                0
+            ) > 0)
+        {
+            return GameplaySceneStr;
+        }
+#endif
+
+        return StoryIntroState.HasBeenWatched
+            ? GameplaySceneStr
+            : StoryIntroSceneStr;
+    }
+
     private void StartSceneTransition()
     {
-        if (TransitionManager.Instance == null)
-        {
-            Debug.LogWarning(
-                "Không tìm thấy TransitionManager. " +
-                "Scene sẽ được mở trực tiếp."
-            );
-
-            ActivateNextScene();
-            return;
-        }
-
-        TransitionManager.Instance.PlayCover(
-            ActivateNextScene
-        );
+        // The loading screen is already visible. Activate the preloaded scene
+        // immediately instead of waiting for an extra TransitionManager cover.
+        ActivateNextScene();
     }
 
     private void ActivateNextScene()

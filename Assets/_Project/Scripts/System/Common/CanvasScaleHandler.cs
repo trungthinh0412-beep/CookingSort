@@ -1,29 +1,140 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
-public class CanvasScaleHandler : MonoBehaviour
+[DisallowMultipleComponent]
+public sealed class CanvasScaleHandler : MonoBehaviour
 {
-    [SerializeField] private Camera camera;
-    [SerializeField] private UnityEngine.UI.CanvasScaler canvasScaler;
-    private void Awake()
+    private static readonly Vector2 PortraitReferenceResolution =
+        new Vector2(1080f, 1920f);
+
+    [SerializeField] private new Camera camera;
+    [SerializeField] private CanvasScaler canvasScaler;
+
+    private int _lastWidth;
+    private int _lastHeight;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+    private static void RegisterSceneCallback()
     {
-        float currentRatio = 1080f / 1920;
-        float newRatio = (float) Screen.width / Screen.height;
-        SetupCanvasScaler(newRatio);
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+        SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
-    private void OnDrawGizmos()
+    private static void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        if (Application.isPlaying) return;
-        if (camera != null && canvasScaler != null)
+        ConfigureLoadedPortraitCanvases();
+    }
+
+    private void Awake()
+    {
+        Configure();
+    }
+
+    private void OnEnable()
+    {
+        Configure();
+    }
+
+    private void Update()
+    {
+        int width = GetCurrentWidth();
+        int height = GetCurrentHeight();
+        if (width == _lastWidth && height == _lastHeight)
         {
-            float currentRatio = 1080f / 1920;
-            float newRatio = (float) camera.pixelWidth / camera.pixelHeight;
-            SetupCanvasScaler(newRatio);
+            return;
+        }
+
+        Configure();
+    }
+
+    private void OnValidate()
+    {
+        Configure();
+    }
+
+    private void Configure()
+    {
+        if (canvasScaler == null)
+        {
+            canvasScaler = GetComponent<CanvasScaler>();
+        }
+
+        ConfigurePortraitScaler(canvasScaler);
+        _lastWidth = GetCurrentWidth();
+        _lastHeight = GetCurrentHeight();
+    }
+
+    private int GetCurrentWidth()
+    {
+        return !Application.isPlaying && camera != null
+            ? camera.pixelWidth
+            : Screen.width;
+    }
+
+    private int GetCurrentHeight()
+    {
+        return !Application.isPlaying && camera != null
+            ? camera.pixelHeight
+            : Screen.height;
+    }
+
+    private static void ConfigureLoadedPortraitCanvases()
+    {
+        CanvasScaler[] scalers = FindObjectsByType<CanvasScaler>(
+            FindObjectsInactive.Include,
+            FindObjectsSortMode.None
+        );
+
+        for (int index = 0; index < scalers.Length; index++)
+        {
+            CanvasScaler scaler = scalers[index];
+            if (!UsesPortraitReference(scaler))
+            {
+                continue;
+            }
+
+            Canvas canvas = scaler.GetComponent<Canvas>();
+            if (canvas != null && canvas.renderMode == RenderMode.WorldSpace)
+            {
+                continue;
+            }
+
+            ConfigurePortraitScaler(scaler);
         }
     }
 
-    private void SetupCanvasScaler(float ratio)
+    private static bool UsesPortraitReference(CanvasScaler scaler)
     {
-        canvasScaler.matchWidthOrHeight = ratio > .65f ? 1 : 0;
+        if (scaler == null)
+        {
+            return false;
+        }
+
+        Vector2 resolution = scaler.referenceResolution;
+        return Mathf.Approximately(
+                   resolution.x,
+                   PortraitReferenceResolution.x
+               ) &&
+               Mathf.Approximately(
+                   resolution.y,
+                   PortraitReferenceResolution.y
+               );
+    }
+
+    private static void ConfigurePortraitScaler(CanvasScaler scaler)
+    {
+        if (scaler == null)
+        {
+            return;
+        }
+
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = PortraitReferenceResolution;
+
+        // Expand uses the smaller scale factor. The logical canvas can grow
+        // beyond 1080x1920, but it can never become smaller, so anchored UI
+        // remains visible on tall phones, tablets and foldable portrait screens.
+        scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.Expand;
     }
 }

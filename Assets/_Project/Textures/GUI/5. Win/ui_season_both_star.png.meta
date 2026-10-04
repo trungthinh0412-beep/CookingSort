@@ -1,0 +1,755 @@
+fileFormatVersion: 2
+guid: 024cc9b3af311944e83a5c0d0881e7f4
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 5049579518447541075
+    second: ui_season_both_star_0
+  - first:
+      213: -8592687564501364523
+    second: ui_season_both_star_1
+  - first:
+      213: 4594262221326842345
+    second: ui_season_both_star_2
+  - first:
+      213: -6089688157841652406
+    second: ui_season_both_star_3
+  - first:
+      213: 5999268189870234737
+    second: ui_season_both_star_4
+  - first:
+      213: -6448621486965556962
+    second: ui_season_both_star_5
+  - first:
+      213: -9091441394004496488
+    second: ui_season_both_star_6
+  - first:
+      213: -4020433374173944419
+    second: ui_season_both_star_7
+  - first:
+      213: 6112027747085137501
+    second: ui_season_both_star_8
+  - first:
+      213: 8287190060317084354
+    second: ui_season_both_star_9
+  - first:
+      213: 9182529309395693638
+    second: ui_season_both_star_10
+  - first:
+      213: -8507784483337958857
+    second: ui_season_both_star_11
+  - first:
+      213: -1515221416618343388
+    second: ui_season_both_star_12
+  - first:
+      213: -2334566902486756906
+    second: ui_season_both_star_13
+  - first:
+      213: -8209326259883108934
+    second: ui_season_both_star_14
+  - first:
+      213: 280316839787042689
+    second: ui_season_both_star_15
+  - first:
+      213: 8953681237316837203
+    second: ui_season_both_star_16
+  - first:
+      213: -6768388138628876118
+    second: ui_season_both_star_17
+  - first:
+      213: -7542125860066968496
+    second: ui_season_both_star_18
+  - first:
+      213: -7675304838452679499
+    second: ui_season_both_star_19
+  - first:
+      213: -7942630378962369632
+    second: ui_season_both_star_20
+  - first:
+      213: 3859915398282910516
+    second: ui_season_both_star_21
+  - first:
+      213: -1086211872983347152
+    second: ui_season_both_star_22
+  - first:
+      213: -3523870466530352608
+    second: ui_season_both_star_23
+  - first:
+      213: -9172266788625390608
+    second: ui_season_both_star_24
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: ui_season_both_star_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 930
+        width: 15
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 35b572671d5b31640800000000000000
+      internalID: 5049579518447541075
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_season_both_star_1
+      rect:
+        serializedVersion: 2
+        x: 73
+        y: 923
+        width: 97
+        height: 95
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5d0daf3af24a0c880800000000000000
+      internalID: -8592687564501364523
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_season_both_star_2
+      rect:
+        serializedVersion: 2
+        x: 228
+        y: 923
+        width: 97
+        height: 95
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9e9fe2b162912cf30800000000000000
+      internalID: 4594262221326842345
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_season_both_star_3
+      rect:
+        serializedVersion: 2
+        x: 383
+        y: 923
+        width: 47
+        height: 95
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a4502fe82e41d7ba0800000000000000
+      internalID: -6089688157841652406
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_season_both_star_4
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 769
+        width: 90
+        height: 96
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 17c148912aea14350800000000000000
+      internalID: 5999268189870234737
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_season_both_star_5
+      rect:
+        serializedVersion: 2
+        x: 148
+        y: 769
+        width: 97
+        height: 96
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e1977728ce4e186a0800000000000000
+      internalID: -6448621486965556962
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_season_both_star_6
+      rect:
+        serializedVersion: 2
+        x: 303
+        y: 769
+        width: 97
+        height: 96
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 89f641e7836b4d180800000000000000
+      internalID: -9091441394004496488
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_season_both_star_7
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 622
+        width: 15
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d95ac39b52d8438c0800000000000000
+      internalID: -4020433374173944419
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_season_both_star_8
+      rect:
+        serializedVersion: 2
+        x: 73
+        y: 614
+        width: 97
+        height: 97
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d5637526ad842d450800000000000000
+      internalID: 6112027747085137501
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_season_both_star_9
+      rect:
+        serializedVersion: 2
+        x: 228
+        y: 614
+        width: 97
+        height: 97
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2ca0953d373020370800000000000000
+      internalID: 8287190060317084354
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_season_both_star_10
+      rect:
+        serializedVersion: 2
+        x: 383
+        y: 615
+        width: 47
+        height: 96
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 640b42a71c5ee6f70800000000000000
+      internalID: 9182529309395693638
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_season_both_star_11
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 461
+        width: 90
+        height: 96
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 73a8f0da6174ee980800000000000000
+      internalID: -8507784483337958857
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_season_both_star_12
+      rect:
+        serializedVersion: 2
+        x: 148
+        y: 461
+        width: 97
+        height: 96
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 424466a462ad8fae0800000000000000
+      internalID: -1515221416618343388
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_season_both_star_13
+      rect:
+        serializedVersion: 2
+        x: 303
+        y: 461
+        width: 97
+        height: 96
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6d194e075c3f99fd0800000000000000
+      internalID: -2334566902486756906
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_season_both_star_14
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 315
+        width: 15
+        height: 62
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ab59162f24d921e80800000000000000
+      internalID: -8209326259883108934
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_season_both_star_15
+      rect:
+        serializedVersion: 2
+        x: 73
+        y: 307
+        width: 97
+        height: 96
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 187111c3ea2e3e300800000000000000
+      internalID: 280316839787042689
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_season_both_star_16
+      rect:
+        serializedVersion: 2
+        x: 228
+        y: 307
+        width: 97
+        height: 96
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 35f995e85add14c70800000000000000
+      internalID: 8953681237316837203
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_season_both_star_17
+      rect:
+        serializedVersion: 2
+        x: 383
+        y: 307
+        width: 47
+        height: 96
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aa8fe0f29dad112a0800000000000000
+      internalID: -6768388138628876118
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_season_both_star_18
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 153
+        width: 90
+        height: 96
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 05cbb6b7d7cf45790800000000000000
+      internalID: -7542125860066968496
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_season_both_star_19
+      rect:
+        serializedVersion: 2
+        x: 148
+        y: 153
+        width: 97
+        height: 96
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5bce0393ae6db7590800000000000000
+      internalID: -7675304838452679499
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_season_both_star_20
+      rect:
+        serializedVersion: 2
+        x: 303
+        y: 153
+        width: 97
+        height: 96
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0a3c8bf80cb16c190800000000000000
+      internalID: -7942630378962369632
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_season_both_star_21
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 22
+        width: 15
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 43b96b1aa9c219530800000000000000
+      internalID: 3859915398282910516
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_season_both_star_22
+      rect:
+        serializedVersion: 2
+        x: 73
+        y: 0
+        width: 97
+        height: 95
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 03014087e000de0f0800000000000000
+      internalID: -1086211872983347152
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_season_both_star_23
+      rect:
+        serializedVersion: 2
+        x: 228
+        y: 0
+        width: 97
+        height: 95
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 022e7ff1b72b81fc0800000000000000
+      internalID: -3523870466530352608
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_season_both_star_24
+      rect:
+        serializedVersion: 2
+        x: 383
+        y: 0
+        width: 47
+        height: 95
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0f3eed6d3ff85b080800000000000000
+      internalID: -9172266788625390608
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable: {}
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

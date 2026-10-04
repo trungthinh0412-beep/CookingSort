@@ -263,20 +263,7 @@ namespace custom.find.reference
 			//if (!string.IsNullOrEmpty(m_addressable)) Debug.LogWarning(guid + " --> " + m_addressable);
 			m_assetbundle = AssetDatabase.GetImplicitAssetBundleName(m_assetPath);
 			
-			if (assetType == typeof(Texture2D))
-			{
-				var importer = AssetImporter.GetAtPath(m_assetPath);
-				if (importer is TextureImporter)
-				{
-					var tImporter = importer as TextureImporter;
-					if (tImporter.qualifiesForSpritePacking)
-					{
-						m_atlas = tImporter.spritePackingTag;
-					}
-				}
-			}
-			
-			// check if file content changed
+            // check if file content changed
 			var metaInfo = new FileInfo(m_assetPath + ".meta");
 			var assetTime = CustomUnity.Epoch(info.LastWriteTime);
 			var metaTime = CustomUnity.Epoch(metaInfo.LastWriteTime);

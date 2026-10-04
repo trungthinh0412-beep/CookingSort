@@ -57,12 +57,12 @@ public class PopupDebug : Popup
         panelPlayerData.SetActive(false);
     }
 
-    public void OnClickUpdate()
+    public async void OnClickUpdate()
     {
         SoundController.Instance.PlayFX(SoundName.ClickButton);
         try
         {
-            Data.UpdateData(inputField.text);
+            await Data.UpdateData(inputField.text);
         }
         catch (Exception e)
         {

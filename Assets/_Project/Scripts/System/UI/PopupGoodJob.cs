@@ -5,6 +5,8 @@ using CustomTween;
 
 public sealed class PopupGoodJob : Popup, IPointerClickHandler
 {
+    private const int CoinReward = 50;
+    private const int GemReward = 10;
     private const string NextButtonName = "Next_Btn";
     private const string BonusButtonName = "Bonus_btn";
 
@@ -17,7 +19,8 @@ public sealed class PopupGoodJob : Popup, IPointerClickHandler
 
     private CustomButton _nextButton;
     private CustomButton _bonusButton;
-    private bool _isClosing;
+    private bool _claimInProgress;
+    private bool _rewardClaimed;
     private Vector3 _coinRewardsBaseScale;
     private Vector3 _gemsRewardsBaseScale;
     private bool _rewardBaseScalesCached;
@@ -38,7 +41,8 @@ public sealed class PopupGoodJob : Popup, IPointerClickHandler
     {
         base.BeforeShow();
 
-        _isClosing = false;
+        _claimInProgress = false;
+        _rewardClaimed = false;
         SetButtonsInteractable(true);
         ResetRewardScales();
 
@@ -51,6 +55,7 @@ public sealed class PopupGoodJob : Popup, IPointerClickHandler
     protected override void AfterShown()
     {
         base.AfterShown();
+        SoundController.Instance?.PauseBackground();
         SoundController.Instance?.PlayFX(SoundName.WinLevel);
         PlayRewardPopAnimation();
     }
@@ -71,31 +76,93 @@ public sealed class PopupGoodJob : Popup, IPointerClickHandler
 
     public void OnClickNext()
     {
-        CloseToHome();
+        ClaimAndReturnHome(1);
     }
 
     public void OnClickGetX2BuyAds()
     {
-        if (_isClosing)
+        if (_claimInProgress)
             return;
 
+        _claimInProgress = true;
         SetButtonsInteractable(false);
 
         if (SoundController.Instance != null)
             SoundController.Instance.PlayFX(SoundName.ClickButton);
 
-        CloseToHome();
+        if (AdsController.Instance != null)
+        {
+            AdsController.Instance.ShowInterstitial(
+                () => ClaimAndReturnHome(2),
+                placement: "PopupGoodJob_OnClickGetX2BuyAds"
+            );
+            return;
+        }
+
+        ClaimAndReturnHome(2);
     }
 
-    private void CloseToHome()
+    private void ClaimAndReturnHome(int rewardMultiplier)
     {
-        if (_isClosing)
+        if (_rewardClaimed)
             return;
 
-        _isClosing = true;
+        _claimInProgress = true;
+        _rewardClaimed = true;
         SetButtonsInteractable(false);
+
+        int goldReward = CoinReward * rewardMultiplier;
+        Vector3 coinSourceWorldPosition = coinRewards != null
+            ? coinRewards.position
+            : transform.position;
+        Camera coinSourceCamera = GetUiCamera(coinRewards);
+        bool goldCommitted = false;
+
+        if (Data.PlayerData != null)
+        {
+            // Commit the wallet immediately, then explicitly play one visual
+            // sequence after Home is visible so the hidden GoodJob source can
+            // fly into the active Home GoldHandler without a duplicate batch.
+            GoldHandler.AddWithoutResourceAnimation(goldReward);
+            goldCommitted = true;
+            Data.PlayerData.CurrentStar += GemReward * rewardMultiplier;
+            Data.SaveData();
+        }
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.ReturnHome();
+            if (goldCommitted)
+            {
+                GoldHandler.PlayCommittedRewardFromWorld(
+                    coinSourceWorldPosition,
+                    coinSourceCamera,
+                    goldReward
+                );
+            }
+            return;
+        }
+
         Hide(PopupAnimation.None);
-        PopupController.Instance?.SetBottomBarVisible(true);
+        if (goldCommitted)
+        {
+            GoldHandler.PlayCommittedRewardFromWorld(
+                coinSourceWorldPosition,
+                coinSourceCamera,
+                goldReward
+            );
+        }
+    }
+
+    private static Camera GetUiCamera(RectTransform source)
+    {
+        Canvas sourceCanvas = source != null
+            ? source.GetComponentInParent<Canvas>()
+            : null;
+        return sourceCanvas != null &&
+               sourceCanvas.renderMode != RenderMode.ScreenSpaceOverlay
+            ? sourceCanvas.worldCamera
+            : null;
     }
 
     private CustomButton BindButton(string buttonName, UnityAction clickAction)

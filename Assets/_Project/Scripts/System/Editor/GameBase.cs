@@ -47,6 +47,34 @@ public class GameBase : EditorWindow
         Data.SaveData();
         Debug.Log("<color=Green>Add 100 build gems succeed</color>");
     }
+
+    [MenuItem("GameBase/Debug/Booster")]
+    public static void AddBooster()
+    {
+        if (Data.PlayerData == null)
+        {
+            Debug.LogWarning("PlayerData is not loaded. Enter Play Mode first.");
+            return;
+        }
+
+        CardType[] popupBoosterTypes =
+        {
+            CardType.StackCard,
+            CardType.UpgradeCard,
+            CardType.KingCard
+        };
+
+        foreach (CardType cardType in popupBoosterTypes)
+        {
+            Data.PlayerData.SetPreLevelCardAmount(
+                cardType,
+                Data.PlayerData.GetPreLevelCardAmount(cardType) + 1
+            );
+        }
+
+        Data.SaveData();
+        Debug.Log("<color=Green>Added 1 to each active PopupBooster quantity badge.</color>");
+    }
     
     [MenuItem("GameBase/Debug/Switch Debug %`")]
     public static void SwitchDebug()

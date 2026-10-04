@@ -15,10 +15,17 @@ public sealed class ResourceTransferAnimator : MonoBehaviour
 
     [Header("Transfer Timing")]
     [SerializeField] [Min(0f)] private float startDelay = .02f;
-    [SerializeField] [Range(.02f, .12f)] private float spawnInterval = .03f;
-    [SerializeField] [Range(.2f, .6f)] private float flightDuration = .45f;
-    [SerializeField] [Min(0f)] private float curveHeight = 34f;
-    [SerializeField] [Min(0f)] private float horizontalPathJitter = 12f;
+    [Tooltip("Delay between icons. Icons follow each other; they do not wait for the previous arrival.")]
+    [SerializeField] [Range(.02f, .2f)] private float spawnInterval = .08f;
+    [SerializeField] [Range(.2f, 1f)] private float flightDuration = .55f;
+
+    [Header("Half-Parabola Curve")]
+    [Tooltip("0 = straight line, 1 = exact half-parabola with the source as its apex. The path remains one-way throughout this range.")]
+    [SerializeField] [Range(0f, 1f)] private float curveStrength = 1f;
+    [Tooltip("Position of the bend control point from Start (0) to Target (1). Above 0.5 stays flatter longer, then curves more sharply into the target.")]
+    [SerializeField] [Range(.05f, .95f)] private float curveBendPosition = .65f;
+
+    [Header("Visual Scale")]
     [SerializeField] [Range(.35f, 1.1f)] private float visualScale = .72f;
     [Tooltip("Gem starts small and grows while travelling toward the Build Button.")]
     [SerializeField] [Range(.35f, 1f)] private float startScaleMultiplier = .55f;
@@ -154,6 +161,7 @@ public sealed class ResourceTransferAnimator : MonoBehaviour
         float elapsed = 0f;
         int nextGemIndex = 0;
         int arrivedGemCount = 0;
+        float safeSpawnInterval = Mathf.Max(.001f, spawnInterval);
 
         while (nextGemIndex < visualGemCount || flights.Count > 0)
         {
@@ -164,7 +172,7 @@ public sealed class ResourceTransferAnimator : MonoBehaviour
             }
 
             while (nextGemIndex < visualGemCount &&
-                   elapsed >= startDelay + spawnInterval * nextGemIndex)
+                   elapsed >= startDelay + safeSpawnInterval * nextGemIndex)
             {
                 GemFlyVisual visual = SpawnVisual(
                     animationRoot,
@@ -181,16 +189,17 @@ public sealed class ResourceTransferAnimator : MonoBehaviour
                         Visual = visual,
                         StartScreen = startScreen,
                         EndScreen = endScreen,
-                        ControlScreen = GetControlPoint(
+                        ControlScreen = GetHalfParabolaControlPoint(
                             startScreen,
                             endScreen,
-                            nextGemIndex,
-                            this.curveHeight,
-                            this.horizontalPathJitter
+                            curveStrength,
+                            curveBendPosition
                         ),
                         Rotation = GetRotation(nextGemIndex),
                         Duration = Mathf.Max(.01f, flightDuration),
-                        Elapsed = 0f
+                        // Preserve stagger even when a slow frame spawns several icons.
+                        Elapsed = Mathf.Max(0f, elapsed -
+                            (startDelay + safeSpawnInterval * nextGemIndex))
                     });
                 }
 
@@ -199,8 +208,12 @@ public sealed class ResourceTransferAnimator : MonoBehaviour
 
             float deltaTime = GetDeltaTime();
 
-            for (int i = flights.Count - 1; i >= 0; i--)
+            // Process oldest first so same-frame arrivals keep their launch order.
+            for (int i = 0; i < flights.Count;)
             {
+                if (!IsTransferValid(version, animationRoot))
+                    yield break;
+
                 VisualGemFlight flight = flights[i];
 
                 if (flight.Visual == null)
@@ -257,6 +270,7 @@ public sealed class ResourceTransferAnimator : MonoBehaviour
                 if (progress < 1f)
                 {
                     flights[i] = flight;
+                    i++;
                     continue;
                 }
 
@@ -416,31 +430,22 @@ public sealed class ResourceTransferAnimator : MonoBehaviour
             requirementText.text = Mathf.Max(0, value).ToString();
     }
 
-    private static Vector2 GetControlPoint(
+    private static Vector2 GetHalfParabolaControlPoint(
         Vector2 start,
         Vector2 end,
-        int index,
-        float curveHeight,
-        float horizontalPathJitter
+        float strength,
+        float bendPosition
     )
     {
-        Vector2 direction = end - start;
-
-        if (direction.sqrMagnitude < .01f)
-            direction = Vector2.down;
-
-        Vector2 perpendicular = new Vector2(-direction.y, direction.x)
-            .normalized;
-        float side = index % 2 == 0 ? 1f : -1f;
-        float curve = Mathf.Max(0f, curveHeight) *
-                      side *
-                      (1f + (index % 3) * .12f);
-        float jitter = Mathf.Sin((index + 1) * 17.37f) *
-                       Mathf.Max(0f, horizontalPathJitter);
-
-        return (start + end) * .5f +
-               perpendicular * curve +
-               Vector2.right * jitter;
+        // Keeping the control point between the endpoint X values makes horizontal
+        // movement monotonic: it cannot overshoot and reverse. Control Y moves
+        // toward source Y as strength approaches 1, producing a sharper one-sided
+        // parabolic branch. Bend position shifts the turn without creating a full arc.
+        float midpointY = (start.y + end.y) * .5f;
+        return new Vector2(
+            Mathf.Lerp(start.x, end.x, Mathf.Clamp(bendPosition, .05f, .95f)),
+            Mathf.Lerp(midpointY, start.y, Mathf.Clamp01(strength))
+        );
     }
 
     private static float GetRotation(int index)

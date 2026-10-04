@@ -8,32 +8,22 @@ using UnityEngine.Purchasing;
 
 public class IAPController : SingletonDontDestroy<IAPController>
 {
+    private const int PermanentRemoveAdsYears = 100;
+
     [SerializeField] private IAPConfig iapConfig;
 
     private StoreController _store;
+    private PackName? _queuedPurchase;
+    private bool _productsReady;
+    private bool _purchaseInProgress;
 
     private readonly Dictionary<string, PackName> _productIdToPack = new();
-    private readonly Dictionary<PackName, ProductType> _packTypes = new();
     private readonly HashSet<PackName> _activePack = new();
 
     protected override void Awake()
     {
         base.Awake();
-        BuildTypeMap();
         Initialize();
-    }
-
-    private void BuildTypeMap()
-    {
-        _packTypes[PackName.RemoveAds] = ProductType.NonConsumable;
-        _packTypes[PackName.SmallBundle] = ProductType.Consumable;
-        _packTypes[PackName.BigBundle] = ProductType.Consumable;
-        _packTypes[PackName.Gold1] = ProductType.Consumable;
-        _packTypes[PackName.Gold2] = ProductType.Consumable;
-        _packTypes[PackName.Gold3] = ProductType.Consumable;
-        _packTypes[PackName.Gold4] = ProductType.Consumable;
-        _packTypes[PackName.Gold5] = ProductType.Consumable;
-        _packTypes[PackName.Gold6] = ProductType.Consumable;
     }
 
     // =========================
@@ -83,10 +73,9 @@ public class IAPController : SingletonDontDestroy<IAPController>
 
         foreach (var d in iapConfig.packData)
         {
-            if (!_packTypes.TryGetValue(d.packName, out var type)) continue;
             if (string.IsNullOrEmpty(d.packId)) continue;
 
-            defs.Add(new ProductDefinition(d.packId, type));
+            defs.Add(new ProductDefinition(d.packId, d.productType));
             _productIdToPack[d.packId] = d.packName;
         }
 
@@ -95,23 +84,73 @@ public class IAPController : SingletonDontDestroy<IAPController>
 
     public void PurchasePack(PackName packName)
     {
-        if (_store == null)
-        {
-            Debug.LogError("IAP is not initialized.");
-            return;
-        }
-
-        var pid = iapConfig.GetPackData(packName)?.packId;
-        if (string.IsNullOrEmpty(pid))
+        PackData packData = iapConfig?.GetPackData(packName);
+        if (packData == null || string.IsNullOrEmpty(packData.packId))
         {
             Debug.LogError($"Unknown product id for {packName}");
             return;
         }
 
-        var product = _store.GetProducts().FirstOrDefault(p => p.definition.id == pid);
+#if UNITY_EDITOR
+        CompleteEditorPurchase(packName);
+        return;
+#endif
+
+        if (_store == null || !_productsReady)
+        {
+            _queuedPurchase ??= packName;
+            Debug.Log($"[IAP] Queued {packName} until products are ready.");
+            return;
+        }
+
+        StartPurchase(packName, packData.packId);
+    }
+
+#if UNITY_EDITOR
+    private void CompleteEditorPurchase(PackName packName)
+    {
+        if (_purchaseInProgress)
+            return;
+
+        _purchaseInProgress = true;
+        try
+        {
+            int goldAmount = HandlePurchase(packName);
+            Data.SaveData();
+            AdsController.Instance?.HideBanner();
+
+            if (goldAmount > 0)
+                Observer.PurchasePackGoldGranted?.Invoke(packName, goldAmount);
+
+            Observer.PurchasePackComplete?.Invoke();
+            Debug.Log($"[IAP] Editor purchase completed immediately: {packName}");
+        }
+        catch (Exception exception)
+        {
+            Debug.LogException(exception);
+        }
+        finally
+        {
+            _purchaseInProgress = false;
+        }
+    }
+#endif
+
+    private void StartPurchase(PackName packName, string productId)
+    {
+        if (_purchaseInProgress)
+        {
+            Debug.LogWarning($"[IAP] A purchase is already in progress. Ignored {packName}.");
+            return;
+        }
+
+        var products = _store?.GetProducts();
+        var product = products?.FirstOrDefault(
+            item => item.definition.id == productId);
         if (product == null)
         {
-            Debug.LogError($"Product not fetched yet: {pid}");
+            _queuedPurchase ??= packName;
+            Debug.Log($"[IAP] Product not fetched yet: {productId}. Purchase queued.");
             return;
         }
 
@@ -121,7 +160,43 @@ public class IAPController : SingletonDontDestroy<IAPController>
             return;
         }
 
+        _purchaseInProgress = true;
         _store.PurchaseProduct(product);
+    }
+
+    private void StartQueuedPurchaseIfReady()
+    {
+        if (!_productsReady || !_queuedPurchase.HasValue)
+            return;
+
+        PackName packName = _queuedPurchase.Value;
+        _queuedPurchase = null;
+        string productId = iapConfig?.GetPackData(packName)?.packId;
+        if (string.IsNullOrEmpty(productId))
+        {
+            Debug.LogError($"Unknown product id for queued pack {packName}");
+            return;
+        }
+
+        StartPurchase(packName, productId);
+    }
+
+    public string GetLocalizedPrice(PackName packName)
+    {
+        if (_store == null)
+            return null;
+
+        string productId = iapConfig?.GetPackData(packName)?.packId;
+        if (string.IsNullOrEmpty(productId))
+            return null;
+
+        var products = _store.GetProducts();
+        if (products == null)
+            return null;
+
+        Product product = products.FirstOrDefault(
+            item => item.definition.id == productId);
+        return product?.metadata?.localizedPriceString;
     }
 
     public void RestorePurchases()
@@ -137,12 +212,17 @@ public class IAPController : SingletonDontDestroy<IAPController>
 
     private void OnProductsFetched(List<Product> products)
     {
+        _productsReady = true;
+        Observer.IAPProductsUpdated?.Invoke();
+
         // Proceed to fetch previous purchases/entitlements
         _store.FetchPurchases();
+        StartQueuedPurchaseIfReady();
     }
 
     private void OnProductsFetchFailed(ProductFetchFailed failure)
     {
+        _productsReady = false;
         Debug.LogError($"IAP Products fetch failed: {failure}");
     }
 
@@ -162,10 +242,13 @@ public class IAPController : SingletonDontDestroy<IAPController>
 
                     if (_productIdToPack.TryGetValue(pid, out var pack))
                     {
-                        if (_packTypes.TryGetValue(pack, out var type) && (type == ProductType.Subscription || type == ProductType.NonConsumable))
+                        var packData = iapConfig.GetPackData(pack);
+                        if (packData != null &&
+                            (packData.productType == ProductType.Subscription ||
+                             packData.productType == ProductType.NonConsumable))
                         {
                             _activePack.Add(pack);
-                            Debug.Log($"<color=cyan>[IAP] Active subscription: {pack}</color>");
+                            Debug.Log($"<color=cyan>[IAP] Active product: {pack}</color>");
                         }
                     }
                 }
@@ -187,6 +270,9 @@ public class IAPController : SingletonDontDestroy<IAPController>
     {
         try
         {
+            List<(PackName packName, int goldAmount)> grantedGoldPacks =
+                new List<(PackName, int)>();
+
             foreach (var item in order.CartOrdered.Items())
             {
                 var product = item.Product;
@@ -208,11 +294,22 @@ public class IAPController : SingletonDontDestroy<IAPController>
                     }
                 }
 
-                HandlePurchase(packName, product);
+                int goldAmount = HandlePurchase(packName);
+                if (goldAmount > 0)
+                    grantedGoldPacks.Add((packName, goldAmount));
             }
 
             // Always confirm after you have granted rewards & saved state
+            Data.SaveData();
+            AdsController.Instance?.HideBanner();
             _store.ConfirmPurchase(order);
+
+            foreach (var grantedPack in grantedGoldPacks)
+            {
+                Observer.PurchasePackGoldGranted?.Invoke(
+                    grantedPack.packName,
+                    grantedPack.goldAmount);
+            }
 
             // Update UI
             Observer.PurchasePackComplete?.Invoke();
@@ -222,16 +319,22 @@ public class IAPController : SingletonDontDestroy<IAPController>
             Debug.LogException(e);
             // DO NOT confirm here if you failed to grant rewards; allow retry on next init
         }
+        finally
+        {
+            _purchaseInProgress = false;
+        }
     }
 
     private void OnPurchaseFailed(FailedOrder failed)
     {
+        _purchaseInProgress = false;
         // FirebaseController.Instance.TrackingPurchaseFailIap(failed.ToString());
         Debug.LogError($"Purchase failed: {failed}");
     }
 
     private void OnPurchaseDeferred(DeferredOrder deferred)
     {
+        _purchaseInProgress = false;
         Debug.LogWarning($"Purchase deferred: {deferred}");
     }
 
@@ -246,103 +349,81 @@ public class IAPController : SingletonDontDestroy<IAPController>
     }
 
     // =========================
-    // Reward logic (unchanged)
+    // Data-driven reward logic
     // =========================
-    private void HandlePurchase(PackName packName, Product purchasedProduct)
+    private int HandlePurchase(PackName packName)
     {
-        switch (packName)
+        PackData pack = iapConfig?.GetPackData(packName);
+        if (pack == null)
         {
-            case PackName.RemoveAds:
-                HandleRemoveAdsPurchase(PackName.RemoveAds);
+            throw new InvalidOperationException($"Missing IAP config for {packName}.");
+        }
+
+        int grantedGold = 0;
+        if (pack.rewards != null)
+        {
+            foreach (ShopRewardData reward in pack.rewards)
+            {
+                ApplyReward(reward);
+                if (reward != null && reward.type == ShopRewardType.Gold)
+                    grantedGold += Mathf.Max(0, reward.amount);
+            }
+        }
+
+        // Every successful IAP pack removes ads permanently.
+        EnsureRemoveAdsForYears(PermanentRemoveAdsYears);
+        return grantedGold;
+    }
+
+    private static void ApplyReward(ShopRewardData reward)
+    {
+        if (reward == null || reward.amount <= 0)
+            return;
+
+        switch (reward.type)
+        {
+            case ShopRewardType.Gold:
+                GoldHandler.AddWithoutResourceAnimation(reward.amount);
                 break;
-            case PackName.SmallBundle:
-                HandleSmallBundlePurchase(PackName.SmallBundle);
+            case ShopRewardType.Shuffle:
+                Data.PlayerData.CurrentShuffle += reward.amount;
                 break;
-            case PackName.BigBundle:
-                HandleBigBundlePurchase(PackName.BigBundle);
+            case ShopRewardType.Bomb:
+                Data.PlayerData.CurrentBomb += reward.amount;
                 break;
-            case PackName.Gold1:
-                HandleGold1Purchase(PackName.Gold1);
+            case ShopRewardType.MoreDeal:
+                Data.PlayerData.CurrentMoreDeal += reward.amount;
                 break;
-            case PackName.Gold2:
-                HandleGold2Purchase(PackName.Gold2);
+            case ShopRewardType.MagicSwap:
+                Data.PlayerData.CurrentMagicSwap += reward.amount;
                 break;
-            case PackName.Gold3:
-                HandleGold3Purchase(PackName.Gold3);
+            case ShopRewardType.Magnet:
+                Data.PlayerData.CurrentMagnet += reward.amount;
                 break;
-            case PackName.Gold4:
-                HandleGold4Purchase(PackName.Gold4);
+            case ShopRewardType.InfiniteHeartHours:
+                Data.PlayerData.AddInfiniteHeartTime(reward.amount);
                 break;
-            case PackName.Gold5:
-                HandleGold5Purchase(PackName.Gold5);
+            case ShopRewardType.RemoveAdsYears:
+                ExtendRemoveAds(years: reward.amount);
                 break;
-            case PackName.Gold6:
-                HandleGold6Purchase(PackName.Gold6);
+            case ShopRewardType.StackCardHours:
+                Data.PlayerData.AddTimedPreLevelCardTime(
+                    CardType.StackCard,
+                    reward.amount);
+                break;
+            case ShopRewardType.UpgradeCardHours:
+                Data.PlayerData.AddTimedPreLevelCardTime(
+                    CardType.UpgradeCard,
+                    reward.amount);
+                break;
+            case ShopRewardType.KingCardHours:
+                Data.PlayerData.AddTimedPreLevelCardTime(
+                    CardType.KingCard,
+                    reward.amount);
                 break;
             default:
-                throw new ArgumentOutOfRangeException(nameof(packName), packName, null);
+                throw new ArgumentOutOfRangeException();
         }
-    }
-
-    private void HandleRemoveAdsPurchase(PackName packName)
-    {
-        //FirebaseController.Instance.TrackingIapRevenue("HandleRemoveAdsPurchase", $"{packName}");
-        ExtendRemoveAds(0, 100);
-    }
-
-    private void HandleSmallBundlePurchase(PackName packName)
-    {
-        //FirebaseController.Instance.TrackingIapRevenue("HandleSmallBundlePurchase", $"{packName}");
-        Data.PlayerData.CurrentGold += 1500;
-        Data.PlayerData.CurrentShuffle += 1;
-        Data.PlayerData.CurrentBomb += 1;
-        Data.PlayerData.AddInfiniteHeartTime(1);
-
-    }
-
-    private void HandleBigBundlePurchase(PackName packName)
-    {
-        //FirebaseController.Instance.TrackingIapRevenue("HandleBigBundlePurchase", $"{packName}");
-        Data.PlayerData.CurrentGold += 3000;
-        Data.PlayerData.CurrentShuffle += 4;
-        Data.PlayerData.CurrentBomb += 4;
-        Data.PlayerData.AddInfiniteHeartTime(3);
-    }
-
-    private void HandleGold1Purchase(PackName packName)
-    {
-        //FirebaseController.Instance.TrackingIapRevenue("HandleGold1Purchase", $"{packName}");
-        Data.PlayerData.CurrentGold += 300;
-    }
-
-    private void HandleGold2Purchase(PackName packName)
-    {
-        //FirebaseController.Instance.TrackingIapRevenue("HandleGold2Purchase", $"{packName}");
-        Data.PlayerData.CurrentGold += 900;
-    }
-
-    private void HandleGold3Purchase(PackName packName)
-    {
-        //FirebaseController.Instance.TrackingIapRevenue("HandleGold3Purchase", $"{packName}");
-        Data.PlayerData.CurrentGold += 1900;
-    }
-
-    private void HandleGold4Purchase(PackName packName)
-    {
-        //FirebaseController.Instance.TrackingIapRevenue("HandleGold4Purchase", $"{packName}");
-        Data.PlayerData.CurrentGold += 6000;
-    }
-
-    private void HandleGold5Purchase(PackName packName)
-    {
-        //FirebaseController.Instance.TrackingIapRevenue("HandleGold5Purchase", $"{packName}");
-        Data.PlayerData.CurrentGold += 15000;
-    }
-
-    private void HandleGold6Purchase(PackName packName)
-    {
-        //FirebaseController.Instance.TrackingIapRevenue("HandleGold6Purchase", $"{packName}");
-        Data.PlayerData.CurrentGold += 36000;
     }
 
     private static void ExtendRemoveAds(int months = 0, int years = 0)
@@ -363,5 +444,26 @@ public class IAPController : SingletonDontDestroy<IAPController>
 
         current = months > 0 ? current.AddMonths(months) : current.AddYears(years);
         Data.PlayerData.RemoveAdsExpiryDate = current.ToString(Utility.DateTimeFormat, System.Globalization.CultureInfo.InvariantCulture);
+    }
+
+    private static void EnsureRemoveAdsForYears(int years)
+    {
+        System.DateTime minimumExpiry = System.DateTime.UtcNow.AddYears(years);
+        if (!string.IsNullOrEmpty(Data.PlayerData.RemoveAdsExpiryDate) &&
+            System.DateTime.TryParseExact(
+                Data.PlayerData.RemoveAdsExpiryDate,
+                Utility.DateTimeFormat,
+                System.Globalization.CultureInfo.InvariantCulture,
+                System.Globalization.DateTimeStyles.AssumeUniversal |
+                System.Globalization.DateTimeStyles.AdjustToUniversal,
+                out System.DateTime existing) &&
+            existing >= minimumExpiry)
+        {
+            return;
+        }
+
+        Data.PlayerData.RemoveAdsExpiryDate = minimumExpiry.ToString(
+            Utility.DateTimeFormat,
+            System.Globalization.CultureInfo.InvariantCulture);
     }
 }

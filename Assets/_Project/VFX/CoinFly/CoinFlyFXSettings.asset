@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 08f7ad448d964081bc0246a32dd0df21, type: 3}
+  m_Name: CoinFlyFXSettings
+  m_EditorClassIdentifier: Assembly-CSharp::CoinFlyFXSettings
+  coinSpinFrames:
+  - {fileID: 1820211085, guid: 930c9df45af10b74194968de8c9009c8, type: 3}
+  - {fileID: 1934099834, guid: 930c9df45af10b74194968de8c9009c8, type: 3}
+  - {fileID: 568450522, guid: 930c9df45af10b74194968de8c9009c8, type: 3}
+  - {fileID: 1101071562, guid: 930c9df45af10b74194968de8c9009c8, type: 3}
+  - {fileID: 1459423396, guid: 930c9df45af10b74194968de8c9009c8, type: 3}
+  - {fileID: -798083699, guid: 930c9df45af10b74194968de8c9009c8, type: 3}
+  - {fileID: -482882618, guid: 930c9df45af10b74194968de8c9009c8, type: 3}
+  - {fileID: 1313400564, guid: 930c9df45af10b74194968de8c9009c8, type: 3}
+  - {fileID: -1670893858, guid: 930c9df45af10b74194968de8c9009c8, type: 3}
+  - {fileID: 401350326, guid: 930c9df45af10b74194968de8c9009c8, type: 3}
+  - {fileID: 570230743, guid: 930c9df45af10b74194968de8c9009c8, type: 3}
+  spinFrameRate: 24
+  previewCoinCount: 12

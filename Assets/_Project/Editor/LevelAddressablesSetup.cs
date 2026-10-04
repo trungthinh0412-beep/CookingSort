@@ -7,7 +7,7 @@ using UnityEngine;
 
 public static class LevelAddressablesSetup
 {
-    private const string LevelFolder = "Assets/_Project/Hidden Object/Prefabs/Level";
+    private const string LevelFolder = "Assets/_Project/Levels";
     private const string GroupName = "Levels";
 
     [InitializeOnLoadMethod]
@@ -51,12 +51,6 @@ public static class LevelAddressablesSetup
         {
             string assetPath = AssetDatabase.GUIDToAssetPath(guid);
             string address = Path.GetFileNameWithoutExtension(assetPath);
-            // Only playable levels. Reusable spots/templates must never become level addresses.
-            if (!System.Text.RegularExpressions.Regex.IsMatch(address, @"^Level [1-9]\d*$"))
-                continue;
-            var level = AssetDatabase.LoadAssetAtPath<GameObject>(assetPath);
-            if (level == null || level.GetComponent<MagicSoft.Differences.DifferenceWorldBoard>() == null)
-                continue;
             AddressableAssetEntry entry = settings.FindAssetEntry(guid);
 
             if (entry == null || entry.parentGroup != group)
@@ -70,16 +64,6 @@ public static class LevelAddressablesSetup
                 entry.SetAddress(address, false);
                 changed = true;
             }
-        }
-
-        // Archived Loop Sort assets are preserved, but are no longer playable addresses.
-        foreach (var existingGroup in settings.groups)
-        {
-            if (existingGroup == null) continue;
-            var archived = new System.Collections.Generic.List<string>();
-            foreach (var entry in existingGroup.entries)
-                if (entry.AssetPath.StartsWith("Assets/_Project/Legacy/LoopSort/Levels/")) archived.Add(entry.guid);
-            foreach (var guid in archived) { settings.RemoveAssetEntry(guid); changed = true; }
         }
 
         if (!changed)
