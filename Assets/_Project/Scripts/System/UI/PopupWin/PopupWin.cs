@@ -160,7 +160,11 @@ public class PopupWin : Popup
 
     private void ClaimReward(bool isWatchAds)
     {
-        if (_winGold == 0) { GameManager.Instance.ReturnHome(); return; }
+        if (_winGold == 0)
+        {
+            ReturnHomeAndShowCompletion();
+            return;
+        }
         if (isWatchAds)
         {
             Data.PlayerData.SavingReward = new RewardData(_winGold * winArrowItem.currentWinBonusArea.MultiBonus, _popupInGame.CurrentStar);
@@ -172,7 +176,15 @@ public class PopupWin : Popup
         btnBonusRewardAds.gameObject.SetActive(false);
         btnClaim.gameObject.SetActive(false);
         
+        ReturnHomeAndShowCompletion();
+    }
+
+    private void ReturnHomeAndShowCompletion()
+    {
         GameManager.Instance.ReturnHome();
+
+        if (PopupController.Instance.Get<PopupGoodJob>() != null)
+            PopupController.Instance.Show<PopupGoodJob>(PopupAnimation.ScaleFade);
     }
 }
 [Serializable]
