@@ -11,6 +11,9 @@ using Random = UnityEngine.Random;
 
 public class PopupInGame : Popup
 {
+    [Header("Base Game")]
+    [SerializeField] private bool stripLegacyContent = true;
+
     private const int UseBoosterSortingOrder = 32000;
     private const float TrayFullProgressDangerThreshold = 0.3f;
     private const int FreeMoveAdRewardAmount = 5;
@@ -426,6 +429,12 @@ public class PopupInGame : Popup
 
     private void Awake()
     {
+        if (stripLegacyContent)
+        {
+            ClearLegacyContent();
+            return;
+        }
+
         ConfigureUseBoosterSorting();
         CacheBoosterFocusLayout();
 
@@ -453,6 +462,16 @@ public class PopupInGame : Popup
         RegisterTrayFullButton();
         Observer.StartLevel += StartLevel;
         Observer.GoldChangedDone += UpdateGoldText;
+    }
+
+    private void ClearLegacyContent()
+    {
+        for (int i = transform.childCount - 1; i >= 0; i--)
+        {
+            GameObject child = transform.GetChild(i).gameObject;
+            child.SetActive(false);
+            Destroy(child);
+        }
     }
 
     private void ConfigureUseBoosterSorting()

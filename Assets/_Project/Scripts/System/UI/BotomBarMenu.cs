@@ -944,7 +944,7 @@ public class BottomBarMenu : MonoBehaviour
         {
             case 0:
                 PopupController.Instance
-                    .Show<PopupShop>(
+                    .Show<PopupLeague>(
                         PopupAnimation.None
                     );
                 break;

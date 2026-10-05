@@ -300,21 +300,7 @@ public class GoldHandler : ResourceHandler
         if (SoundController.Instance != null)
             SoundController.Instance.PlayFX(SoundName.ClickButton);
 
-        PopupController popupController = PopupController.Instance;
-        if (popupController == null)
-            return;
-
-        // Gold can be tapped while another main page is still active. Keep
-        // that page from covering Shop, then restore Shop's visual state.
-        popupController.HideAllExcept<PopupShop>();
-        popupController.Show<PopupShop>(PopupAnimation.None);
-
-        PopupShop popupShop = popupController.Get<PopupShop>() as PopupShop;
-        if (popupShop == null)
-            return;
-
-        popupShop.Show(PopupAnimation.None);
-        popupShop.ShowGoldPackages();
+        Observer.Notify?.Invoke("Shop is unavailable.", Vector3.zero);
     }
     
     protected override void OnCollectedEffect(GameObject target)

@@ -138,7 +138,7 @@ public class PopupBuyBooster : Popup
         if (Data.PlayerData.CurrentGold < price)
         {
             Observer.Notify?.Invoke("Not enough gold!", Vector3.zero);
-            PopupController.Instance.Show<PopupShopInGame>();
+            Observer.Notify?.Invoke("Not enough gold!", Vector3.zero);
             return;
         }
 

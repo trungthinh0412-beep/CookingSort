@@ -23,7 +23,7 @@ public class PopupCreatorWindow : EditorWindow
     {
         EditorGUILayout.Space(10);
 
-        EditorGUILayout.HelpBox($"Enter the popup name. For example: PopupShop\nThe script will be created in: {_creator.ScriptSavingDirectory} \nThe prefab will be created in: {_creator.PopupSavingDirectory}", MessageType.Info);
+        EditorGUILayout.HelpBox($"Enter the popup name. For example: PopupSettings\nThe script will be created in: {_creator.ScriptSavingDirectory} \nThe prefab will be created in: {_creator.PopupSavingDirectory}", MessageType.Info);
 
         EditorGUILayout.Space(5);
         _popupName = EditorGUILayout.TextField("Popup Name", _popupName);

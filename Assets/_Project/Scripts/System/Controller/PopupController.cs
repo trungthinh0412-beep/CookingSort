@@ -431,13 +431,12 @@ public class PopupController : SingletonDontDestroy<PopupController>
 
 
     // ============================================================
-    // 5 MAIN POPUPS
+    // 4 MAIN POPUPS
     // ============================================================
 
     private bool IsMainBottomBarPopup(Type popupType)
     {
         return
-            popupType == typeof(PopupShop) ||
             popupType == typeof(PopupLeague) ||
             popupType == typeof(PopupHome) ||
             popupType == typeof(PopupCollection) ||
@@ -449,14 +448,12 @@ public class PopupController : SingletonDontDestroy<PopupController>
         switch (index)
         {
             case 0:
-                return Get<PopupShop>();
-            case 1:
                 return Get<PopupLeague>();
-            case 2:
+            case 1:
                 return Get<PopupHome>();
-            case 3:
+            case 2:
                 return Get<PopupCollection>();
-            case 4:
+            case 3:
                 return Get<PopupKingdom>();
             default:
                 return null;
@@ -465,20 +462,17 @@ public class PopupController : SingletonDontDestroy<PopupController>
 
     public int GetMainTabIndex(Popup popup)
     {
-        if (popup is PopupShop)
+        if (popup is PopupLeague)
             return 0;
 
-        if (popup is PopupLeague)
+        if (popup is PopupHome)
             return 1;
 
-        if (popup is PopupHome)
+        if (popup is PopupCollection)
             return 2;
 
-        if (popup is PopupCollection)
-            return 3;
-
         if (popup is PopupKingdom)
-            return 4;
+            return 3;
 
         return -1;
     }

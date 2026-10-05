@@ -67,7 +67,7 @@ public class PopupMoreLife : Popup
         if (Data.PlayerData.CurrentGold < goldFullHeart)
         {
             Observer.Notify?.Invoke("Not enough gold!", Vector3.zero);
-            PopupController.Instance.Show<PopupShopInGame>();
+            Observer.Notify?.Invoke("Not enough gold!", Vector3.zero);
             return;
         }
         Data.PlayerData.CurrentGold -= goldFullHeart;
@@ -120,4 +120,3 @@ public class PopupMoreLife : Popup
         Hide(PopupAnimation.None);
     }
 }
-

@@ -51,7 +51,6 @@ public static class Data
     {
         int previousStar = PlayerData == null ? 0 : PlayerData.CurrentStar;
 
-        StoryIntroState.ResetWatchedState();
         BonusTrayTutorialState.ResetSeenState();
         RewardTrayTutorialState.ResetSeenState();
         WildCardTutorialState.ResetSeenState();

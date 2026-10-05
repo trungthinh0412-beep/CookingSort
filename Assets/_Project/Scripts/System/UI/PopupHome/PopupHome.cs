@@ -974,7 +974,7 @@ public class PopupHome : Popup
     public void OnClickShop()
     {
         PlayClickSound();
-        OpenPopup<PopupShop>();
+        Observer.Notify?.Invoke("Shop is unavailable.", Vector3.zero);
     }
 
     public void OnClickLeague()

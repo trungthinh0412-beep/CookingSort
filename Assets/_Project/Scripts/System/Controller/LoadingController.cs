@@ -26,9 +26,6 @@ public class LoadingController : MonoBehaviour
     private const string GameplaySceneStr =
         "GameplayScene";
 
-    private const string StoryIntroSceneStr =
-        "StoryIntroScene";
-
     private void Start()
     {
         progress.fillAmount = 0f;
@@ -124,9 +121,7 @@ public class LoadingController : MonoBehaviour
         }
 #endif
 
-        return StoryIntroState.HasBeenWatched
-            ? GameplaySceneStr
-            : StoryIntroSceneStr;
+        return GameplaySceneStr;
     }
 
     private void StartSceneTransition()

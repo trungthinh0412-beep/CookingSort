@@ -58,7 +58,7 @@ public class BottomTabBar : MonoBehaviour
     [SerializeField] private float deselectVisualDuration = 0.07f;
 
     [Header("Default Tab")]
-    [SerializeField] private int defaultIndex = 2;
+    [SerializeField] private int defaultIndex = 1;
 
 
     // ============================================================
@@ -110,6 +110,7 @@ public class BottomTabBar : MonoBehaviour
 
     private void Awake()
     {
+        RemoveShopTab();
         InitializeSafeAreaOffset();
 
         CacheNormalState();
@@ -123,6 +124,18 @@ public class BottomTabBar : MonoBehaviour
         currentIndex = DefaultIndex;
 
         ApplyStateInstant(currentIndex);
+    }
+
+    private void RemoveShopTab()
+    {
+        if (tabs.Count == 0)
+            return;
+
+        Tab shopTab = tabs[0];
+        if (shopTab.button != null)
+            shopTab.button.gameObject.SetActive(false);
+
+        tabs.RemoveAt(0);
     }
 
     private void OnEnable()
@@ -1293,30 +1306,29 @@ public class BottomTabBar : MonoBehaviour
         {
             case 0:
                 PopupController.Instance
-                    .Show<PopupShop>(
-                        PopupAnimation.None
-                    );
-                break;
-
-
-            case 1:
-                PopupController.Instance
                     .Show<PopupLeague>(
                         PopupAnimation.None
                     );
                 break;
 
 
-            case 2:
+            case 1:
                 PopupController.Instance.Show<PopupHome>(
                     PopupAnimation.None
                 );
                 break;
 
 
-            case 3:
+            case 2:
                 PopupController.Instance
                     .Show<PopupCollection>(
+                        PopupAnimation.None
+                    );
+                break;
+
+            case 3:
+                PopupController.Instance
+                    .Show<PopupKingdom>(
                         PopupAnimation.None
                     );
                 break;

@@ -417,8 +417,7 @@ public class PopupBooster : Popup
             return;
 
         RefundSelectedPreLevelCards();
-        popupController.HideAll();
-        popupController.Show<PopupShop>(PopupAnimation.None);
+        Observer.Notify?.Invoke("Shop is unavailable.", Vector3.zero);
     }
 
     private void HidePreLevelCardSlots()
