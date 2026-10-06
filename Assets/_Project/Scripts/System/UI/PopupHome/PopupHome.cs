@@ -118,7 +118,7 @@ public class PopupHome : Popup
         if (taskButton != null)
         {
             taskButton.gameObject.SetActive(
-                level >= Mathf.Max(1, taskUnlockLevel)
+                false
             );
         }
     }
