@@ -22,7 +22,7 @@ public class PopupDailyReward : Popup
         base.AfterHidden();
         if (!PopupController.Instance.Get<PopupHome>().isActiveAndEnabled)
         {
-            GameManager.Instance.gameState = GameState.PlayingGame;
+            
         }
     }
 

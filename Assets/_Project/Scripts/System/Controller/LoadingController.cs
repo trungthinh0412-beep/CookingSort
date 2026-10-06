@@ -113,7 +113,7 @@ public class LoadingController : MonoBehaviour
     {
 #if UNITY_EDITOR
         if (UnityEditor.SessionState.GetInt(
-                Level.EditorPlayLevelKey,
+                "EditorPlayLevelKey",
                 0
             ) > 0)
         {

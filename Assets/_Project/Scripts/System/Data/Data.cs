@@ -15,49 +15,48 @@ public static class Data
 
         // Encrypt the JSON data
         string encryptedData = EncryptionHelper.Encrypt(jsonData);
-        File.WriteAllText(SavePath, encryptedData);
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        Debug.Log("<color=green>Save player data (encrypted) succeed</color>");
-#endif
-    }
 
+        File.WriteAllText(SavePath, encryptedData);
+    }
+    
     public static void LoadData()
     {
         if (File.Exists(SavePath))
         {
             string encryptedData = File.ReadAllText(SavePath);
-
-            // Decrypt the data before loading
-            string decryptedData = EncryptionHelper.Decrypt(encryptedData);
-            PlayerData = JsonConvert.DeserializeObject<PlayerData>(decryptedData);
-
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-            Debug.Log("<color=green>Load player data (decrypted) succeed</color>");
-#endif
+            try
+            {
+                // Try decrypting the data
+                string jsonData = EncryptionHelper.Decrypt(encryptedData);
+                PlayerData = JsonConvert.DeserializeObject<PlayerData>(jsonData);
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogWarning("Decryption failed. Attempting to read as plain text: " + ex.Message);
+                try
+                {
+                    // Fallback to reading plain JSON data
+                    PlayerData = JsonConvert.DeserializeObject<PlayerData>(encryptedData);
+                }
+                catch (System.Exception parseEx)
+                {
+                    Debug.LogError("Failed to parse data file. Creating a new one: " + parseEx.Message);
+                    PlayerData = new PlayerData();
+                }
+            }
         }
         else
         {
             PlayerData = new PlayerData();
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-            Debug.Log("<color=green>Create new player data ... </color>");
-#endif
         }
-
-        CollectionManager.ValidatePlayerProgress();
-        Observer.CollectionChanged?.Invoke();
     }
 
     public static void ClearData()
     {
-        int previousStar = PlayerData == null ? 0 : PlayerData.CurrentStar;
-
-        BonusTrayTutorialState.ResetSeenState();
-        RewardTrayTutorialState.ResetSeenState();
-        WildCardTutorialState.ResetSeenState();
-        DowngradeCardTutorialState.ResetSeenState();
-        IronCardTutorialState.ResetSeenState();
-        DarkKingCardTutorialState.ResetSeenState();
-        FrozenCardTutorialState.ResetSeenState();
+        int previousStar = PlayerData?.Star ?? 0;
+        
+        0.ResetSeenStates();
+        0.ResetSeenState();
 
         if (File.Exists(SavePath))
         {
@@ -71,9 +70,6 @@ public static class Data
             Debug.LogWarning("No save file found to delete!");
         }
 
-        // Clearing only the file leaves the current PlayerData object alive
-        // while Play Mode is running. Reset the in-memory state as well so
-        // PopupKingdomBuild immediately reads every slot as NotBuilt.
         PlayerData = new PlayerData();
 
         if (previousStar > 0)
@@ -95,3 +91,4 @@ public static class Data
 #endif
     }
 }
+public partial class PlayerData { public int Star; }

@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -40,7 +40,6 @@ public class BottomBarMenu : MonoBehaviour
     [SerializeField] private TabData league;
     [SerializeField] private TabData home;
     [SerializeField] private TabData collection;
-    [SerializeField] private TabData kingdom;
 
     // =========================================================
     // BACKGROUND
@@ -55,7 +54,7 @@ public class BottomBarMenu : MonoBehaviour
     // =========================================================
 
     [Header("Current Tab")]
-    [Tooltip("Shop=0, League=1, Home=2, Collection=3, Kingdom=4")]
+    [Tooltip("Shop=0, League=1, Home=2, Collection=3")]
     [SerializeField] private int currentTabIndex = 2;
 
     // =========================================================
@@ -63,882 +62,252 @@ public class BottomBarMenu : MonoBehaviour
     // =========================================================
 
     [Header("Tab Width")]
-
-    // Kích thước cuối cùng của tab selected
     [SerializeField] private float selectedWidth = 336f;
-
-    // Chỉ pop rất nhẹ và nhanh
-    [SerializeField] private float selectedPopWidth = 344f;
-
-    [SerializeField] private float fallbackTotalWidth = 1080f;
-
-    // =========================================================
-    // ICON
-    // =========================================================
-
-    [Header("Icon")]
-
-    // Vị trí cuối cùng
-    [SerializeField] private float iconLift = 40f;
-
-    // Icon nhảy cao hơn một chút lúc pop
-    [SerializeField] private float iconPopLift = 55f;
-
-    // Scale cuối cùng
-    [SerializeField] private float selectedIconScale = 1.18f;
-
-    // Scale lớn nhất lúc pop
-    [SerializeField] private float iconPopScale = 1.32f;
-
-    // Scale lúc bắt đầu
-    [SerializeField] private float iconStartScale = 0.94f;
+    [SerializeField] private float widthOvershootValue = 350f;
+    [SerializeField] private float widthOvershootTime = 0.1f;
+    [SerializeField] private float normalWidth = 260f;
+    [SerializeField] private float widthSettleTime = 0.15f;
 
     // =========================================================
-    // TEXT
+    // ICON 
     // =========================================================
 
-    [Header("Text")]
-
-    [SerializeField] private float selectedTextLift = 15f;
-
-    [SerializeField] private float selectedTextScale = 1.08f;
-
-    [SerializeField] private float textPopScale = 1.14f;
-
-    [SerializeField] private float textStartScale = 0.88f;
-
-    [SerializeField] private float textStartOffsetY = -8f;
+    [Header("Selected Icon")]
+    [SerializeField] private float selectedIconYOffset = 69f;
+    [SerializeField] private float selectedIconScale = 1.35f;
+    [SerializeField] private float iconOvershootScale = 1.55f;
+    [SerializeField] private float iconOvershootTime = 0.15f;
+    [SerializeField] private float iconSettleTime = 0.1f;
 
     // =========================================================
-    // TIMING
+    // LABEL 
     // =========================================================
 
-    [Header("Animation Timing")]
-
-    // Tab chỉ pop ngang rất nhanh
-    [SerializeField] private float tabPopOutDuration = 0.055f;
-    [SerializeField] private float tabPopBackDuration = 0.075f;
-
-    // Icon + text
-    [SerializeField] private float iconPopDuration = 0.11f;
-    [SerializeField] private float iconSettleDuration = 0.10f;
-
-    [Range(0f, 1f)]
-    [SerializeField] private float iconSwapPoint = 0.25f;
+    [Header("Selected Label")]
+    [SerializeField] private float selectedLabelYOffset = 5f;
+    [SerializeField] private float selectedLabelScale = 1.0f;
+    [SerializeField] private float labelFadeTime = 0.1f;
 
     // =========================================================
-
-    private TabData[] tabs;
-
-    private Coroutine entranceRoutine;
-
-    private bool initialized;
-    private bool isOpening;
-
+    // GLOBAL
     // =========================================================
-    // UNITY
-    // =========================================================
+
+    [Header("Visual Speed Global")]
+    [SerializeField] private float deselectTime = 0.12f;
+    [SerializeField] private float interactionCooldown = 0.3f; // Khóa UI khi dang anim
+
+    private TabData[] _tabs;
+    private Coroutine[] _tabCoroutines;
+    private float _lastInteractionTime;
 
     private void Awake()
     {
-        Initialize();
-    }
-
-    private void OnEnable()
-    {
-        Initialize();
-
-        RefreshTabInteraction();
-
-        if (!Application.isPlaying)
-        {
-            SetFinalStateImmediate();
-            return;
-        }
-
-        if (entranceRoutine != null)
-        {
-            StopCoroutine(entranceRoutine);
-        }
-
-        entranceRoutine =
-            StartCoroutine(PlaySelectedEntrance());
-    }
-
-    private void OnDisable()
-    {
-        if (entranceRoutine != null)
-        {
-            StopCoroutine(entranceRoutine);
-            entranceRoutine = null;
-        }
-
-        isOpening = false;
-    }
-
-    // =========================================================
-    // INITIALIZE
-    // =========================================================
-
-    private void Initialize()
-    {
-        if (initialized)
-            return;
-
-        tabs = new TabData[]
+        _tabs = new TabData[]
         {
             shop,
             league,
             home,
-            collection,
-            kingdom
+            collection
         };
 
-        for (int i = 0; i < tabs.Length; i++)
-        {
-            TabData tab = tabs[i];
-
-            if (tab == null || tab.root == null)
-                continue;
-
-            tab.layout =
-                tab.root.GetComponent<LayoutElement>();
-
-            // CanvasGroup của toàn tab
-            tab.tabCanvasGroup =
-                tab.root.GetComponent<CanvasGroup>();
-
-            if (tab.tabCanvasGroup == null)
-            {
-                tab.tabCanvasGroup =
-                    tab.root.AddComponent<CanvasGroup>();
-            }
-
-            if (tab.background == null)
-            {
-                tab.background =
-                    tab.root.GetComponent<Image>();
-            }
-
-            // ICON
-            if (tab.icon != null)
-            {
-                tab.iconRect =
-                    tab.icon.rectTransform;
-
-                tab.normalIconPosition =
-                    tab.iconRect.anchoredPosition;
-
-                tab.normalIconScale =
-                    tab.iconRect.localScale;
-            }
-
-            // TEXT
-            if (tab.label != null)
-            {
-                tab.labelRect =
-                    tab.label.rectTransform;
-
-                tab.normalLabelPosition =
-                    tab.labelRect.anchoredPosition;
-
-                tab.normalLabelScale =
-                    tab.labelRect.localScale;
-
-                tab.labelGroup =
-                    tab.label.GetComponent<CanvasGroup>();
-
-                if (tab.labelGroup == null)
-                {
-                    tab.labelGroup =
-                        tab.label.gameObject
-                            .AddComponent<CanvasGroup>();
-                }
-            }
-        }
-
-        initialized = true;
+        _tabCoroutines = new Coroutine[_tabs.Length];
+        
+        InitTabsData();
     }
 
-    // =========================================================
-    // INTERACTION
-    // =========================================================
-
-    private void RefreshTabInteraction()
+    private void Start()
     {
-        if (tabs == null)
+        ForceTabImmediate(currentTabIndex);
+    }
+    
+    // ============================================================
+    // ON ENABLE HOOK
+    // ============================================================
+
+    private void OnEnable()
+    {
+        SetupHooks();
+        UpdateSelectedTabToMatchPopup();
+    }
+    
+    private void OnDisable()
+    {
+        RemoveHooks();
+    }
+    
+    private void SetupHooks()
+    {
+        //LevelStart += OnHideTabsUI;
+    }
+    
+    private void RemoveHooks()
+    {
+        //LevelStart -= OnHideTabsUI;
+    }
+    
+    private void OnHideTabsUI(GameObject obj)
+    {
+        gameObject.SetActive(false);
+    }
+
+    private void UpdateSelectedTabToMatchPopup()
+    {
+        if (PopupController.Instance == null)
             return;
-
-        for (int i = 0; i < tabs.Length; i++)
+            
+        int targetIndex = PopupController.Instance.GetCurrentMainTabIndex();
+        
+        if (targetIndex >= 0 && targetIndex != currentTabIndex && targetIndex < _tabs.Length)
         {
-            TabData tab = tabs[i];
+            OpenTab(targetIndex);
+        }
+    }
 
-            if (tab == null ||
-                tab.tabCanvasGroup == null)
-                continue;
 
-            bool selected =
-                i == currentTabIndex;
+    // =========================================================
+    // INITIALIZATION
+    // =========================================================
 
-            // Selected tab không nhận click
-            tab.tabCanvasGroup.blocksRaycasts =
-                !selected;
+    private void InitTabsData()
+    {
+        for (int i = 0; i < _tabs.Length; i++)
+        {
+            if (_tabs[i].root == null) continue;
 
-            tab.tabCanvasGroup.interactable =
-                !selected;
+            _tabs[i].layout = _tabs[i]
+                .root.GetComponent<LayoutElement>();
+
+            _tabs[i].iconRect = _tabs[i]
+                .icon.GetComponent<RectTransform>();
+
+            _tabs[i].labelRect = _tabs[i]
+                .label.GetComponent<RectTransform>();
+
+
+            _tabs[i].labelGroup = _tabs[i]
+                .label.GetComponent<CanvasGroup>();
+
+            if (_tabs[i].labelGroup == null)
+            {
+                _tabs[i].labelGroup = _tabs[i]
+                    .label.gameObject.AddComponent<CanvasGroup>();
+            }
+
+            _tabs[i].tabCanvasGroup = _tabs[i]
+                .root.GetComponent<CanvasGroup>();
+
+            if (_tabs[i].tabCanvasGroup == null)
+            {
+                _tabs[i].tabCanvasGroup = _tabs[i]
+                    .root.gameObject.AddComponent<CanvasGroup>();
+            }
+
+
+            _tabs[i].normalIconPosition = _tabs[i].iconRect.anchoredPosition;
+            _tabs[i].normalIconScale = _tabs[i].iconRect.localScale;
+
+            _tabs[i].normalLabelPosition = _tabs[i].labelRect.anchoredPosition;
+            _tabs[i].normalLabelScale = _tabs[i].labelRect.localScale;
         }
     }
 
     // =========================================================
-    // WIDTH
+    // FORCE (START)
     // =========================================================
 
-    private float GetTotalWidth()
+    private void ForceTabImmediate(int index)
     {
-        RectTransform rect =
-            transform as RectTransform;
-
-        if (rect != null &&
-            rect.rect.width > 0.01f)
+        for (int i = 0; i < _tabs.Length; i++)
         {
-            return rect.rect.width;
+            if (_tabs[i].root == null) continue;
+
+            if (_tabCoroutines[i] != null)
+            {
+                StopCoroutine(_tabCoroutines[i]);
+                _tabCoroutines[i] = null;
+            }
+
+            bool isSel = (i == index);
+
+            if (_tabs[i].background != null)
+            {
+                _tabs[i].background.sprite = isSel
+                    ? selectedBackgroundSprite
+                    : normalBackgroundSprite;
+            }
+
+
+            if (_tabs[i].icon != null)
+            {
+                _tabs[i].icon.sprite = isSel
+                    ? _tabs[i].selectedIcon
+                    : _tabs[i].normalIcon;
+            }
+
+            // Width
+            _tabs[i].layout.preferredWidth = isSel
+                ? selectedWidth
+                : normalWidth;
+
+
+            Vector2 iPos = _tabs[i].normalIconPosition;
+            if (isSel) iPos.y += selectedIconYOffset;
+            _tabs[i].iconRect.anchoredPosition = iPos;
+            _tabs[i].iconRect.localScale = isSel
+                ? Vector3.one * selectedIconScale
+                : _tabs[i].normalIconScale;
+
+
+            Vector2 lPos = _tabs[i].normalLabelPosition;
+            if (isSel) lPos.y += selectedLabelYOffset;
+            _tabs[i].labelRect.anchoredPosition = lPos;
+            _tabs[i].labelRect.localScale = isSel
+                ? Vector3.one * selectedLabelScale
+                : _tabs[i].normalLabelScale;
+
+
+            _tabs[i].labelGroup.alpha = isSel ? 1f : 0f;
         }
 
-        return fallbackTotalWidth;
+        RebuildLayoutRoot();
     }
 
-    private float GetOtherWidth(
-        float selectedCurrentWidth)
-    {
-        int otherCount =
-            tabs.Length - 1;
-
-        if (otherCount <= 0)
-            return 0f;
-
-        return
-            (GetTotalWidth() - selectedCurrentWidth) /
-            otherCount;
-    }
 
     // =========================================================
-    // PREPARE
+    // OPEN TAB -> COROUTINE MAIN
     // =========================================================
 
-    private void PrepareEntrance()
+    public void OpenTab(int index)
     {
-        // QUAN TRỌNG:
-        // WIDTH được set NGAY lập tức về trạng thái selected.
-        // Không còn animation từ normal width -> selected width.
+        if (index == currentTabIndex) return;
+        if (Time.time - _lastInteractionTime < interactionCooldown) return;
+        _lastInteractionTime = Time.time;
 
-        float otherWidth =
-            GetOtherWidth(selectedWidth);
+        int old = currentTabIndex;
+        currentTabIndex = index;
 
-        for (int i = 0; i < tabs.Length; i++)
+
+        if (old >= 0 && old < _tabs.Length)
         {
-            TabData tab = tabs[i];
+            if (_tabCoroutines[old] != null)
+                StopCoroutine(_tabCoroutines[old]);
 
-            if (tab == null)
-                continue;
-
-            bool selected =
-                i == currentTabIndex;
-
-            // =============================================
-            // WIDTH - SNAP NGAY
-            // =============================================
-
-            if (tab.layout != null)
-            {
-                tab.layout.preferredWidth =
-                    selected
-                        ? selectedWidth
-                        : otherWidth;
-            }
-
-            // =============================================
-            // BACKGROUND
-            // =============================================
-
-            if (tab.background != null)
-            {
-                tab.background.sprite =
-                    selected
-                        ? selectedBackgroundSprite
-                        : normalBackgroundSprite;
-            }
-
-            // =============================================
-            // ICON
-            // =============================================
-
-            if (tab.icon != null &&
-                tab.iconRect != null)
-            {
-                if (selected)
-                {
-                    if (tab.normalIcon != null)
-                    {
-                        tab.icon.sprite =
-                            tab.normalIcon;
-                    }
-
-                    tab.iconRect.anchoredPosition =
-                        tab.normalIconPosition +
-                        Vector2.up * iconLift;
-
-                    tab.iconRect.localScale =
-                        tab.normalIconScale *
-                        iconStartScale;
-                }
-                else
-                {
-                    if (tab.normalIcon != null)
-                    {
-                        tab.icon.sprite =
-                            tab.normalIcon;
-                    }
-
-                    tab.iconRect.anchoredPosition =
-                        tab.normalIconPosition;
-
-                    tab.iconRect.localScale =
-                        tab.normalIconScale;
-                }
-
-                tab.iconRect.localRotation =
-                    Quaternion.identity;
-            }
-
-            // =============================================
-            // TEXT
-            // =============================================
-
-            if (tab.labelGroup != null)
-            {
-                tab.labelGroup.alpha =
-                    selected ? 0f : 0f;
-            }
-
-            if (tab.labelRect != null)
-            {
-                if (selected)
-                {
-                    Vector2 finalPos =
-                        tab.normalLabelPosition +
-                        Vector2.up *
-                        selectedTextLift;
-
-                    tab.labelRect.anchoredPosition =
-                        finalPos +
-                        Vector2.up *
-                        textStartOffsetY;
-
-                    tab.labelRect.localScale =
-                        tab.normalLabelScale *
-                        textStartScale;
-                }
-                else
-                {
-                    tab.labelRect.anchoredPosition =
-                        tab.normalLabelPosition;
-
-                    tab.labelRect.localScale =
-                        tab.normalLabelScale;
-                }
-            }
-        }
-
-        ForceLayout();
-    }
-
-    // =========================================================
-    // ENTRANCE
-    // =========================================================
-
-    private IEnumerator PlaySelectedEntrance()
-    {
-        if (currentTabIndex < 0 ||
-            currentTabIndex >= tabs.Length)
-        {
-            yield break;
-        }
-
-        TabData selectedTab =
-            tabs[currentTabIndex];
-
-        if (selectedTab == null)
-            yield break;
-
-        RefreshTabInteraction();
-
-        // Tab lập tức về đúng layout
-        PrepareEntrance();
-
-        // Cho Unity rebuild layout trước
-        yield return null;
-
-        // Chạy animation nhỏ
-        Coroutine widthRoutine =
-            StartCoroutine(
-                PlayTabWidthPop(selectedTab)
+            _tabCoroutines[old] = StartCoroutine(
+                DeselectRoutine(_tabs[old])
             );
-
-        Coroutine iconRoutine =
-            StartCoroutine(
-                PlayIconAndTextPop(selectedTab)
-            );
-
-        // Chờ cả animation xong
-        if (widthRoutine != null)
-            yield return widthRoutine;
-
-        if (iconRoutine != null)
-            yield return iconRoutine;
-
-        SetFinalStateImmediate();
-
-        RefreshTabInteraction();
-
-        entranceRoutine = null;
-    }
-
-    // =========================================================
-    // QUICK TAB WIDTH POP
-    // =========================================================
-
-    private IEnumerator PlayTabWidthPop(
-        TabData selectedTab)
-    {
-        if (selectedTab == null ||
-            selectedTab.layout == null)
-        {
-            yield break;
         }
 
-        // -----------------------------------------------------
-        // 336 -> 344
-        // cực nhanh
-        // -----------------------------------------------------
+        if (_tabCoroutines[index] != null)
+            StopCoroutine(_tabCoroutines[index]);
+            
+        _tabCoroutines[index] = StartCoroutine(
+            SelectRoutine(_tabs[index])
+        );
+
+        SoundController.Instance.PlayFX(
+            SoundName.ClickButton
+        );
 
-        float elapsed = 0f;
-
-        while (elapsed < tabPopOutDuration)
-        {
-            elapsed +=
-                Time.unscaledDeltaTime;
-
-            float t =
-                Mathf.Clamp01(
-                    elapsed /
-                    Mathf.Max(
-                        tabPopOutDuration,
-                        0.001f
-                    )
-                );
-
-            float ease =
-                EaseOutCubic(t);
-
-            float currentSelectedWidth =
-                Mathf.Lerp(
-                    selectedWidth,
-                    selectedPopWidth,
-                    ease
-                );
-
-            ApplyWidths(
-                currentSelectedWidth
-            );
-
-            yield return null;
-        }
-
-        // -----------------------------------------------------
-        // 344 -> 336
-        // settle nhanh
-        // -----------------------------------------------------
-
-        elapsed = 0f;
-
-        while (elapsed < tabPopBackDuration)
-        {
-            elapsed +=
-                Time.unscaledDeltaTime;
-
-            float t =
-                Mathf.Clamp01(
-                    elapsed /
-                    Mathf.Max(
-                        tabPopBackDuration,
-                        0.001f
-                    )
-                );
-
-            float ease =
-                SmoothStep(t);
-
-            float currentSelectedWidth =
-                Mathf.Lerp(
-                    selectedPopWidth,
-                    selectedWidth,
-                    ease
-                );
-
-            ApplyWidths(
-                currentSelectedWidth
-            );
-
-            yield return null;
-        }
-
-        ApplyWidths(selectedWidth);
-    }
-
-    // =========================================================
-    // APPLY WIDTH
-    // =========================================================
-
-    private void ApplyWidths(
-        float currentSelectedWidth)
-    {
-        float otherWidth =
-            GetOtherWidth(
-                currentSelectedWidth
-            );
-
-        for (int i = 0; i < tabs.Length; i++)
-        {
-            TabData tab = tabs[i];
-
-            if (tab == null ||
-                tab.layout == null)
-                continue;
-
-            tab.layout.preferredWidth =
-                i == currentTabIndex
-                    ? currentSelectedWidth
-                    : otherWidth;
-        }
-
-        ForceLayout();
-    }
-
-    // =========================================================
-    // ICON + TEXT
-    // =========================================================
-
-    private IEnumerator PlayIconAndTextPop(
-        TabData selectedTab)
-    {
-        bool iconSwapped = false;
-
-        Vector2 iconStartPos =
-            selectedTab.normalIconPosition +
-            Vector2.up * iconLift;
-
-        Vector2 iconPopPos =
-            selectedTab.normalIconPosition +
-            Vector2.up * iconPopLift;
-
-        Vector2 textFinalPos =
-            selectedTab.normalLabelPosition +
-            Vector2.up * selectedTextLift;
-
-        Vector2 textStartPos =
-            textFinalPos +
-            Vector2.up * textStartOffsetY;
-
-        // =====================================================
-        // POP
-        // =====================================================
-
-        float elapsed = 0f;
-
-        while (elapsed < iconPopDuration)
-        {
-            elapsed +=
-                Time.unscaledDeltaTime;
-
-            float t =
-                Mathf.Clamp01(
-                    elapsed /
-                    Mathf.Max(
-                        iconPopDuration,
-                        0.001f
-                    )
-                );
-
-            float ease =
-                EaseOutCubic(t);
-
-            // ICON POSITION
-            if (selectedTab.iconRect != null)
-            {
-                selectedTab.iconRect.anchoredPosition =
-                    Vector2.Lerp(
-                        iconStartPos,
-                        iconPopPos,
-                        ease
-                    );
-
-                selectedTab.iconRect.localScale =
-                    Vector3.Lerp(
-                        selectedTab.normalIconScale *
-                        iconStartScale,
-                        selectedTab.normalIconScale *
-                        iconPopScale,
-                        ease
-                    );
-            }
-
-            // SWAP ICON
-            if (!iconSwapped &&
-                t >= iconSwapPoint)
-            {
-                iconSwapped = true;
-
-                if (selectedTab.icon != null &&
-                    selectedTab.selectedIcon != null)
-                {
-                    selectedTab.icon.sprite =
-                        selectedTab.selectedIcon;
-                }
-            }
-
-            // TEXT
-            if (selectedTab.labelGroup != null)
-            {
-                selectedTab.labelGroup.alpha =
-                    ease;
-            }
-
-            if (selectedTab.labelRect != null)
-            {
-                selectedTab.labelRect.anchoredPosition =
-                    Vector2.Lerp(
-                        textStartPos,
-                        textFinalPos,
-                        ease
-                    );
-
-                selectedTab.labelRect.localScale =
-                    Vector3.Lerp(
-                        selectedTab.normalLabelScale *
-                        textStartScale,
-                        selectedTab.normalLabelScale *
-                        textPopScale,
-                        ease
-                    );
-            }
-
-            yield return null;
-        }
-
-        // =====================================================
-        // SETTLE
-        // =====================================================
-
-        elapsed = 0f;
-
-        while (elapsed < iconSettleDuration)
-        {
-            elapsed +=
-                Time.unscaledDeltaTime;
-
-            float t =
-                Mathf.Clamp01(
-                    elapsed /
-                    Mathf.Max(
-                        iconSettleDuration,
-                        0.001f
-                    )
-                );
-
-            float ease =
-                SmoothStep(t);
-
-            // ICON
-            if (selectedTab.iconRect != null)
-            {
-                Vector2 finalIconPos =
-                    selectedTab.normalIconPosition +
-                    Vector2.up * iconLift;
-
-                selectedTab.iconRect.anchoredPosition =
-                    Vector2.Lerp(
-                        iconPopPos,
-                        finalIconPos,
-                        ease
-                    );
-
-                selectedTab.iconRect.localScale =
-                    Vector3.Lerp(
-                        selectedTab.normalIconScale *
-                        iconPopScale,
-                        selectedTab.normalIconScale *
-                        selectedIconScale,
-                        ease
-                    );
-            }
-
-            // TEXT
-            if (selectedTab.labelGroup != null)
-            {
-                selectedTab.labelGroup.alpha = 1f;
-            }
-
-            if (selectedTab.labelRect != null)
-            {
-                selectedTab.labelRect.anchoredPosition =
-                    textFinalPos;
-
-                selectedTab.labelRect.localScale =
-                    Vector3.Lerp(
-                        selectedTab.normalLabelScale *
-                        textPopScale,
-                        selectedTab.normalLabelScale *
-                        selectedTextScale,
-                        ease
-                    );
-            }
-
-            yield return null;
-        }
-    }
-
-    // =========================================================
-    // FINAL STATE
-    // =========================================================
-
-    private void SetFinalStateImmediate()
-    {
-        float otherWidth =
-            GetOtherWidth(selectedWidth);
-
-        for (int i = 0; i < tabs.Length; i++)
-        {
-            TabData tab = tabs[i];
-
-            if (tab == null)
-                continue;
-
-            bool selected =
-                i == currentTabIndex;
-
-            // WIDTH
-            if (tab.layout != null)
-            {
-                tab.layout.preferredWidth =
-                    selected
-                        ? selectedWidth
-                        : otherWidth;
-            }
-
-            // BACKGROUND
-            if (tab.background != null)
-            {
-                tab.background.sprite =
-                    selected
-                        ? selectedBackgroundSprite
-                        : normalBackgroundSprite;
-            }
-
-            // ICON
-            if (tab.icon != null &&
-                tab.iconRect != null)
-            {
-                if (selected)
-                {
-                    if (tab.selectedIcon != null)
-                    {
-                        tab.icon.sprite =
-                            tab.selectedIcon;
-                    }
-
-                    tab.iconRect.anchoredPosition =
-                        tab.normalIconPosition +
-                        Vector2.up *
-                        iconLift;
-
-                    tab.iconRect.localScale =
-                        tab.normalIconScale *
-                        selectedIconScale;
-                }
-                else
-                {
-                    if (tab.normalIcon != null)
-                    {
-                        tab.icon.sprite =
-                            tab.normalIcon;
-                    }
-
-                    tab.iconRect.anchoredPosition =
-                        tab.normalIconPosition;
-
-                    tab.iconRect.localScale =
-                        tab.normalIconScale;
-                }
-
-                tab.iconRect.localRotation =
-                    Quaternion.identity;
-            }
-
-            // TEXT
-            if (tab.labelGroup != null)
-            {
-                tab.labelGroup.alpha =
-                    selected ? 1f : 0f;
-            }
-
-            if (tab.labelRect != null)
-            {
-                tab.labelRect.anchoredPosition =
-                    selected
-                        ? tab.normalLabelPosition +
-                          Vector2.up *
-                          selectedTextLift
-                        : tab.normalLabelPosition;
-
-                tab.labelRect.localScale =
-                    selected
-                        ? tab.normalLabelScale *
-                          selectedTextScale
-                        : tab.normalLabelScale;
-            }
-        }
-
-        ForceLayout();
-
-        RefreshTabInteraction();
-    }
-
-    // =========================================================
-    // CLICK
-    // =========================================================
-
-    private void OpenTab(int index)
-    {
-        // Đang mở popup -> chặn spam
-        if (isOpening)
-            return;
-
-        // Đang ở tab này -> không cho bấm lại
-        if (index == currentTabIndex)
-            return;
-
-        isOpening = true;
-
-        OpenPopup(index);
-    }
-
-    // =========================================================
-    // POPUP
-    // =========================================================
-
-    private void OpenPopup(int index)
-    {
-        PopupController.Instance.HideAll();
 
         switch (index)
         {
@@ -951,31 +320,15 @@ public class BottomBarMenu : MonoBehaviour
 
             case 1:
                 PopupController.Instance
-                    .Show<PopupLeague>(
-                        PopupAnimation.None
-                    );
-                break;
-
-            case 2:
-                PopupController.Instance
                     .Show<PopupHome>(
                         PopupAnimation.None
                     );
                 break;
 
-            case 3:
-                PopupController.Instance
-                    .Show<PopupCollection>(
-                        PopupAnimation.None
-                    );
-                break;
+            
 
-            case 4:
-                PopupController.Instance
-                    .Show<PopupKingdom>(
-                        PopupAnimation.None
-                    );
-                break;
+            
+
         }
     }
 
@@ -1003,10 +356,6 @@ public class BottomBarMenu : MonoBehaviour
         OpenTab(3);
     }
 
-    public void OnClickKingdom()
-    {
-        OpenTab(4);
-    }
 
     // =========================================================
     // EASING
@@ -1038,17 +387,227 @@ public class BottomBarMenu : MonoBehaviour
     // LAYOUT
     // =========================================================
 
-    private void ForceLayout()
-    {
-        RectTransform rect =
-            transform as RectTransform;
 
-        if (rect != null)
+    private void RebuildLayoutRoot()
+    {
+        
+    }
+
+
+    // =========================================================
+    // DESELECT ROUTINE
+    // =========================================================
+
+    private IEnumerator DeselectRoutine(TabData tab)
+    {
+        if (tab.background != null)
+            tab.background.sprite = normalBackgroundSprite;
+
+
+        float startW = tab.layout.preferredWidth;
+        float startIY = tab.iconRect.anchoredPosition.y;
+        Vector3 startISc = tab.iconRect.localScale;
+        float startLY = tab.labelRect.anchoredPosition.y;
+        float startLA = tab.labelGroup.alpha;
+
+        float dur = deselectTime;
+        float el = 0f;
+
+        while (el < dur)
         {
-            LayoutRebuilder
-                .ForceRebuildLayoutImmediate(
-                    rect
-                );
+            el += Time.deltaTime;
+            float t = SmoothStep(el / dur);
+
+            tab.layout.preferredWidth = Mathf.Lerp(
+                startW,
+                normalWidth,
+                t
+            );
+
+            Vector2 iPos = tab.iconRect.anchoredPosition;
+            iPos.y = Mathf.Lerp(
+                startIY,
+                tab.normalIconPosition.y,
+                t
+            );
+            tab.iconRect.anchoredPosition = iPos;
+            tab.iconRect.localScale = Vector3.LerpUnclamped(
+                startISc,
+                tab.normalIconScale,
+                t
+            );
+
+            Vector2 lPos = tab.labelRect.anchoredPosition;
+            lPos.y = Mathf.Lerp(
+                startLY,
+                tab.normalLabelPosition.y,
+                t
+            );
+            tab.labelRect.anchoredPosition = lPos;
+            tab.labelGroup.alpha = Mathf.Lerp(
+                startLA,
+                0f,
+                t
+            );
+
+            RebuildLayoutRoot();
+            yield return null;
         }
+
+        tab.layout.preferredWidth = normalWidth;
+
+        Vector2 fi = tab.iconRect.anchoredPosition;
+        fi.y = tab.normalIconPosition.y;
+        tab.iconRect.anchoredPosition = fi;
+        tab.iconRect.localScale = tab.normalIconScale;
+        if (tab.icon != null) tab.icon.sprite = tab.normalIcon;
+
+
+        Vector2 fl = tab.labelRect.anchoredPosition;
+        fl.y = tab.normalLabelPosition.y;
+        tab.labelRect.anchoredPosition = fl;
+        tab.labelRect.localScale = tab.normalLabelScale;
+        tab.labelGroup.alpha = 0f;
+    }
+
+
+    // =========================================================
+    // SELECT ROUTINE (OVERSHOOT)
+    // =========================================================
+
+    private IEnumerator SelectRoutine(TabData tab)
+    {
+        if (tab.background != null)
+            tab.background.sprite = selectedBackgroundSprite;
+
+
+        if (tab.icon != null)
+            tab.icon.sprite = tab.normalIcon;
+
+        // --- PHASE 1: WIDTH OVERSHOOT ---
+        float startW = tab.layout.preferredWidth;
+        float startIY = tab.iconRect.anchoredPosition.y;
+        Vector3 startISc = tab.iconRect.localScale;
+
+        float targetIY = tab.normalIconPosition.y +
+                         selectedIconYOffset;
+        Vector3 peakISc = Vector3.one *
+                          iconOvershootScale;
+
+        float el = 0f;
+        while (el < widthOvershootTime)
+        {
+            el += Time.deltaTime;
+            float t = EaseOutCubic(el / widthOvershootTime);
+
+            tab.layout.preferredWidth = Mathf.Lerp(
+                startW,
+                widthOvershootValue,
+                t
+            );
+
+            Vector2 iPos = tab.iconRect.anchoredPosition;
+            iPos.y = Mathf.Lerp(
+                startIY,
+                targetIY,
+                t
+            );
+            tab.iconRect.anchoredPosition = iPos;
+
+
+            float tIcon = EaseOutCubic(el / iconOvershootTime);
+            tab.iconRect.localScale = Vector3.LerpUnclamped(
+                startISc,
+                peakISc,
+                tIcon
+            );
+
+            RebuildLayoutRoot();
+            yield return null;
+        }
+
+
+        if (tab.icon != null)
+            tab.icon.sprite = tab.selectedIcon;
+
+
+        // --- PHASE 2: WIDTH SETTLE & ICON SETTLE & LABEL ---
+        el = 0f;
+        float finalIY = targetIY;
+        Vector3 finalISc = Vector3.one * selectedIconScale;
+
+        float startLY = tab.labelRect.anchoredPosition.y;
+        float finalLY = tab.normalLabelPosition.y +
+                        selectedLabelYOffset;
+        Vector3 finalLSc = Vector3.one * selectedLabelScale;
+
+        while (el < widthSettleTime)
+        {
+            el += Time.deltaTime;
+
+
+            float tW = SmoothStep(el / widthSettleTime);
+            tab.layout.preferredWidth = Mathf.Lerp(
+                widthOvershootValue,
+                selectedWidth,
+                tW
+            );
+
+
+            float tIcon = SmoothStep(
+                Mathf.Clamp01(el / iconSettleTime)
+            );
+            tab.iconRect.localScale = Vector3.LerpUnclamped(
+                peakISc,
+                finalISc,
+                tIcon
+            );
+
+            Vector2 iPos = tab.iconRect.anchoredPosition;
+            iPos.y = Mathf.Lerp(
+                iPos.y,
+                finalIY,
+                tIcon
+            );
+            tab.iconRect.anchoredPosition = iPos;
+
+
+            float tLabel = SmoothStep(
+                Mathf.Clamp01(el / labelFadeTime)
+            );
+            tab.labelGroup.alpha = tLabel;
+
+            Vector2 lPos = tab.labelRect.anchoredPosition;
+            lPos.y = Mathf.Lerp(
+                startLY,
+                finalLY,
+                tLabel
+            );
+            tab.labelRect.anchoredPosition = lPos;
+            tab.labelRect.localScale = Vector3.LerpUnclamped(
+                tab.normalLabelScale,
+                finalLSc,
+                tLabel
+            );
+
+            RebuildLayoutRoot();
+            yield return null;
+        }
+
+        tab.layout.preferredWidth = selectedWidth;
+
+        Vector2 fi = tab.iconRect.anchoredPosition;
+        fi.y = finalIY;
+        tab.iconRect.anchoredPosition = fi;
+        tab.iconRect.localScale = finalISc;
+
+
+        Vector2 fl = tab.labelRect.anchoredPosition;
+        fl.y = finalLY;
+        tab.labelRect.anchoredPosition = fl;
+        tab.labelRect.localScale = finalLSc;
+        tab.labelGroup.alpha = 1f;
+
+        RebuildLayoutRoot();
     }
 }

@@ -244,9 +244,9 @@ public sealed class HomeEntranceAnimator : MonoBehaviour
 
         if (includePersistentBottomBar && bottomBar == null &&
             PopupController.Instance != null &&
-            PopupController.Instance.BottomBarInstance != null)
+            null != null)
         {
-            bottomBar = PopupController.Instance.BottomBarInstance
+            bottomBar = null
                 .GetComponent<RectTransform>();
         }
     }

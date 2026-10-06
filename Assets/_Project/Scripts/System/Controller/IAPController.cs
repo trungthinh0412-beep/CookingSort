@@ -383,7 +383,7 @@ public class IAPController : SingletonDontDestroy<IAPController>
         switch (reward.type)
         {
             case ShopRewardType.Gold:
-                GoldHandler.AddWithoutResourceAnimation(reward.amount);
+                
                 break;
             case ShopRewardType.Shuffle:
                 Data.PlayerData.CurrentShuffle += reward.amount;

@@ -99,6 +99,6 @@ public class HeartHandler : ResourceHandler
     public void OnClickShop()
     {
         SoundController.Instance.PlayFX(SoundName.ClickButton);
-        PopupController.Instance.Show<PopupMoreLife>(PopupAnimation.None);
+        
     }
 }

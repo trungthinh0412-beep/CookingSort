@@ -57,14 +57,14 @@ public class GameBase : EditorWindow
             return;
         }
 
-        CardType[] popupBoosterTypes =
+        // =
         {
             CardType.StackCard,
             CardType.UpgradeCard,
             CardType.KingCard
         };
 
-        foreach (CardType cardType in popupBoosterTypes)
+        //
         {
             Data.PlayerData.SetPreLevelCardAmount(
                 cardType,
