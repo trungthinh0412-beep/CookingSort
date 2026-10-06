@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -38,10 +38,10 @@ public class PopupController : SingletonDontDestroy<PopupController>
     [Header("Persistent Bottom Bar")]
     [SerializeField] private BottomTabBar bottomBarPrefab;
 
-    [Tooltip("Sorting Order c?a BottomBar.")]
+    [Tooltip("Sorting Order của BottomBar.")]
     [SerializeField] private int bottomBarSortingOrder = 500;
 
-    [Tooltip("Sorting Order c?a popup m? dÃ¨ lÃªn BottomBar.")]
+    [Tooltip("Sorting Order của popup mở đè lên BottomBar.")]
     [SerializeField] private int overlayPopupSortingOrder = 600;
 
 
@@ -53,7 +53,7 @@ public class PopupController : SingletonDontDestroy<PopupController>
     public Popup currentPopup;
 
     private BottomTabBar bottomBarInstance;
-    
+    private MainTabSwipeController mainTabSwipeController;
 
     private GameObject _currentHighlightObj = null;
 
@@ -135,7 +135,35 @@ public class PopupController : SingletonDontDestroy<PopupController>
         InitializeMainTabSwipe();
     }
 
-    private void InitializeMainTabSwipe() {} // ============================================================
+    private void InitializeMainTabSwipe()
+    {
+        if (bottomBarInstance == null)
+            return;
+
+        if (mainTabSwipeController == null)
+        {
+            mainTabSwipeController =
+                GetComponent<MainTabSwipeController>();
+        }
+
+        if (mainTabSwipeController == null)
+        {
+            mainTabSwipeController =
+                gameObject.AddComponent<MainTabSwipeController>();
+        }
+
+        mainTabSwipeController.Initialize(
+            this,
+            bottomBarInstance
+        );
+
+        bottomBarInstance.BindSwipeController(
+            mainTabSwipeController
+        );
+    }
+
+
+    // ============================================================
     // INITIALIZE POPUPS
     // ============================================================
 
@@ -258,7 +286,7 @@ public class PopupController : SingletonDontDestroy<PopupController>
         if (bottomBarPrefab == null)
         {
             Debug.LogWarning(
-                "[PopupController] BottomBar Prefab chua du?c gÃ¡n."
+                "[PopupController] BottomBar Prefab chưa được gán."
             );
 
             return;
@@ -289,7 +317,7 @@ public class PopupController : SingletonDontDestroy<PopupController>
 
 
         // ========================================================
-        // CANVAS RIÃŠNG
+        // CANVAS RIÊNG
         // ========================================================
 
         Canvas bottomCanvas =
@@ -322,7 +350,7 @@ public class PopupController : SingletonDontDestroy<PopupController>
 
 
         // ========================================================
-        // ÃUA V? CU?I HIERARCHY
+        // ĐƯA VỀ CUỐI HIERARCHY
         // ========================================================
 
         bottomBarObject.transform
@@ -330,16 +358,16 @@ public class PopupController : SingletonDontDestroy<PopupController>
 
 
         // ========================================================
-        // RESET VISUAL V? HOME
+        // RESET VISUAL VỀ HOME
         // ========================================================
 
-        bottomBarInstance.ForceStateImmediate(1);
+        bottomBarInstance.ResetToHome();
 
 
         // ========================================================
-        // BAN Ã?U ?N
+        // BAN ĐẦU ẨN
         //
-        // PopupHome khi Show s? b?t nÃ³ lÃªn.
+        // PopupHome khi Show sẽ bật nó lên.
         // ========================================================
 
         bottomBarObject.SetActive(false);
@@ -398,21 +426,22 @@ public class PopupController : SingletonDontDestroy<PopupController>
         if (bottomBarInstance == null)
             return;
 
-        bottomBarInstance.ForceStateImmediate(1);
+        bottomBarInstance.ResetToHome();
     }
 
 
     // ============================================================
-    // 4 MAIN POPUPS
+    // 5 MAIN POPUPS
     // ============================================================
 
     private bool IsMainBottomBarPopup(Type popupType)
     {
         return
+            popupType == typeof(PopupShop) ||
             popupType == typeof(PopupLeague) ||
             popupType == typeof(PopupHome) ||
-            popupType == typeof(PopupLeague) ||
-            popupType == typeof(PopupLeague);
+            popupType == typeof(PopupCollection) ||
+            popupType == typeof(PopupKingdom);
     }
 
     public Popup GetMainTabPopup(int index)
@@ -420,13 +449,15 @@ public class PopupController : SingletonDontDestroy<PopupController>
         switch (index)
         {
             case 0:
-                return Get<PopupLeague>();
+                return Get<PopupShop>();
             case 1:
-                return Get<PopupHome>();
+                return Get<PopupLeague>();
             case 2:
-                return Get<PopupLeague>();
+                return Get<PopupHome>();
             case 3:
-                return Get<PopupLeague>();
+                return Get<PopupCollection>();
+            case 4:
+                return Get<PopupKingdom>();
             default:
                 return null;
         }
@@ -434,17 +465,20 @@ public class PopupController : SingletonDontDestroy<PopupController>
 
     public int GetMainTabIndex(Popup popup)
     {
-        if (popup is PopupLeague)
+        if (popup is PopupShop)
             return 0;
 
-        if (popup is PopupHome)
+        if (popup is PopupLeague)
             return 1;
 
-        if (false)
+        if (popup is PopupHome)
             return 2;
 
-        if (false)
+        if (popup is PopupCollection)
             return 3;
+
+        if (popup is PopupKingdom)
+            return 4;
 
         return -1;
     }
@@ -467,10 +501,10 @@ public class PopupController : SingletonDontDestroy<PopupController>
         int mainTabIndex = GetMainTabIndex(currentPopup);
 
         if (mainTabIndex >= 0 && bottomBarInstance != null &&
-            (false ||
+            (mainTabSwipeController == null ||
              !mainTabSwipeController.IsTransitioning))
         {
-            bottomBarInstance.ForceStateImmediate(mainTabIndex);
+            bottomBarInstance.SetSelectedInstant(mainTabIndex);
         }
     }
 
@@ -665,7 +699,7 @@ public class PopupController : SingletonDontDestroy<PopupController>
     }
 
     // ============================================================
-    // POPUP PH? N?M TRÃŠN BOTTOM BAR
+    // POPUP PHỤ NẰM TRÊN BOTTOM BAR
     // ============================================================
 
     private void PutPopupAboveBottomBar(Popup popup)
@@ -687,7 +721,7 @@ public class PopupController : SingletonDontDestroy<PopupController>
 
 
     // ============================================================
-    // MAIN POPUP N?M DU?I BOTTOM BAR
+    // MAIN POPUP NẰM DƯỚI BOTTOM BAR
     // ============================================================
 
     private void PutMainPopupBelowBottomBar(Popup popup)
@@ -744,13 +778,13 @@ public class PopupController : SingletonDontDestroy<PopupController>
         }
 
         // ========================================================
-        // POPUP KHÃC
+        // POPUP KHÁC
         // ========================================================
 
         else
         {
-            // N?u v?n cÃ²n main popup phÃ­a du?i,
-            // popup nÃ y lÃ  overlay.
+            // Nếu vẫn còn main popup phía dưới,
+            // popup này là overlay.
             if (HasActiveMainBottomBarPopup())
             {
                 SetBottomBarVisible(true);
@@ -761,16 +795,16 @@ public class PopupController : SingletonDontDestroy<PopupController>
             }
             else
             {
-                // KhÃ´ng cÃ³ Home / Shop / League /
-                // Collection / Kingdom phÃ­a du?i.
+                // Không có Home / Shop / League /
+                // Collection / Kingdom phía dưới.
                 //
-                // VÃ­ d?:
+                // Ví dụ:
                 // InGame
                 // Win
                 // Lose
                 // Loading
                 //
-                // => ?n BottomBar.
+                // => Ẩn BottomBar.
                 SetBottomBarVisible(false);
             }
         }
@@ -801,10 +835,10 @@ public class PopupController : SingletonDontDestroy<PopupController>
 
         if (mainTabIndex >= 0 &&
             bottomBarInstance != null &&
-            (false ||
+            (mainTabSwipeController == null ||
              !mainTabSwipeController.IsTransitioning))
         {
-            bottomBarInstance.ForceStateImmediate(
+            bottomBarInstance.SetSelectedInstant(
                 mainTabIndex
             );
         }

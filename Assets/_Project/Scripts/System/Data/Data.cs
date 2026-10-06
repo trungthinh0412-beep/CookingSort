@@ -55,8 +55,8 @@ public static class Data
     {
         int previousStar = PlayerData?.Star ?? 0;
         
-        0.ResetSeenStates();
-        0.ResetSeenState();
+
+
 
         if (File.Exists(SavePath))
         {

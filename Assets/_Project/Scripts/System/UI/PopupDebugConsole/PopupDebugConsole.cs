@@ -39,11 +39,11 @@ public class PopupDebugConsole : Popup
         _currentTab = tabType;
         foreach (var tab in tabs)
         {
-            tab.Setup(_currentTab);
+            if (tab != null) tab.Setup(_currentTab);
         }
         foreach (var panel in panels)
         {
-            panel.Setup(_currentTab);
+            if (panel != null) panel.Setup(_currentTab);
         }
     }
     

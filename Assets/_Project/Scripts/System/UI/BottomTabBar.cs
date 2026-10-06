@@ -43,8 +43,10 @@ public class BottomTabBar : MonoBehaviour
     [Header("Selected Icon")]
     [SerializeField] private float selectedIconYOffset = 70f;
 
+    // Scale cuối cùng
     [SerializeField] private float selectedIconScale = 1.4f;
 
+    // Scale overshoot
     [SerializeField] private float selectedIconOvershootScale = 1.5f;
 
     [Header("Selected Label")]
@@ -56,494 +58,1397 @@ public class BottomTabBar : MonoBehaviour
     [SerializeField] private float deselectVisualDuration = 0.07f;
 
     [Header("Default Tab")]
-    [SerializeField] private int defaultTabIndex = 1;
+    [SerializeField] private int defaultIndex = 2;
 
-    private int _currentTabIndex = -1;
 
-    private Coroutine[] _widthCoroutines;
-    private Coroutine _overlayCoroutine;
+    // ============================================================
+    // RUNTIME
+    // ============================================================
 
-    private Coroutine[] _iconYCoroutines;
-    private Coroutine[] _iconScaleCoroutines;
+    private int currentIndex = -1;
+    private bool isAnimating = false;
 
-    private Coroutine[] _labelYCoroutines;
-    private Coroutine[] _labelAlphaCoroutines;
-    private Coroutine[] _labelScaleCoroutines;
+    private Coroutine transitionRoutine;
 
-    private readonly List<CanvasGroup> _labelCanvasGroups = new List<CanvasGroup>();
-    private readonly List<Vector2> _originalIconAnchors = new List<Vector2>();
-    private readonly List<Vector2> _originalLabelAnchors = new List<Vector2>();
-    private readonly List<float> _currentLabelAlpha = new List<float>();
+    private Vector2[] normalIconPositions;
+    private Vector3[] normalIconScales;
+
+    private Vector2[] normalLabelPositions;
+    private Vector3[] normalLabelScales;
+    private MainTabSwipeController swipeController;
+    private RectTransform responsiveRoot;
+    private Canvas responsiveCanvas;
+    private HorizontalLayoutGroup underLayoutGroup;
+    private Vector2 authoredRootSize;
+    private Vector2 authoredButtonPosition;
+    private Vector2 authoredUnderPosition;
+    private Vector2 authoredUnderSize;
+    private float authoredRootBottom;
+    private int authoredUnderBottomPadding;
+    private Rect lastSafeArea;
+    private Vector2Int lastScreenSize;
+    private bool hasResponsiveBaseline;
+
+
+    // ============================================================
+    // CONSTANT
+    // ============================================================
+
+    private const int HOME_INDEX = 2;
+
+    public int CurrentIndex => currentIndex;
+    public int TabCount => tabs.Count;
+    public bool IsAnimating => isAnimating;
+    private int DefaultIndex => tabs.Count == 0
+        ? 0
+        : Mathf.Clamp(defaultIndex, 0, tabs.Count - 1);
+
+
+    // ============================================================
+    // UNITY
+    // ============================================================
 
     private void Awake()
     {
-        int count = tabs.Count;
+        InitializeSafeAreaOffset();
 
-        _widthCoroutines = new Coroutine[count];
-        _iconYCoroutines = new Coroutine[count];
-        _iconScaleCoroutines = new Coroutine[count];
-        _labelYCoroutines = new Coroutine[count];
-        _labelAlphaCoroutines = new Coroutine[count];
-        _labelScaleCoroutines = new Coroutine[count];
+        CacheNormalState();
 
-        for (int i = 0; i < count; i++)
-        {
-            int index = i; 
-            tabs[i].button.onClick.AddListener(() => OnTabClicked(index));
+        RegisterButtons();
 
-            if (tabs[i].label != null)
-            {
-                CanvasGroup cg = tabs[i].label.GetComponent<CanvasGroup>();
-                if (cg == null)
-                    cg = tabs[i].label.gameObject.AddComponent<CanvasGroup>();
-                _labelCanvasGroups.Add(cg);
-                _currentLabelAlpha.Add(1f);
-            }
-            else
-            {
-                _labelCanvasGroups.Add(null);
-                _currentLabelAlpha.Add(1f);
-            }
+        // ========================================================
+        // LUÔN KHỞI ĐỘNG Ở HOME
+        // ========================================================
 
-            if (tabs[i].icon != null)
-                _originalIconAnchors.Add(tabs[i].icon.anchoredPosition);
-            else
-                _originalIconAnchors.Add(Vector2.zero);
+        currentIndex = DefaultIndex;
 
-            if (tabs[i].label != null)
-                _originalLabelAnchors.Add(tabs[i].label.anchoredPosition);
-            else
-                _originalLabelAnchors.Add(Vector2.zero);
-        }
+        ApplyStateInstant(currentIndex);
     }
-
-    private void Start()
-    {
-        ForceStateImmediate(defaultTabIndex);
-    }
-    
-    // ============================================================
-    // ON ENABLE HOOK
-    // ============================================================
 
     private void OnEnable()
     {
-        UpdateSelectedTabToMatchPopup();
-    }
-    
-    private void OnDisable()
-    {
-    }
-    
-    private void OnHideTabsUI(GameObject obj)
-    {
-        gameObject.SetActive(false);
-    }
-
-    private void UpdateSelectedTabToMatchPopup()
-    {
-        if (PopupController.Instance == null)
-            return;
-            
-        int targetIndex = PopupController.Instance.GetCurrentMainTabIndex();
-        
-        if (targetIndex >= 0 && targetIndex != _currentTabIndex && targetIndex < tabs.Count)
-        {
-            OnTabClicked(targetIndex);
-        }
+        InitializeSafeAreaOffset();
+        ApplySafeAreaOffset();
     }
 
     private void Update()
     {
-        ForceRebuildIfDirty();
+        Rect safeArea = Screen.safeArea;
+        Vector2Int screenSize = new Vector2Int(Screen.width, Screen.height);
+        if (safeArea == lastSafeArea && screenSize == lastScreenSize)
+        {
+            return;
+        }
+
+        ApplySafeAreaOffset();
     }
 
-    private void ForceRebuildIfDirty()
+    private void InitializeSafeAreaOffset()
     {
-        bool dirty = false;
-
-        for (int i = 0; i < tabs.Count; i++)
+        if (responsiveRoot == null)
         {
-            if (_widthCoroutines[i] != null || _overlayCoroutine != null)
+            responsiveRoot = transform as RectTransform;
+        }
+
+        if (responsiveCanvas == null)
+        {
+            responsiveCanvas = GetComponentInParent<Canvas>();
+        }
+
+        if (!hasResponsiveBaseline && responsiveRoot != null)
+        {
+            authoredRootSize = responsiveRoot.sizeDelta;
+            authoredRootBottom = responsiveRoot.anchoredPosition.y -
+                                 authoredRootSize.y * responsiveRoot.pivot.y;
+
+            if (buttonLayoutRoot != null)
             {
-                dirty = true;
-                break;
+                authoredButtonPosition = buttonLayoutRoot.anchoredPosition;
+            }
+
+            if (underLayoutRoot != null)
+            {
+                authoredUnderPosition = underLayoutRoot.anchoredPosition;
+                authoredUnderSize = underLayoutRoot.sizeDelta;
+                underLayoutGroup = underLayoutRoot.GetComponent<HorizontalLayoutGroup>();
+                if (underLayoutGroup != null)
+                {
+                    authoredUnderBottomPadding = underLayoutGroup.padding.bottom;
+                }
+            }
+
+            hasResponsiveBaseline = true;
+        }
+    }
+
+    private void ApplySafeAreaOffset()
+    {
+        if (!hasResponsiveBaseline || responsiveRoot == null)
+        {
+            return;
+        }
+
+        float canvasHeight = Screen.height;
+        if (responsiveCanvas != null &&
+            responsiveCanvas.transform is RectTransform canvasRect)
+        {
+            canvasHeight = canvasRect.rect.height;
+        }
+
+        float bottomInset = Screen.height > 0
+            ? Mathf.Max(0f, Screen.safeArea.yMin / Screen.height * canvasHeight)
+            : 0f;
+
+        // Keep the blue bar touching the physical bottom edge. Only its
+        // interactive content moves above the home indicator. Expanding the
+        // opaque underlay prevents a blank strip from appearing below it.
+        Vector2 rootSize = authoredRootSize;
+        rootSize.y += bottomInset;
+        responsiveRoot.sizeDelta = rootSize;
+
+        Vector2 rootPosition = responsiveRoot.anchoredPosition;
+        rootPosition.y = authoredRootBottom + rootSize.y * responsiveRoot.pivot.y;
+        responsiveRoot.anchoredPosition = rootPosition;
+
+        if (buttonLayoutRoot != null)
+        {
+            Vector2 buttonPosition = authoredButtonPosition;
+            buttonPosition.y += bottomInset;
+            buttonLayoutRoot.anchoredPosition = buttonPosition;
+        }
+
+        if (underLayoutRoot != null)
+        {
+            Vector2 underSize = authoredUnderSize;
+            underSize.y += bottomInset;
+            underLayoutRoot.sizeDelta = underSize;
+
+            Vector2 underPosition = authoredUnderPosition;
+            underPosition.y += bottomInset * 0.5f;
+            underLayoutRoot.anchoredPosition = underPosition;
+        }
+
+        if (underLayoutGroup != null)
+        {
+            RectOffset padding = underLayoutGroup.padding;
+            underLayoutGroup.padding = new RectOffset(
+                padding.left,
+                padding.right,
+                padding.top,
+                authoredUnderBottomPadding + Mathf.RoundToInt(bottomInset)
+            );
+        }
+
+        lastSafeArea = Screen.safeArea;
+        lastScreenSize = new Vector2Int(Screen.width, Screen.height);
+    }
+
+
+    // ============================================================
+    // PUBLIC RESET HOME
+    //
+    // PopupController có thể gọi hàm này sau khi instantiate.
+    // Không mở PopupHome.
+    // Chỉ reset visual BottomBar.
+    // ============================================================
+
+    public void ResetToHome()
+    {
+        // Nếu đang chạy animation thì dừng
+        if (transitionRoutine != null)
+        {
+            StopCoroutine(transitionRoutine);
+
+            transitionRoutine = null;
+        }
+
+        isAnimating = false;
+
+        currentIndex = DefaultIndex;
+
+        ApplyStateInstant(currentIndex);
+    }
+
+
+    // ============================================================
+    // CACHE NORMAL STATE
+    // ============================================================
+
+    private void CacheNormalState()
+    {
+        int count = tabs.Count;
+
+        normalIconPositions = new Vector2[count];
+        normalIconScales = new Vector3[count];
+
+        normalLabelPositions = new Vector2[count];
+        normalLabelScales = new Vector3[count];
+
+        for (int i = 0; i < count; i++)
+        {
+            if (tabs[i].icon != null)
+            {
+                normalIconPositions[i] =
+                    tabs[i].icon.anchoredPosition;
+
+                normalIconScales[i] =
+                    tabs[i].icon.localScale;
+            }
+
+            if (tabs[i].label != null)
+            {
+                normalLabelPositions[i] =
+                    tabs[i].label.anchoredPosition;
+
+                normalLabelScales[i] =
+                    tabs[i].label.localScale;
             }
         }
     }
 
 
     // ============================================================
-    // TAB SELECTION
+    // REGISTER BUTTONS
     // ============================================================
 
-    private void OnTabClicked(int index)
+    private void RegisterButtons()
     {
-        if (_currentTabIndex == index)
+        for (int i = 0; i < tabs.Count; i++)
+        {
+            int index = i;
+
+            if (tabs[i].button == null)
+                continue;
+
+            tabs[i].button.onClick.AddListener(
+                () => SelectTab(index)
+            );
+        }
+    }
+
+
+    // ============================================================
+    // SELECT TAB
+    // ============================================================
+
+    public void SelectTab(int newIndex)
+    {
+        if (!IsValidIndex(newIndex))
             return;
 
-        int oldIndex = _currentTabIndex;
-        _currentTabIndex = index;
+        if (newIndex == currentIndex)
+            return;
 
-        AnimateWidths();
+        SoundController.Instance.PlayFX(SoundName.MenuBar);
 
-        if (oldIndex >= 0)
+        if (swipeController != null)
         {
-            AnimateVisuals(oldIndex, false);
+            swipeController.GoToTab(newIndex);
+            return;
         }
 
-        AnimateVisuals(index, true);
+        if (isAnimating)
+            return;
 
-        if (index == 0) PopupController.Instance.Show<PopupLeague>();
-        else if (index == 1) PopupController.Instance.Show<PopupHome>();
-
+        transitionRoutine =
+            StartCoroutine(
+                AnimateToTab(newIndex)
+            );
     }
 
-
-
-    // ============================================================
-    // FORCE STATE IMMEDIATE
-    // ============================================================
-
-    public void ForceStateImmediate(int index)
+    public void BindSwipeController(
+        MainTabSwipeController controller)
     {
-        StopAllTransitions();
+        swipeController = controller;
+    }
 
-        _currentTabIndex = index;
+    public void SetSelectedInstant(int index)
+    {
+        if (!IsValidIndex(index))
+            return;
+
+        if (transitionRoutine != null)
+        {
+            StopCoroutine(transitionRoutine);
+            transitionRoutine = null;
+        }
+
+        isAnimating = false;
+        ApplyStateInstant(index);
+    }
+
+    public void SetInteractiveProgress(
+        int fromIndex,
+        int toIndex,
+        float progress)
+    {
+        if (!IsValidIndex(fromIndex) ||
+            !IsValidIndex(toIndex))
+        {
+            return;
+        }
+
+        if (transitionRoutine != null)
+        {
+            StopCoroutine(transitionRoutine);
+            transitionRoutine = null;
+        }
+
+        isAnimating = true;
+
+        float t = Mathf.Clamp01(progress);
 
         for (int i = 0; i < tabs.Count; i++)
         {
-            bool isSelected = (i == index);
+            float selectedAmount = 0f;
 
-            float width = isSelected ? selectedWidth : normalWidth;
-            SetWidthImmediate(i, width);
+            if (i == fromIndex)
+                selectedAmount = 1f - t;
 
-            SetVisualImmediate(i, isSelected);
+            if (i == toIndex)
+                selectedAmount = t;
+
+            float width =
+                Mathf.Lerp(
+                    normalWidth,
+                    selectedWidth,
+                    selectedAmount
+                );
+
+            SetWidth(tabs[i].buttonLayout, width);
+            SetWidth(tabs[i].underLayout, width);
         }
 
-        LayoutRebuilder.ForceRebuildLayoutImmediate(buttonLayoutRoot);
-        LayoutRebuilder.ForceRebuildLayoutImmediate(underLayoutRoot);
-        
+        ForceLayoutNow();
+
+        for (int i = 0; i < tabs.Count; i++)
+        {
+            float selectedAmount = 0f;
+
+            if (i == fromIndex)
+                selectedAmount = 1f - t;
+
+            if (i == toIndex)
+                selectedAmount = t;
+
+            if (tabs[i].icon != null)
+            {
+                tabs[i].icon.anchoredPosition =
+                    normalIconPositions[i] +
+                    Vector2.up *
+                    selectedIconYOffset *
+                    selectedAmount;
+
+                tabs[i].icon.localScale =
+                    normalIconScales[i] *
+                    Mathf.Lerp(
+                        1f,
+                        selectedIconScale,
+                        selectedAmount
+                    );
+            }
+
+            if (tabs[i].label != null)
+            {
+                // Keep only the destination label visible during a swipe.
+                // Showing both labels while their positions animate makes
+                // the old and new tab names overlap for a few frames.
+                tabs[i].label.gameObject.SetActive(
+                    i == toIndex && selectedAmount > 0.001f
+                );
+
+                tabs[i].label.anchoredPosition =
+                    normalLabelPositions[i] +
+                    Vector2.up *
+                    selectedLabelYOffset *
+                    selectedAmount;
+
+                tabs[i].label.localScale =
+                    normalLabelScales[i] *
+                    Mathf.Lerp(
+                        1f,
+                        selectedLabelScale,
+                        selectedAmount
+                    );
+            }
+        }
+
         if (overlaySelected != null)
         {
-            Vector2 pos = overlaySelected.anchoredPosition;
-            overlaySelected.anchoredPosition = pos;
-        }
+            float currentX =
+                overlaySelected.anchoredPosition.x;
 
-
-    }
-
-
-    private void SetWidthImmediate(int index, float width)
-    {
-        if (tabs[index].buttonLayout != null)
-            tabs[index].buttonLayout.preferredWidth = width;
-
-        if (tabs[index].underLayout != null)
-            tabs[index].underLayout.preferredWidth = width;
-    }
-
-
-    private void SetVisualImmediate(int index, bool isSelected)
-    {
-        if (tabs[index].icon != null)
-        {
-            Vector2 pos = _originalIconAnchors[index];
-            if (isSelected) pos.y += selectedIconYOffset;
-            
-            tabs[index].icon.anchoredPosition = pos;
-            tabs[index].icon.localScale = Vector3.one * (isSelected ? selectedIconScale : 1f);
-        }
-
-
-        if (tabs[index].label != null)
-        {
-            Vector2 pos = _originalLabelAnchors[index];
-            if (isSelected) pos.y += selectedLabelYOffset;
-            
-            tabs[index].label.anchoredPosition = pos;
-
-            float alpha = isSelected ? 1f : 0f;
-            _currentLabelAlpha[index] = alpha;
-
-            if (_labelCanvasGroups[index] != null)
-                _labelCanvasGroups[index].alpha = alpha;
-                
-            tabs[index].label.localScale = Vector3.one * (isSelected ? selectedLabelScale : 1f); 
-        }
-    }
-
-
-
-    // ============================================================
-    // STOPPING
-    // ============================================================
-
-    private void StopAllTransitions()
-    {
-        for (int i = 0; i < tabs.Count; i++)
-        {
-            if (_widthCoroutines[i] != null) StopCoroutine(_widthCoroutines[i]);
-
-            if (_iconYCoroutines[i] != null) StopCoroutine(_iconYCoroutines[i]);
-            if (_iconScaleCoroutines[i] != null) StopCoroutine(_iconScaleCoroutines[i]);
-
-            if (_labelYCoroutines[i] != null) StopCoroutine(_labelYCoroutines[i]);
-            if (_labelAlphaCoroutines[i] != null) StopCoroutine(_labelAlphaCoroutines[i]);
-            if (_labelScaleCoroutines[i] != null) StopCoroutine(_labelScaleCoroutines[i]);
-        }
-
-        if (_overlayCoroutine != null) StopCoroutine(_overlayCoroutine);
-    }
-
-
-
-    // ============================================================
-    // ANIMATE WIDTHS
-    // ============================================================
-
-    private void AnimateWidths()
-    {
-        for (int i = 0; i < tabs.Count; i++)
-        {
-            bool isSelected = (i == _currentTabIndex);
-            float targetW = isSelected ? selectedWidth : normalWidth;
-
-            if (_widthCoroutines[i] != null)
-                StopCoroutine(_widthCoroutines[i]);
-
-            _widthCoroutines[i] = StartCoroutine(
-                WidthRoutine(i, targetW, widthDuration)
-            );
-        }
-    }
-
-
-    private IEnumerator WidthRoutine(int index, float targetW, float dur)
-    {
-        float startBtnW = tabs[index].buttonLayout != null
-            ? tabs[index].buttonLayout.preferredWidth
-            : targetW;
-
-        float startUnderW = tabs[index].underLayout != null
-            ? tabs[index].underLayout.preferredWidth
-            : targetW;
-
-        float time = 0f;
-
-        while (time < dur)
-        {
-            time += Time.deltaTime;
-            float t = Mathf.Clamp01(time / dur);
-
-            float smoothedT = t * t * (3f - 2f * t);
-
-            if (tabs[index].buttonLayout != null)
-                tabs[index].buttonLayout.preferredWidth =
-                    Mathf.Lerp(startBtnW, targetW, smoothedT);
-
-            if (tabs[index].underLayout != null)
-                tabs[index].underLayout.preferredWidth =
-                    Mathf.Lerp(startUnderW, targetW, smoothedT);
-
-            yield return null;
-        }
-
-        SetWidthImmediate(index, targetW);
-        _widthCoroutines[index] = null;
-    }
-
-
-
-    // ============================================================
-    // ANIMATE VISUALS (ICONS, LABELS)
-    // ============================================================
-
-    private void AnimateVisuals(int index, bool isSelected)
-    {
-        float dur = isSelected
-            ? selectVisualDuration
-            : deselectVisualDuration;
-
-
-        if (_iconYCoroutines[index] != null) StopCoroutine(_iconYCoroutines[index]);
-        if (_iconScaleCoroutines[index] != null) StopCoroutine(_iconScaleCoroutines[index]);
-
-        if (tabs[index].icon != null)
-        {
-            float targetY = _originalIconAnchors[index].y +
-                            (isSelected ? selectedIconYOffset : 0f);
-
-            _iconYCoroutines[index] = StartCoroutine(
-                LocalMoveYCurve(tabs[index].icon, targetY, dur, isSelected ? 4 : 5)
-            );
-
-
-            float targetScale = isSelected ? selectedIconScale : 1f;
-
-            if (isSelected)
-            {
-                _iconScaleCoroutines[index] = StartCoroutine(
-                    ScaleOvershootRoutine(tabs[index].icon, targetScale, dur,
-                        selectedIconOvershootScale)
+            float fromX =
+                CalculateOverlayTargetFromIcon(
+                    fromIndex,
+                    currentX
                 );
-            }
-            else
-            {
-                _iconScaleCoroutines[index] = StartCoroutine(
-                    ScaleCurveRoutine(tabs[index].icon, targetScale, dur, 1)
+
+            float toX =
+                CalculateOverlayTargetFromIcon(
+                    toIndex,
+                    currentX
                 );
+
+            Vector2 position =
+                overlaySelected.anchoredPosition;
+
+            position.x = Mathf.Lerp(fromX, toX, t);
+            overlaySelected.anchoredPosition = position;
+        }
+    }
+
+    public void CompleteInteractiveTransition(int index)
+    {
+        isAnimating = false;
+        ApplyStateInstant(index);
+    }
+
+    public void CancelInteractiveTransition(int index)
+    {
+        isAnimating = false;
+        ApplyStateInstant(index);
+    }
+
+
+    // ============================================================
+    // MAIN ANIMATION
+    // ============================================================
+
+    private IEnumerator AnimateToTab(int newIndex)
+    {
+        isAnimating = true;
+
+        int oldIndex = currentIndex;
+        int count = tabs.Count;
+
+
+        // ========================================================
+        // CACHE START VALUES
+        // ========================================================
+
+        float[] startButtonWidths =
+            new float[count];
+
+        float[] startUnderWidths =
+            new float[count];
+
+        Vector2[] startIconPositions =
+            new Vector2[count];
+
+        Vector3[] startIconScales =
+            new Vector3[count];
+
+
+        for (int i = 0; i < count; i++)
+        {
+            startButtonWidths[i] =
+                GetWidth(
+                    tabs[i].buttonLayout,
+                    normalWidth
+                );
+
+            startUnderWidths[i] =
+                GetWidth(
+                    tabs[i].underLayout,
+                    normalWidth
+                );
+
+            if (tabs[i].icon != null)
+            {
+                startIconPositions[i] =
+                    tabs[i].icon.anchoredPosition;
+
+                startIconScales[i] =
+                    tabs[i].icon.localScale;
             }
         }
 
-        if (_labelYCoroutines[index] != null) StopCoroutine(_labelYCoroutines[index]);
-        if (_labelAlphaCoroutines[index] != null) StopCoroutine(_labelAlphaCoroutines[index]);
-        if (_labelScaleCoroutines[index] != null) StopCoroutine(_labelScaleCoroutines[index]);
 
-        if (tabs[index].label != null)
+        // ========================================================
+        // OVERLAY START
+        // ========================================================
+
+        float overlayStartX =
+            overlaySelected != null
+                ? overlaySelected.anchoredPosition.x
+                : 0f;
+
+
+        // ========================================================
+        // CALCULATE FINAL OVERLAY TARGET
+        // ========================================================
+
+        for (int i = 0; i < count; i++)
         {
-            float targetY = _originalLabelAnchors[index].y +
-                            (isSelected ? selectedLabelYOffset : 0f);
+            float finalWidth =
+                i == newIndex
+                    ? selectedWidth
+                    : normalWidth;
 
-            _labelYCoroutines[index] = StartCoroutine(
-                LocalMoveYCurve(tabs[index].label, targetY, dur,
-                    isSelected ? 4 : 5) 
+            SetWidth(
+                tabs[i].buttonLayout,
+                finalWidth
             );
 
-            float targetAlpha = isSelected ? 1f : 0f;
-            _labelAlphaCoroutines[index] = StartCoroutine(
-                AlphaRoutine(index, targetAlpha, dur)
+            SetWidth(
+                tabs[i].underLayout,
+                finalWidth
             );
-            
-            float targetScale = isSelected ? selectedLabelScale : 1f; 
-            _labelScaleCoroutines[index] = StartCoroutine(
-                ScaleCurveRoutine(tabs[index].label, targetScale, dur, 1)
+        }
+
+
+        ForceLayoutNow();
+
+
+        float overlayTargetX =
+            CalculateOverlayTargetFromIcon(
+                newIndex,
+                overlayStartX
             );
 
+
+        // ========================================================
+        // RESTORE START WIDTH
+        // ========================================================
+
+        for (int i = 0; i < count; i++)
+        {
+            SetWidth(
+                tabs[i].buttonLayout,
+                startButtonWidths[i]
+            );
+
+            SetWidth(
+                tabs[i].underLayout,
+                startUnderWidths[i]
+            );
         }
-    }
 
 
-    private IEnumerator LocalMoveYCurve(RectTransform rt, float targetY, float dur, int curveType)
-    {
-        if (rt == null) yield break;
+        ForceLayoutNow();
 
-        float startY = rt.anchoredPosition.y;
+
+        if (overlaySelected != null)
+        {
+            Vector2 pos =
+                overlaySelected.anchoredPosition;
+
+            pos.x =
+                overlayStartX;
+
+            overlaySelected.anchoredPosition =
+                pos;
+        }
+
+
+        // ========================================================
+        // LABEL OLD
+        // ========================================================
+
+        if (IsValidIndex(oldIndex) &&
+            tabs[oldIndex].label != null)
+        {
+            tabs[oldIndex].label.gameObject
+                .SetActive(false);
+
+            tabs[oldIndex].label.anchoredPosition =
+                normalLabelPositions[oldIndex];
+
+            tabs[oldIndex].label.localScale =
+                normalLabelScales[oldIndex];
+        }
+
+
+        // ========================================================
+        // LABEL NEW
+        // ========================================================
+
+        if (tabs[newIndex].label != null)
+        {
+            tabs[newIndex].label.gameObject
+                .SetActive(true);
+
+            tabs[newIndex].label.anchoredPosition =
+                normalLabelPositions[newIndex];
+
+            tabs[newIndex].label.localScale =
+                normalLabelScales[newIndex];
+        }
+
+
+        // ========================================================
+        // DURATION
+        // ========================================================
+
+        float totalDuration =
+            Mathf.Max(
+                widthDuration,
+                overlayDuration,
+                selectVisualDuration,
+                deselectVisualDuration
+            );
+
         float time = 0f;
 
-        while (time < dur)
+
+        // ========================================================
+        // ANIMATION LOOP
+        // ========================================================
+
+        while (time < totalDuration)
         {
-            time += Time.deltaTime;
-            float t = Mathf.Clamp01(time / dur);
+            time += Time.unscaledDeltaTime;
 
-            float easeT = GetEase(t, curveType);
 
-            Vector2 pos = rt.anchoredPosition;
-            pos.y = Mathf.Lerp(startY, targetY, easeT);
-            rt.anchoredPosition = pos;
+            float widthT =
+                EaseInOutCubic(
+                    Mathf.Clamp01(
+                        time /
+                        Mathf.Max(
+                            widthDuration,
+                            0.001f
+                        )
+                    )
+                );
+
+
+            float overlayT =
+                EaseInOutCubic(
+                    Mathf.Clamp01(
+                        time /
+                        Mathf.Max(
+                            overlayDuration,
+                            0.001f
+                        )
+                    )
+                );
+
+
+            float selectT =
+                EaseOutCubic(
+                    Mathf.Clamp01(
+                        time /
+                        Mathf.Max(
+                            selectVisualDuration,
+                            0.001f
+                        )
+                    )
+                );
+
+
+            float deselectT =
+                EaseOutCubic(
+                    Mathf.Clamp01(
+                        time /
+                        Mathf.Max(
+                            deselectVisualDuration,
+                            0.001f
+                        )
+                    )
+                );
+
+
+            // ====================================================
+            // WIDTH
+            // ====================================================
+
+            for (int i = 0; i < count; i++)
+            {
+                bool selected =
+                    i == newIndex;
+
+                float targetWidth =
+                    selected
+                        ? selectedWidth
+                        : normalWidth;
+
+
+                SetWidth(
+                    tabs[i].buttonLayout,
+                    Mathf.Lerp(
+                        startButtonWidths[i],
+                        targetWidth,
+                        widthT
+                    )
+                );
+
+
+                SetWidth(
+                    tabs[i].underLayout,
+                    Mathf.Lerp(
+                        startUnderWidths[i],
+                        targetWidth,
+                        widthT
+                    )
+                );
+            }
+
+
+            RebuildLayouts();
+
+
+            // ====================================================
+            // ICON
+            // ====================================================
+
+            for (int i = 0; i < count; i++)
+            {
+                if (tabs[i].icon == null)
+                    continue;
+
+
+                bool selected =
+                    i == newIndex;
+
+
+                // ================================================
+                // POSITION
+                // ================================================
+
+                Vector2 targetPosition =
+                    normalIconPositions[i];
+
+
+                if (selected)
+                {
+                    targetPosition +=
+                        Vector2.up *
+                        selectedIconYOffset;
+                }
+
+
+                float positionT =
+                    selected
+                        ? selectT
+                        : deselectT;
+
+
+                tabs[i].icon.anchoredPosition =
+                    Vector2.Lerp(
+                        startIconPositions[i],
+                        targetPosition,
+                        positionT
+                    );
+
+
+                // ================================================
+                // SCALE
+                //
+                // selected:
+                // current -> 1.5 -> 1.4
+                //
+                // deselected:
+                // current -> normal
+                // ================================================
+
+                if (selected)
+                {
+                    Vector3 overshootScale =
+                        normalIconScales[i] *
+                        selectedIconOvershootScale;
+
+
+                    Vector3 finalScale =
+                        normalIconScales[i] *
+                        selectedIconScale;
+
+
+                    float rawSelectT =
+                        Mathf.Clamp01(
+                            time /
+                            Mathf.Max(
+                                selectVisualDuration,
+                                0.001f
+                            )
+                        );
+
+
+                    const float overshootPoint =
+                        0.65f;
+
+
+                    if (rawSelectT < overshootPoint)
+                    {
+                        float t =
+                            rawSelectT /
+                            overshootPoint;
+
+
+                        t =
+                            EaseOutCubic(t);
+
+
+                        tabs[i].icon.localScale =
+                            Vector3.Lerp(
+                                startIconScales[i],
+                                overshootScale,
+                                t
+                            );
+                    }
+                    else
+                    {
+                        float t =
+                            (
+                                rawSelectT -
+                                overshootPoint
+                            ) /
+                            (
+                                1f -
+                                overshootPoint
+                            );
+
+
+                        t =
+                            EaseOutCubic(t);
+
+
+                        tabs[i].icon.localScale =
+                            Vector3.Lerp(
+                                overshootScale,
+                                finalScale,
+                                t
+                            );
+                    }
+                }
+                else
+                {
+                    tabs[i].icon.localScale =
+                        Vector3.Lerp(
+                            startIconScales[i],
+                            normalIconScales[i],
+                            deselectT
+                        );
+                }
+            }
+
+
+            // ====================================================
+            // LABEL
+            // ====================================================
+
+            if (tabs[newIndex].label != null)
+            {
+                Vector2 targetPosition =
+                    normalLabelPositions[newIndex] +
+                    Vector2.up *
+                    selectedLabelYOffset;
+
+
+                Vector3 targetScale =
+                    normalLabelScales[newIndex] *
+                    selectedLabelScale;
+
+
+                tabs[newIndex].label.anchoredPosition =
+                    Vector2.Lerp(
+                        normalLabelPositions[newIndex],
+                        targetPosition,
+                        selectT
+                    );
+
+
+                tabs[newIndex].label.localScale =
+                    Vector3.Lerp(
+                        normalLabelScales[newIndex],
+                        targetScale,
+                        selectT
+                    );
+            }
+
+
+            // ====================================================
+            // OVERLAY
+            // ====================================================
+
+            if (overlaySelected != null)
+            {
+                Vector2 pos =
+                    overlaySelected.anchoredPosition;
+
+
+                pos.x =
+                    Mathf.Lerp(
+                        overlayStartX,
+                        overlayTargetX,
+                        overlayT
+                    );
+
+
+                overlaySelected.anchoredPosition =
+                    pos;
+            }
+
 
             yield return null;
         }
 
-        Vector2 finalPos = rt.anchoredPosition;
-        finalPos.y = targetY;
-        rt.anchoredPosition = finalPos;
+
+        // ========================================================
+        // FINAL
+        // ========================================================
+
+        currentIndex =
+            newIndex;
+
+
+        ApplyStateInstant(
+            newIndex
+        );
+
+
+        transitionRoutine =
+            null;
+
+
+        isAnimating =
+            false;
+
+
+        // ========================================================
+        // OPEN POPUP AFTER ANIMATION
+        // ========================================================
+
+        OpenPopup(
+            newIndex
+        );
     }
 
 
-    private IEnumerator ScaleCurveRoutine(RectTransform rt, float targetScale, float dur, int curveType)
+    // ============================================================
+    // APPLY STATE INSTANT
+    // ============================================================
+
+    private void ApplyStateInstant(int index)
     {
-        if (rt == null) yield break;
+        if (!IsValidIndex(index))
+            return;
 
-        Vector3 startScale = rt.localScale;
-        Vector3 finalScale = Vector3.one * targetScale;
 
-        float time = 0f;
-        while (time < dur)
+        currentIndex =
+            index;
+
+
+        // ========================================================
+        // WIDTH
+        // ========================================================
+
+        for (int i = 0; i < tabs.Count; i++)
         {
-            time += Time.deltaTime;
-            float t = Mathf.Clamp01(time / dur);
+            bool selected =
+                i == index;
 
-            float easeT = GetEase(t, curveType);
-            rt.localScale = Vector3.LerpUnclamped(startScale, finalScale, easeT);
 
-            yield return null;
+            float width =
+                selected
+                    ? selectedWidth
+                    : normalWidth;
+
+
+            SetWidth(
+                tabs[i].buttonLayout,
+                width
+            );
+
+
+            SetWidth(
+                tabs[i].underLayout,
+                width
+            );
         }
 
-        rt.localScale = finalScale;
+
+        ForceLayoutNow();
+
+
+        // ========================================================
+        // ICON + LABEL
+        // ========================================================
+
+        for (int i = 0; i < tabs.Count; i++)
+        {
+            bool selected =
+                i == index;
+
+
+            if (tabs[i].icon != null)
+            {
+                Vector2 pos =
+                    normalIconPositions[i];
+
+
+                Vector3 scale =
+                    normalIconScales[i];
+
+
+                if (selected)
+                {
+                    pos +=
+                        Vector2.up *
+                        selectedIconYOffset;
+
+
+                    scale =
+                        normalIconScales[i] *
+                        selectedIconScale;
+                }
+
+
+                tabs[i].icon.anchoredPosition =
+                    pos;
+
+
+                tabs[i].icon.localScale =
+                    scale;
+            }
+
+
+            if (tabs[i].label != null)
+            {
+                tabs[i].label.gameObject
+                    .SetActive(selected);
+
+
+                if (selected)
+                {
+                    tabs[i].label.anchoredPosition =
+                        normalLabelPositions[i] +
+                        Vector2.up *
+                        selectedLabelYOffset;
+
+
+                    tabs[i].label.localScale =
+                        normalLabelScales[i] *
+                        selectedLabelScale;
+                }
+                else
+                {
+                    tabs[i].label.anchoredPosition =
+                        normalLabelPositions[i];
+
+
+                    tabs[i].label.localScale =
+                        normalLabelScales[i];
+                }
+            }
+        }
+
+
+        // ========================================================
+        // OVERLAY
+        // ========================================================
+
+        if (overlaySelected != null)
+        {
+            float startX =
+                overlaySelected.anchoredPosition.x;
+
+
+            float targetX =
+                CalculateOverlayTargetFromIcon(
+                    index,
+                    startX
+                );
+
+
+            Vector2 pos =
+                overlaySelected.anchoredPosition;
+
+
+            pos.x =
+                targetX;
+
+
+            overlaySelected.anchoredPosition =
+                pos;
+        }
     }
 
 
-    private IEnumerator ScaleOvershootRoutine(RectTransform rt, float finalTarget, float dur, float overshootPeak)
+    // ============================================================
+    // OVERLAY TARGET FROM ICON CENTER
+    // ============================================================
+
+    private float CalculateOverlayTargetFromIcon(
+        int index,
+        float currentOverlayX)
     {
-        if (rt == null) yield break;
-
-        Vector3 startScale = rt.localScale;
-        Vector3 peakScale = Vector3.one * overshootPeak;
-        Vector3 endScale = Vector3.one * finalTarget;
-
-        float halfDur = dur * 0.6f; 
-        float restDur = dur - halfDur;
+        if (!IsValidIndex(index))
+            return currentOverlayX;
 
 
-        float t = 0f;
-        while (t < halfDur)
-        {
-            t += Time.deltaTime;
-            float pct = Mathf.Clamp01(t / halfDur);
+        if (overlaySelected == null)
+            return currentOverlayX;
 
-            float easeSq = pct * (2f - pct); 
-            rt.localScale = Vector3.LerpUnclamped(startScale, peakScale, easeSq);
-            yield return null;
-        }
-        
-        t = 0f;
-        while (t < restDur)
-        {
-            t += Time.deltaTime;
-            float pct = Mathf.Clamp01(t / restDur);
 
-            float easeSq = pct * (2f - pct);
-            rt.localScale = Vector3.LerpUnclamped(peakScale, endScale, easeSq);
-            yield return null;
-        }
+        RectTransform icon =
+            tabs[index].icon;
 
-        rt.localScale = endScale;
+
+        if (icon == null)
+            return currentOverlayX;
+
+
+        RectTransform parent =
+            overlaySelected.parent
+            as RectTransform;
+
+
+        if (parent == null)
+            return currentOverlayX;
+
+
+        // ========================================================
+        // ICON CENTER
+        // ========================================================
+
+        Vector3[] iconCorners =
+            new Vector3[4];
+
+
+        icon.GetWorldCorners(
+            iconCorners
+        );
+
+
+        Vector3 iconWorldCenter =
+            (
+                iconCorners[0] +
+                iconCorners[1] +
+                iconCorners[2] +
+                iconCorners[3]
+            ) / 4f;
+
+
+        // ========================================================
+        // OVERLAY CENTER
+        // ========================================================
+
+        Vector3[] overlayCorners =
+            new Vector3[4];
+
+
+        overlaySelected.GetWorldCorners(
+            overlayCorners
+        );
+
+
+        Vector3 overlayWorldCenter =
+            (
+                overlayCorners[0] +
+                overlayCorners[1] +
+                overlayCorners[2] +
+                overlayCorners[3]
+            ) / 4f;
+
+
+        // ========================================================
+        // SAME LOCAL SPACE
+        // ========================================================
+
+        Vector3 iconLocal =
+            parent.InverseTransformPoint(
+                iconWorldCenter
+            );
+
+
+        Vector3 overlayLocal =
+            parent.InverseTransformPoint(
+                overlayWorldCenter
+            );
+
+
+        float deltaX =
+            iconLocal.x -
+            overlayLocal.x;
+
+
+        return
+            currentOverlayX +
+            deltaX +
+            overlayOffsetX;
     }
 
 
-    private IEnumerator AlphaRoutine(int index, float targetA, float dur)
+    // ============================================================
+    // OPEN POPUP
+    // ============================================================
+
+    private void OpenPopup(int index)
     {
-        float startA = _currentLabelAlpha[index];
-        float time = 0f;
-
-        CanvasGroup cg = _labelCanvasGroups[index];
-
-        while (time < dur)
+        if (PopupController.Instance == null)
         {
-            time += Time.deltaTime;
-            float t = Mathf.Clamp01(time / dur);
+            Debug.LogError(
+                "[BottomTabBar] PopupController.Instance is null."
+            );
 
-            float smoothedT = t * t * (3f - 2f * t);
-            float a = Mathf.Lerp(startA, targetA, smoothedT);
-
-            _currentLabelAlpha[index] = a;
-
-            if (cg != null) cg.alpha = a;
-
-            yield return null;
+            return;
         }
 
-        _currentLabelAlpha[index] = targetA;
-        if (cg != null) cg.alpha = targetA;
 
-        _labelAlphaCoroutines[index] = null;
+        PopupController.Instance.HideAll();
+
+
+        switch (index)
+        {
+            case 0:
+                PopupController.Instance
+                    .Show<PopupShop>(
+                        PopupAnimation.None
+                    );
+                break;
+
+
+            case 1:
+                PopupController.Instance
+                    .Show<PopupLeague>(
+                        PopupAnimation.None
+                    );
+                break;
+
+
+            case 2:
+                PopupController.Instance.Show<PopupHome>(
+                    PopupAnimation.None
+                );
+                break;
+
+
+            case 3:
+                PopupController.Instance
+                    .Show<PopupCollection>(
+                        PopupAnimation.None
+                    );
+                break;
+
+
+            case 4:
+                PopupController.Instance
+                    .Show<PopupKingdom>(
+                        PopupAnimation.None
+                    );
+                break;
+        }
     }
 
 
+    // ============================================================
+    // WIDTH
+    // ============================================================
 
-    private float GetEase(float t, int curveType)
+    private void SetWidth(
+        LayoutElement element,
+        float width)
     {
-        return t * t * (3f - 2f * t);
+        if (element == null)
+            return;
+
+
+        element.flexibleWidth =
+            0f;
+
+
+        element.preferredWidth =
+            width;
+    }
+
+
+    private float GetWidth(
+        LayoutElement element,
+        float fallback)
+    {
+        if (element == null)
+            return fallback;
+
+
+        if (element.preferredWidth >= 0f)
+            return element.preferredWidth;
+
+
+        RectTransform rect =
+            element.transform
+            as RectTransform;
+
+
+        if (rect != null)
+            return rect.rect.width;
+
+
+        return fallback;
+    }
+
+
+    // ============================================================
+    // LAYOUT
+    // ============================================================
+
+    private void RebuildLayouts()
+    {
+        if (underLayoutRoot != null)
+        {
+            LayoutRebuilder
+                .ForceRebuildLayoutImmediate(
+                    underLayoutRoot
+                );
+        }
+
+
+        if (buttonLayoutRoot != null)
+        {
+            LayoutRebuilder
+                .ForceRebuildLayoutImmediate(
+                    buttonLayoutRoot
+                );
+        }
+    }
+
+
+    private void ForceLayoutNow()
+    {
+        RebuildLayouts();
+
+        Canvas.ForceUpdateCanvases();
+
+        RebuildLayouts();
+    }
+
+
+    // ============================================================
+    // EASING
+    // ============================================================
+
+    private float EaseOutCubic(float x)
+    {
+        return
+            1f -
+            Mathf.Pow(
+                1f - x,
+                3f
+            );
+    }
+
+
+    private float EaseInOutCubic(float x)
+    {
+        return
+            x < 0.5f
+                ? 4f * x * x * x
+                : 1f -
+                  Mathf.Pow(
+                      -2f * x + 2f,
+                      3f
+                  ) / 2f;
+    }
+
+
+    // ============================================================
+    // VALIDATION
+    // ============================================================
+
+    private bool IsValidIndex(int index)
+    {
+        return
+            index >= 0 &&
+            index < tabs.Count;
     }
 }

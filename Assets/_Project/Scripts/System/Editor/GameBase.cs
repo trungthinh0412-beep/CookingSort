@@ -58,18 +58,10 @@ public class GameBase : EditorWindow
         }
 
         // =
-        {
-            CardType.StackCard,
-            CardType.UpgradeCard,
-            CardType.KingCard
-        };
 
         //
         {
-            Data.PlayerData.SetPreLevelCardAmount(
-                cardType,
-                Data.PlayerData.GetPreLevelCardAmount(cardType) + 1
-            );
+
         }
 
         Data.SaveData();

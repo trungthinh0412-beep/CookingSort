@@ -1,10 +1,10 @@
-﻿using CustomTween;
+using CustomTween;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum GameState { None }
+public enum GameState { None, PlayingGame, Pause, GameOver }
 
 public partial class GameManager : SingletonDontDestroy<GameManager>
 {
