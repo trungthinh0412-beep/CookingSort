@@ -38,8 +38,10 @@ namespace UnityToolbarExtender
 		
 		static ToolbarCallback()
 		{
+		#if !UNITY_6000_3_OR_NEWER
 			EditorApplication.update -= OnUpdate;
 			EditorApplication.update += OnUpdate;
+		#endif
 		}
 
 		static void OnUpdate()

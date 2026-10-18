@@ -1,0 +1,74 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dfb4df3e095144eca8191c396b1b61aa, type: 3}
+  m_Name: MergeGoldRewardConfig
+  m_EditorClassIdentifier: Assembly-CSharp::MergeGoldRewardConfig
+  defaultGoldReward: 0
+  defaultVisualCoinCount: 8
+  rewards:
+  - cardType: 1
+    goldAmount: 1
+    visualCoinCount: 2
+  - cardType: 2
+    goldAmount: 1
+    visualCoinCount: 3
+  - cardType: 3
+    goldAmount: 2
+    visualCoinCount: 4
+  - cardType: 4
+    goldAmount: 3
+    visualCoinCount: 6
+  - cardType: 5
+    goldAmount: 4
+    visualCoinCount: 6
+  - cardType: 6
+    goldAmount: 5
+    visualCoinCount: 7
+  - cardType: 7
+    goldAmount: 7
+    visualCoinCount: 8
+  - cardType: 8
+    goldAmount: 10
+    visualCoinCount: 8
+  - cardType: 9
+    goldAmount: 14
+    visualCoinCount: 8
+  - cardType: 10
+    goldAmount: 18
+    visualCoinCount: 8
+  - cardType: 11
+    goldAmount: 25
+    visualCoinCount: 8
+  - cardType: 12
+    goldAmount: 35
+    visualCoinCount: 8
+  - cardType: 13
+    goldAmount: 50
+    visualCoinCount: 8
+  - cardType: 14
+    goldAmount: 70
+    visualCoinCount: 8
+  - cardType: 15
+    goldAmount: 100
+    visualCoinCount: 8
+  - cardType: 16
+    goldAmount: 140
+    visualCoinCount: 8
+  - cardType: 17
+    goldAmount: 200
+    visualCoinCount: 8
+  - cardType: 18
+    goldAmount: 300
+    visualCoinCount: 8
+  - cardType: 19
+    goldAmount: 500
+    visualCoinCount: 8

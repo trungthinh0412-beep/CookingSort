@@ -27,9 +27,14 @@ public class BoosterData
 
 public enum BoosterType
 {
-    Shuffle,
-    Bomb,
-    MoreDeal,
-    MagicSwap,
-    Magnet,
+    Shuffle = 0,
+    Bomb = 1,
+    MoreDeal = 2,
+    MagicMove = 3,
+    Magnet = 4,
+    // Reuse the retired inventory WildCard value so the following saved
+    // booster values remain compatible.
+    Lighter = 5,
+    ExtraTray = 6,
+    FreeMoves = 7,
 }

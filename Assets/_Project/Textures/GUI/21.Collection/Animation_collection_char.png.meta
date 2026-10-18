@@ -1,0 +1,5709 @@
+fileFormatVersion: 2
+guid: b389414860b6e6f4fb5abedf7daaa316
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 4748057691661210312
+    second: Animation_collection_char_0
+  - first:
+      213: -8935551276074089220
+    second: Animation_collection_char_1
+  - first:
+      213: -6002684363596387884
+    second: Animation_collection_char_2
+  - first:
+      213: -6567422991903243261
+    second: Animation_collection_char_3
+  - first:
+      213: -1264702665187783958
+    second: Animation_collection_char_4
+  - first:
+      213: 680105774870456254
+    second: Animation_collection_char_5
+  - first:
+      213: -1944427377893322226
+    second: Animation_collection_char_6
+  - first:
+      213: -6492787203034829271
+    second: Animation_collection_char_7
+  - first:
+      213: -8573214616279381381
+    second: Animation_collection_char_8
+  - first:
+      213: 3588835079393969254
+    second: Animation_collection_char_9
+  - first:
+      213: -7595531484231768426
+    second: Animation_collection_char_10
+  - first:
+      213: 6566566930504162605
+    second: Animation_collection_char_11
+  - first:
+      213: -7564641418996838866
+    second: Animation_collection_char_12
+  - first:
+      213: -6258101843501942561
+    second: Animation_collection_char_13
+  - first:
+      213: -3697551971334059193
+    second: Animation_collection_char_14
+  - first:
+      213: -3174277651727578663
+    second: Animation_collection_char_15
+  - first:
+      213: 8738973298792776267
+    second: Animation_collection_char_16
+  - first:
+      213: 3860385697332894035
+    second: Animation_collection_char_17
+  - first:
+      213: -648029334275486183
+    second: Animation_collection_char_18
+  - first:
+      213: -8855467327034290140
+    second: Animation_collection_char_19
+  - first:
+      213: 5419241092798881621
+    second: Animation_collection_char_20
+  - first:
+      213: 1213108741199566470
+    second: Animation_collection_char_21
+  - first:
+      213: -8738679388865033163
+    second: Animation_collection_char_22
+  - first:
+      213: 1774041258167580181
+    second: Animation_collection_char_23
+  - first:
+      213: 6732152591551163614
+    second: Animation_collection_char_24
+  - first:
+      213: -5649512773646214014
+    second: Animation_collection_char_25
+  - first:
+      213: 7416231080813570375
+    second: Animation_collection_char_26
+  - first:
+      213: 3642681837484557936
+    second: Animation_collection_char_27
+  - first:
+      213: 3166044779292695805
+    second: Animation_collection_char_28
+  - first:
+      213: 2792452988327091915
+    second: Animation_collection_char_29
+  - first:
+      213: 7442513034404220331
+    second: Animation_collection_char_30
+  - first:
+      213: 4983214883889258508
+    second: Animation_collection_char_31
+  - first:
+      213: 330150346202648400
+    second: Animation_collection_char_32
+  - first:
+      213: 7592748343462193703
+    second: Animation_collection_char_33
+  - first:
+      213: 6029777729044796709
+    second: Animation_collection_char_34
+  - first:
+      213: 3311678793761818804
+    second: Animation_collection_char_35
+  - first:
+      213: 7038897309030410258
+    second: Animation_collection_char_36
+  - first:
+      213: 764230075236501127
+    second: Animation_collection_char_37
+  - first:
+      213: 8900452530336950549
+    second: Animation_collection_char_38
+  - first:
+      213: -4606326654763386035
+    second: Animation_collection_char_39
+  - first:
+      213: -9047394481781469500
+    second: Animation_collection_char_40
+  - first:
+      213: -3223810570499026249
+    second: Animation_collection_char_41
+  - first:
+      213: -5690442669150465799
+    second: Animation_collection_char_42
+  - first:
+      213: -5048951649282936116
+    second: Animation_collection_char_43
+  - first:
+      213: 968997557870754162
+    second: Animation_collection_char_44
+  - first:
+      213: -6678177906876245118
+    second: Animation_collection_char_45
+  - first:
+      213: 6501821424559934179
+    second: Animation_collection_char_46
+  - first:
+      213: -7342296701445238874
+    second: Animation_collection_char_47
+  - first:
+      213: 8618397773946912009
+    second: Animation_collection_char_48
+  - first:
+      213: -9103565921536861959
+    second: Animation_collection_char_49
+  - first:
+      213: -2924320566453942806
+    second: Animation_collection_char_50
+  - first:
+      213: -7054517281021379244
+    second: Animation_collection_char_51
+  - first:
+      213: -344244226644199929
+    second: Animation_collection_char_52
+  - first:
+      213: -6603185906144209917
+    second: Animation_collection_char_53
+  - first:
+      213: 3188969522784223954
+    second: Animation_collection_char_54
+  - first:
+      213: -13827139038127883
+    second: Animation_collection_char_55
+  - first:
+      213: -8758564689516040730
+    second: Animation_collection_char_56
+  - first:
+      213: 4728965197053503577
+    second: Animation_collection_char_57
+  - first:
+      213: -5037084311548594225
+    second: Animation_collection_char_58
+  - first:
+      213: 2342635517196679
+    second: Animation_collection_char_59
+  - first:
+      213: -1480909711189903845
+    second: Animation_collection_char_60
+  - first:
+      213: -6862194017192942732
+    second: Animation_collection_char_61
+  - first:
+      213: -6817376423583539055
+    second: Animation_collection_char_62
+  - first:
+      213: 2079932652540841640
+    second: Animation_collection_char_63
+  - first:
+      213: -5857752117011956953
+    second: Animation_collection_char_64
+  - first:
+      213: 7873721910656153809
+    second: Animation_collection_char_65
+  - first:
+      213: -2546965782033018807
+    second: Animation_collection_char_66
+  - first:
+      213: -5868497315072248358
+    second: Animation_collection_char_67
+  - first:
+      213: -590186049347117179
+    second: Animation_collection_char_68
+  - first:
+      213: -1370266067527309647
+    second: Animation_collection_char_69
+  - first:
+      213: 3535279158158981615
+    second: Animation_collection_char_70
+  - first:
+      213: -2758571413445553631
+    second: Animation_collection_char_71
+  - first:
+      213: -2256834069670750651
+    second: Animation_collection_char_72
+  - first:
+      213: -2665293534607217507
+    second: Animation_collection_char_73
+  - first:
+      213: 1572512716102493803
+    second: Animation_collection_char_74
+  - first:
+      213: 7262613028953718068
+    second: Animation_collection_char_75
+  - first:
+      213: 4047918319992521384
+    second: Animation_collection_char_76
+  - first:
+      213: 5987402120995736478
+    second: Animation_collection_char_77
+  - first:
+      213: 1454742912818727602
+    second: Animation_collection_char_78
+  - first:
+      213: 4993601019288106012
+    second: Animation_collection_char_79
+  - first:
+      213: 4166173727626926693
+    second: Animation_collection_char_80
+  - first:
+      213: -5150955517457326991
+    second: Animation_collection_char_81
+  - first:
+      213: 6537950513459986898
+    second: Animation_collection_char_82
+  - first:
+      213: 4780810499876304220
+    second: Animation_collection_char_83
+  - first:
+      213: -7073338189043408724
+    second: Animation_collection_char_84
+  - first:
+      213: -4583900111215694320
+    second: Animation_collection_char_85
+  - first:
+      213: 6600866221482555142
+    second: Animation_collection_char_86
+  - first:
+      213: -3650385173463530453
+    second: Animation_collection_char_87
+  - first:
+      213: 4855843842890492218
+    second: Animation_collection_char_88
+  - first:
+      213: 4251878654973050781
+    second: Animation_collection_char_89
+  - first:
+      213: -4595811778532956234
+    second: Animation_collection_char_90
+  - first:
+      213: -7493876973736011100
+    second: Animation_collection_char_91
+  - first:
+      213: 3109898237158051793
+    second: Animation_collection_char_92
+  - first:
+      213: -5838066628757294819
+    second: Animation_collection_char_93
+  - first:
+      213: 85780678937315063
+    second: Animation_collection_char_94
+  - first:
+      213: 4172668384135245135
+    second: Animation_collection_char_95
+  - first:
+      213: 8567258764140172627
+    second: Animation_collection_char_96
+  - first:
+      213: 3980294212054147787
+    second: Animation_collection_char_97
+  - first:
+      213: 7836538810681654832
+    second: Animation_collection_char_98
+  - first:
+      213: 2965883960112956899
+    second: Animation_collection_char_99
+  - first:
+      213: 86255666371031624
+    second: Animation_collection_char_100
+  - first:
+      213: -1236164486061204739
+    second: Animation_collection_char_101
+  - first:
+      213: -1522969337942379261
+    second: Animation_collection_char_102
+  - first:
+      213: 8050069707021942166
+    second: Animation_collection_char_103
+  - first:
+      213: 3780740463294432042
+    second: Animation_collection_char_104
+  - first:
+      213: 8365490762903689104
+    second: Animation_collection_char_105
+  - first:
+      213: -6916576919902406819
+    second: Animation_collection_char_106
+  - first:
+      213: 2449407408840250369
+    second: Animation_collection_char_107
+  - first:
+      213: -8636591162564859028
+    second: Animation_collection_char_108
+  - first:
+      213: 1131210184107067731
+    second: Animation_collection_char_109
+  - first:
+      213: -6105360586299415215
+    second: Animation_collection_char_110
+  - first:
+      213: 98600101798615151
+    second: Animation_collection_char_111
+  - first:
+      213: 3498761267203696517
+    second: Animation_collection_char_112
+  - first:
+      213: -5348607613322950060
+    second: Animation_collection_char_113
+  - first:
+      213: -6271229720372649179
+    second: Animation_collection_char_114
+  - first:
+      213: 2739674763655289048
+    second: Animation_collection_char_115
+  - first:
+      213: 4143677738167324214
+    second: Animation_collection_char_116
+  - first:
+      213: 894731633979522912
+    second: Animation_collection_char_117
+  - first:
+      213: -3457031984565234428
+    second: Animation_collection_char_118
+  - first:
+      213: -5411782203935522167
+    second: Animation_collection_char_119
+  - first:
+      213: 8170906558139305808
+    second: Animation_collection_char_120
+  - first:
+      213: 1001989941837781358
+    second: Animation_collection_char_121
+  - first:
+      213: 923082893686417721
+    second: Animation_collection_char_122
+  - first:
+      213: -7577146172929839063
+    second: Animation_collection_char_123
+  - first:
+      213: -5454684821672166963
+    second: Animation_collection_char_124
+  - first:
+      213: -2234186005239546811
+    second: Animation_collection_char_125
+  - first:
+      213: -1003090665282518103
+    second: Animation_collection_char_126
+  - first:
+      213: 8125037852093962540
+    second: Animation_collection_char_127
+  - first:
+      213: -4766669202252056060
+    second: Animation_collection_char_128
+  - first:
+      213: -3184836955154626489
+    second: Animation_collection_char_129
+  - first:
+      213: 2413793083066408759
+    second: Animation_collection_char_130
+  - first:
+      213: -929179902552296780
+    second: Animation_collection_char_131
+  - first:
+      213: -7068619125146735387
+    second: Animation_collection_char_132
+  - first:
+      213: -979158600102793
+    second: Animation_collection_char_133
+  - first:
+      213: 7865382744955192316
+    second: Animation_collection_char_134
+  - first:
+      213: 5963403895267443100
+    second: Animation_collection_char_135
+  - first:
+      213: 3389816461634117448
+    second: Animation_collection_char_136
+  - first:
+      213: -366810899364185538
+    second: Animation_collection_char_137
+  - first:
+      213: -8199607315904730577
+    second: Animation_collection_char_138
+  - first:
+      213: 2259559780706789148
+    second: Animation_collection_char_139
+  - first:
+      213: 9074693549630316964
+    second: Animation_collection_char_140
+  - first:
+      213: 4986909829603499157
+    second: Animation_collection_char_141
+  - first:
+      213: -4850533719200838636
+    second: Animation_collection_char_142
+  - first:
+      213: 7020765186083795259
+    second: Animation_collection_char_143
+  - first:
+      213: 6398299528763925554
+    second: Animation_collection_char_144
+  - first:
+      213: -3549681255501714266
+    second: Animation_collection_char_145
+  - first:
+      213: 6743648455893450878
+    second: Animation_collection_char_146
+  - first:
+      213: -497667330393045918
+    second: Animation_collection_char_147
+  - first:
+      213: -8491485795350071928
+    second: Animation_collection_char_148
+  - first:
+      213: -7482471044184650494
+    second: Animation_collection_char_149
+  - first:
+      213: -3665020418139451461
+    second: Animation_collection_char_150
+  - first:
+      213: -7073439490786681102
+    second: Animation_collection_char_151
+  - first:
+      213: -258993793744004771
+    second: Animation_collection_char_152
+  - first:
+      213: 7182561318917125212
+    second: Animation_collection_char_153
+  - first:
+      213: -5729318834394037667
+    second: Animation_collection_char_154
+  - first:
+      213: -6491780539428996215
+    second: Animation_collection_char_155
+  - first:
+      213: -2593651377533075492
+    second: Animation_collection_char_156
+  - first:
+      213: -1477293296453930982
+    second: Animation_collection_char_157
+  - first:
+      213: 6269075107628382839
+    second: Animation_collection_char_158
+  - first:
+      213: -2817567812590811756
+    second: Animation_collection_char_159
+  - first:
+      213: 4392281224232025965
+    second: Animation_collection_char_160
+  - first:
+      213: 4797582927966154222
+    second: Animation_collection_char_161
+  - first:
+      213: -6428818212319830753
+    second: Animation_collection_char_162
+  - first:
+      213: 1498264948848400179
+    second: Animation_collection_char_163
+  - first:
+      213: -258641866981774135
+    second: Animation_collection_char_164
+  - first:
+      213: 4673927285681668926
+    second: Animation_collection_char_165
+  - first:
+      213: -5135614000784844545
+    second: Animation_collection_char_166
+  - first:
+      213: 8576004829948228715
+    second: Animation_collection_char_167
+  - first:
+      213: 4042044810443431537
+    second: Animation_collection_char_168
+  - first:
+      213: -601917108619797051
+    second: Animation_collection_char_169
+  - first:
+      213: -2484085349160847223
+    second: Animation_collection_char_170
+  - first:
+      213: -5192659569401353529
+    second: Animation_collection_char_171
+  - first:
+      213: 6922235942515626984
+    second: Animation_collection_char_172
+  - first:
+      213: -2363454980462252251
+    second: Animation_collection_char_173
+  - first:
+      213: -1158341818163719973
+    second: Animation_collection_char_174
+  - first:
+      213: 4133602763485726331
+    second: Animation_collection_char_175
+  - first:
+      213: -2782257671438585087
+    second: Animation_collection_char_176
+  - first:
+      213: 6643042744932751942
+    second: Animation_collection_char_177
+  - first:
+      213: 1539940985896707348
+    second: Animation_collection_char_178
+  - first:
+      213: -5549931528706650729
+    second: Animation_collection_char_179
+  - first:
+      213: -6959656683753356989
+    second: Animation_collection_char_180
+  - first:
+      213: -3240385306153036530
+    second: Animation_collection_char_181
+  - first:
+      213: 7238835077921991506
+    second: Animation_collection_char_182
+  - first:
+      213: -4501804467781919494
+    second: Animation_collection_char_183
+  - first:
+      213: 9016633858675917170
+    second: Animation_collection_char_184
+  - first:
+      213: 4028989801580792165
+    second: Animation_collection_char_185
+  - first:
+      213: 8718025633062507998
+    second: Animation_collection_char_186
+  - first:
+      213: -2308175064813904374
+    second: Animation_collection_char_187
+  - first:
+      213: -9191203992408787006
+    second: Animation_collection_char_188
+  - first:
+      213: 7977391432254006249
+    second: Animation_collection_char_189
+  - first:
+      213: -85603142778472171
+    second: Animation_collection_char_190
+  - first:
+      213: 7611285747193681956
+    second: Animation_collection_char_191
+  - first:
+      213: 5995541411813605314
+    second: Animation_collection_char_192
+  - first:
+      213: 8645823900252848325
+    second: Animation_collection_char_193
+  - first:
+      213: -6579129796367547347
+    second: Animation_collection_char_194
+  - first:
+      213: 3603944088449954152
+    second: Animation_collection_char_195
+  - first:
+      213: 5451770493208074336
+    second: Animation_collection_char_196
+  - first:
+      213: -5971328687160444427
+    second: Animation_collection_char_197
+  - first:
+      213: 7768838193824652916
+    second: Animation_collection_char_198
+  - first:
+      213: 2363885765027088156
+    second: Animation_collection_char_199
+  - first:
+      213: 2390017689858758384
+    second: Animation_collection_char_200
+  - first:
+      213: 9015362969715295524
+    second: Animation_collection_char_201
+  - first:
+      213: -4587301855652406864
+    second: Animation_collection_char_202
+  - first:
+      213: 7965912641745850891
+    second: Animation_collection_char_203
+  - first:
+      213: 9213936147037328707
+    second: Animation_collection_char_204
+  - first:
+      213: -6302413152945954160
+    second: Animation_collection_char_205
+  - first:
+      213: -550565873928737945
+    second: Animation_collection_char_206
+  - first:
+      213: 5619479566893383937
+    second: Animation_collection_char_207
+  - first:
+      213: 2363450931478574595
+    second: Animation_collection_char_208
+  - first:
+      213: 7030921476085883410
+    second: Animation_collection_char_209
+  - first:
+      213: -9175230298025797403
+    second: Animation_collection_char_210
+  - first:
+      213: -1163301683684224754
+    second: Animation_collection_char_211
+  - first:
+      213: -7101686620457386955
+    second: Animation_collection_char_212
+  - first:
+      213: -5507211652457889288
+    second: Animation_collection_char_213
+  - first:
+      213: -3550880202026884142
+    second: Animation_collection_char_214
+  - first:
+      213: 565519716438543238
+    second: Animation_collection_char_215
+  - first:
+      213: 1899963483242128372
+    second: Animation_collection_char_216
+  - first:
+      213: -862509598215013344
+    second: Animation_collection_char_217
+  - first:
+      213: 2668303851784222649
+    second: Animation_collection_char_218
+  - first:
+      213: 6701108929177273831
+    second: Animation_collection_char_219
+  - first:
+      213: -8799138230610759276
+    second: Animation_collection_char_220
+  - first:
+      213: 6250604396341675439
+    second: Animation_collection_char_221
+  - first:
+      213: 4150531854905317750
+    second: Animation_collection_char_222
+  - first:
+      213: -2708933572052567906
+    second: Animation_collection_char_223
+  - first:
+      213: 3503878069059828801
+    second: Animation_collection_char_224
+  - first:
+      213: 1539421154504726347
+    second: Animation_collection_char_225
+  - first:
+      213: -7558062558295053199
+    second: Animation_collection_char_226
+  - first:
+      213: -1396326300238256897
+    second: Animation_collection_char_227
+  - first:
+      213: 2209515133245536749
+    second: Animation_collection_char_228
+  - first:
+      213: 2483311492349170947
+    second: Animation_collection_char_229
+  - first:
+      213: -7099393533419181623
+    second: Animation_collection_char_230
+  - first:
+      213: 7237238478257149588
+    second: Animation_collection_char_231
+  - first:
+      213: 1861754659323883981
+    second: Animation_collection_char_232
+  - first:
+      213: -8736513343126563297
+    second: Animation_collection_char_233
+  - first:
+      213: -4303301502008373306
+    second: Animation_collection_char_234
+  - first:
+      213: -683209136077556492
+    second: Animation_collection_char_235
+  - first:
+      213: -4447549779528745695
+    second: Animation_collection_char_236
+  - first:
+      213: 2106862166076452387
+    second: Animation_collection_char_237
+  - first:
+      213: 1204130935375278845
+    second: Animation_collection_char_238
+  - first:
+      213: -2596468034594296341
+    second: Animation_collection_char_239
+  - first:
+      213: -1476695613023045746
+    second: Animation_collection_char_240
+  - first:
+      213: -930009781724446443
+    second: Animation_collection_char_241
+  - first:
+      213: 6277420969223272457
+    second: Animation_collection_char_242
+  - first:
+      213: -8714954581393800746
+    second: Animation_collection_char_243
+  - first:
+      213: -1884360340022538856
+    second: Animation_collection_char_244
+  - first:
+      213: 4745907163884531669
+    second: Animation_collection_char_245
+  - first:
+      213: 7296663706377037912
+    second: Animation_collection_char_246
+  - first:
+      213: 7606972557636724291
+    second: Animation_collection_char_247
+  - first:
+      213: 3339109695001200168
+    second: Animation_collection_char_248
+  - first:
+      213: 7466111685440143624
+    second: Animation_collection_char_249
+  - first:
+      213: 2598115063316323898
+    second: Animation_collection_char_250
+  - first:
+      213: -3287053587751049918
+    second: Animation_collection_char_251
+  - first:
+      213: 102397871638072762
+    second: Animation_collection_char_252
+  - first:
+      213: 4729951266936575411
+    second: Animation_collection_char_253
+  - first:
+      213: -1275515900193527556
+    second: Animation_collection_char_254
+  - first:
+      213: -1036835838723668282
+    second: Animation_collection_char_255
+  - first:
+      213: 6639764313889268879
+    second: Animation_collection_char_256
+  - first:
+      213: 6500334507626696138
+    second: Animation_collection_char_257
+  - first:
+      213: 4168871706686268579
+    second: Animation_collection_char_258
+  - first:
+      213: 5855632827282859781
+    second: Animation_collection_char_259
+  - first:
+      213: -6725168414630812755
+    second: Animation_collection_char_260
+  - first:
+      213: -2621279039130838303
+    second: Animation_collection_char_261
+  - first:
+      213: -7253247385292144650
+    second: Animation_collection_char_262
+  - first:
+      213: 7618547705285271434
+    second: Animation_collection_char_263
+  - first:
+      213: -2821052173277751172
+    second: Animation_collection_char_264
+  - first:
+      213: -1470549146233075442
+    second: Animation_collection_char_265
+  - first:
+      213: -8981253713042258538
+    second: Animation_collection_char_266
+  - first:
+      213: -4461341625942506309
+    second: Animation_collection_char_267
+  - first:
+      213: 8564430348852610599
+    second: Animation_collection_char_268
+  - first:
+      213: 8789732281546824723
+    second: Animation_collection_char_269
+  - first:
+      213: -886329425403275566
+    second: Animation_collection_char_270
+  - first:
+      213: -3002902158523990705
+    second: Animation_collection_char_271
+  - first:
+      213: -7356952598340359218
+    second: Animation_collection_char_272
+  - first:
+      213: 3912877112594770806
+    second: Animation_collection_char_273
+  - first:
+      213: 2957614155925185672
+    second: Animation_collection_char_274
+  - first:
+      213: -3128985066901489865
+    second: Animation_collection_char_275
+  - first:
+      213: -8380113370550917924
+    second: Animation_collection_char_276
+  - first:
+      213: 7588857962016068490
+    second: Animation_collection_char_277
+  - first:
+      213: -3610444936184111931
+    second: Animation_collection_char_278
+  - first:
+      213: 6984866984825373878
+    second: Animation_collection_char_279
+  - first:
+      213: -905203853713829420
+    second: Animation_collection_char_280
+  - first:
+      213: 820182564233112475
+    second: Animation_collection_char_281
+  - first:
+      213: 6645302525948701705
+    second: Animation_collection_char_282
+  - first:
+      213: 2408537808048094150
+    second: Animation_collection_char_283
+  - first:
+      213: 3790143722990264716
+    second: Animation_collection_char_284
+  - first:
+      213: 3614079881808235723
+    second: Animation_collection_char_285
+  - first:
+      213: 4180377908708343996
+    second: Animation_collection_char_286
+  - first:
+      213: 5453375327531866473
+    second: Animation_collection_char_287
+  - first:
+      213: 5026598840706468060
+    second: Animation_collection_char_288
+  - first:
+      213: 2484707836934010365
+    second: Animation_collection_char_289
+  - first:
+      213: 1833324918242053760
+    second: Animation_collection_char_290
+  - first:
+      213: 2121584287332873048
+    second: Animation_collection_char_291
+  - first:
+      213: 1881126381131670524
+    second: Animation_collection_char_292
+  - first:
+      213: -988304519136695008
+    second: Animation_collection_char_293
+  - first:
+      213: -5576686963072784222
+    second: Animation_collection_char_294
+  - first:
+      213: -2304926736989013889
+    second: Animation_collection_char_295
+  - first:
+      213: 427065366371313499
+    second: Animation_collection_char_296
+  - first:
+      213: -7565124959162367070
+    second: Animation_collection_char_297
+  - first:
+      213: -5319567986322061229
+    second: Animation_collection_char_298
+  - first:
+      213: -1142487019444023071
+    second: Animation_collection_char_299
+  - first:
+      213: -5023677069118703953
+    second: Animation_collection_char_300
+  - first:
+      213: -5080658792810484970
+    second: Animation_collection_char_301
+  - first:
+      213: 5094493735249603190
+    second: Animation_collection_char_302
+  - first:
+      213: 4474430211975905939
+    second: Animation_collection_char_303
+  - first:
+      213: -7907734812762571706
+    second: Animation_collection_char_304
+  - first:
+      213: 8245282340497818817
+    second: Animation_collection_char_305
+  - first:
+      213: 3741551315965856858
+    second: Animation_collection_char_306
+  - first:
+      213: 3030605826641005125
+    second: Animation_collection_char_307
+  - first:
+      213: -9157321838471557037
+    second: Animation_collection_char_308
+  - first:
+      213: -3646205847520129448
+    second: Animation_collection_char_309
+  - first:
+      213: -2996502730572969931
+    second: Animation_collection_char_310
+  - first:
+      213: -8611185893576658382
+    second: Animation_collection_char_311
+  - first:
+      213: 5829143102600297606
+    second: Animation_collection_char_312
+  - first:
+      213: -6029077268054493756
+    second: Animation_collection_char_313
+  - first:
+      213: 3725895278955650028
+    second: Animation_collection_char_314
+  - first:
+      213: -8308042474871036825
+    second: Animation_collection_char_315
+  - first:
+      213: 7488836127388500389
+    second: Animation_collection_char_316
+  - first:
+      213: 1111665351547431367
+    second: Animation_collection_char_317
+  - first:
+      213: -4495409642792519446
+    second: Animation_collection_char_318
+  - first:
+      213: -3766588540499816626
+    second: Animation_collection_char_319
+  - first:
+      213: -3234568421530528532
+    second: Animation_collection_char_320
+  - first:
+      213: 7343983921038395028
+    second: Animation_collection_char_321
+  - first:
+      213: -3834086064193171087
+    second: Animation_collection_char_322
+  - first:
+      213: 5674357940069842050
+    second: Animation_collection_char_323
+  - first:
+      213: -3398972642441068574
+    second: Animation_collection_char_324
+  - first:
+      213: 609306017419259696
+    second: Animation_collection_char_325
+  - first:
+      213: 3650779205204387767
+    second: Animation_collection_char_326
+  - first:
+      213: -7287855866067336667
+    second: Animation_collection_char_327
+  - first:
+      213: 218136063407280038
+    second: Animation_collection_char_328
+  - first:
+      213: -3449834296062626842
+    second: Animation_collection_char_329
+  - first:
+      213: -3399284991243111341
+    second: Animation_collection_char_330
+  - first:
+      213: 2428000148339585705
+    second: Animation_collection_char_331
+  - first:
+      213: -7541134339292694775
+    second: Animation_collection_char_332
+  - first:
+      213: 6686595437735551383
+    second: Animation_collection_char_333
+  - first:
+      213: -7214821775095477646
+    second: Animation_collection_char_334
+  - first:
+      213: -5919463669320854336
+    second: Animation_collection_char_335
+  - first:
+      213: 1846044342393706365
+    second: Animation_collection_char_336
+  - first:
+      213: -952405213859914715
+    second: Animation_collection_char_337
+  - first:
+      213: 1624079583921987468
+    second: Animation_collection_char_338
+  - first:
+      213: -6479462284203999287
+    second: Animation_collection_char_339
+  - first:
+      213: -7561770652115090501
+    second: Animation_collection_char_340
+  - first:
+      213: 8185629625095210020
+    second: Animation_collection_char_341
+  - first:
+      213: 1172119125388213693
+    second: Animation_collection_char_342
+  - first:
+      213: -2662366766849205145
+    second: Animation_collection_char_343
+  - first:
+      213: 2762415738791924799
+    second: Animation_collection_char_344
+  - first:
+      213: 6010369594613393506
+    second: Animation_collection_char_345
+  - first:
+      213: -2673153077984040087
+    second: Animation_collection_char_346
+  - first:
+      213: -7804275580770358200
+    second: Animation_collection_char_347
+  - first:
+      213: 1169937925017939474
+    second: Animation_collection_char_348
+  - first:
+      213: -6439881352444766829
+    second: Animation_collection_char_349
+  - first:
+      213: -6934809986984258651
+    second: Animation_collection_char_350
+  - first:
+      213: -7938415391974051413
+    second: Animation_collection_char_351
+  - first:
+      213: -1238622848306053797
+    second: Animation_collection_char_352
+  - first:
+      213: 7813791529996877131
+    second: Animation_collection_char_353
+  - first:
+      213: -2335409282922891076
+    second: Animation_collection_char_354
+  - first:
+      213: 8856961268807337285
+    second: Animation_collection_char_355
+  - first:
+      213: -7761633702065101117
+    second: Animation_collection_char_356
+  - first:
+      213: 851559496057366459
+    second: Animation_collection_char_357
+  - first:
+      213: -6381272232484399281
+    second: Animation_collection_char_358
+  - first:
+      213: -7448933011893029910
+    second: Animation_collection_char_359
+  - first:
+      213: 9150221071282547514
+    second: Animation_collection_char_360
+  - first:
+      213: 2912380224448687123
+    second: Animation_collection_char_361
+  - first:
+      213: 6550189631233172015
+    second: Animation_collection_char_362
+  - first:
+      213: -1632916149374230030
+    second: Animation_collection_char_363
+  - first:
+      213: -1133118801867611199
+    second: Animation_collection_char_364
+  - first:
+      213: -3505292673661086085
+    second: Animation_collection_char_365
+  - first:
+      213: 8762039327961250582
+    second: Animation_collection_char_366
+  - first:
+      213: 8048418364530672746
+    second: Animation_collection_char_367
+  - first:
+      213: 6381996681767926867
+    second: Animation_collection_char_368
+  - first:
+      213: -321797417092771503
+    second: Animation_collection_char_369
+  - first:
+      213: 5943364798923399614
+    second: Animation_collection_char_370
+  - first:
+      213: 5846818352807882019
+    second: Animation_collection_char_371
+  - first:
+      213: -7657633163382580662
+    second: Animation_collection_char_372
+  - first:
+      213: -4709651788646997894
+    second: Animation_collection_char_373
+  - first:
+      213: 3870667379209647226
+    second: Animation_collection_char_374
+  - first:
+      213: -7787653946552017153
+    second: Animation_collection_char_375
+  - first:
+      213: 6792533328618454096
+    second: Animation_collection_char_376
+  - first:
+      213: -1073975942909922641
+    second: Animation_collection_char_377
+  - first:
+      213: -6099245677856355877
+    second: Animation_collection_char_378
+  - first:
+      213: 6525976891855616687
+    second: Animation_collection_char_379
+  - first:
+      213: -2213745918909590809
+    second: Animation_collection_char_380
+  - first:
+      213: -8200137094291452230
+    second: Animation_collection_char_381
+  - first:
+      213: -4117356108798396400
+    second: Animation_collection_char_382
+  - first:
+      213: -7998627116227259914
+    second: Animation_collection_char_383
+  - first:
+      213: -3507663852009653408
+    second: Animation_collection_char_384
+  - first:
+      213: -2061268781703077601
+    second: Animation_collection_char_385
+  - first:
+      213: 1889002184450004342
+    second: Animation_collection_char_386
+  - first:
+      213: 5056494148059310686
+    second: Animation_collection_char_387
+  - first:
+      213: -6255260481911571981
+    second: Animation_collection_char_388
+  - first:
+      213: 7165441381980681903
+    second: Animation_collection_char_389
+  - first:
+      213: 7847390514217823219
+    second: Animation_collection_char_390
+  - first:
+      213: -935370206810883673
+    second: Animation_collection_char_391
+  - first:
+      213: -5551077437021934465
+    second: Animation_collection_char_392
+  - first:
+      213: -9050168897756080973
+    second: Animation_collection_char_393
+  - first:
+      213: 8306429865413229579
+    second: Animation_collection_char_394
+  - first:
+      213: 4901903544984867350
+    second: Animation_collection_char_395
+  - first:
+      213: 757927548313311611
+    second: Animation_collection_char_396
+  - first:
+      213: -5364051580734594014
+    second: Animation_collection_char_397
+  - first:
+      213: -9021427540750504184
+    second: Animation_collection_char_398
+  - first:
+      213: 3180042780420778751
+    second: Animation_collection_char_399
+  - first:
+      213: -4578493761533809824
+    second: Animation_collection_char_400
+  - first:
+      213: -6367147135262825509
+    second: Animation_collection_char_401
+  - first:
+      213: -4227452351527671120
+    second: Animation_collection_char_402
+  - first:
+      213: 6374131396436938343
+    second: Animation_collection_char_403
+  - first:
+      213: 3314362476715782271
+    second: Animation_collection_char_404
+  - first:
+      213: 8654025488865850568
+    second: Animation_collection_char_405
+  - first:
+      213: -9052773544695813507
+    second: Animation_collection_char_406
+  - first:
+      213: 6994537641655840295
+    second: Animation_collection_char_407
+  - first:
+      213: -5977941730762929421
+    second: Animation_collection_char_408
+  - first:
+      213: -2572360618252983571
+    second: Animation_collection_char_409
+  - first:
+      213: 3475814401315475761
+    second: Animation_collection_char_410
+  - first:
+      213: 2260109106108635828
+    second: Animation_collection_char_411
+  - first:
+      213: -2929696589284161081
+    second: Animation_collection_char_412
+  - first:
+      213: 3792355022053443470
+    second: Animation_collection_char_413
+  - first:
+      213: 4661143791444022758
+    second: Animation_collection_char_414
+  - first:
+      213: 1689780190922898008
+    second: Animation_collection_char_415
+  - first:
+      213: 8086191089753918878
+    second: Animation_collection_char_416
+  - first:
+      213: 5873591858087105218
+    second: Animation_collection_char_417
+  - first:
+      213: -8446028613025084194
+    second: Animation_collection_char_418
+  - first:
+      213: -5969555566614742079
+    second: Animation_collection_char_419
+  - first:
+      213: 3783721884212264208
+    second: Animation_collection_char_420
+  - first:
+      213: 2504778975644143246
+    second: Animation_collection_char_421
+  - first:
+      213: 3330360607610571009
+    second: Animation_collection_char_422
+  - first:
+      213: 3401576271947364237
+    second: Animation_collection_char_423
+  - first:
+      213: -8561408813420511595
+    second: Animation_collection_char_424
+  - first:
+      213: -2818788336902617165
+    second: Animation_collection_char_425
+  - first:
+      213: -2896757726999502453
+    second: Animation_collection_char_426
+  - first:
+      213: -6434609152001985385
+    second: Animation_collection_char_427
+  - first:
+      213: 4341590304106706888
+    second: Animation_collection_char_428
+  - first:
+      213: 7981958339416853730
+    second: Animation_collection_char_429
+  - first:
+      213: 1301149574422700646
+    second: Animation_collection_char_430
+  - first:
+      213: 5547621112959338461
+    second: Animation_collection_char_431
+  - first:
+      213: 5355633214628577444
+    second: Animation_collection_char_432
+  - first:
+      213: -3071254106263985654
+    second: Animation_collection_char_433
+  - first:
+      213: 3449595091779863189
+    second: Animation_collection_char_434
+  - first:
+      213: -2526083624007013065
+    second: Animation_collection_char_435
+  - first:
+      213: 8013772471703727200
+    second: Animation_collection_char_436
+  - first:
+      213: 7594555924604366077
+    second: Animation_collection_char_437
+  - first:
+      213: -7906589955837280273
+    second: Animation_collection_char_438
+  - first:
+      213: 3719663217350652587
+    second: Animation_collection_char_439
+  - first:
+      213: 7283964378084317723
+    second: Animation_collection_char_440
+  - first:
+      213: -899753247853211251
+    second: Animation_collection_char_441
+  - first:
+      213: -6162648943935041775
+    second: Animation_collection_char_442
+  - first:
+      213: -9067581083931083524
+    second: Animation_collection_char_443
+  - first:
+      213: -451114073223291928
+    second: Animation_collection_char_444
+  - first:
+      213: 6301168589392267462
+    second: Animation_collection_char_445
+  - first:
+      213: 3562944904735533561
+    second: Animation_collection_char_446
+  - first:
+      213: -827422158821240813
+    second: Animation_collection_char_447
+  - first:
+      213: 610708193714848430
+    second: Animation_collection_char_448
+  - first:
+      213: 3796160868601917363
+    second: Animation_collection_char_449
+  - first:
+      213: 1272660258902997927
+    second: Animation_collection_char_450
+  - first:
+      213: -933882764146970301
+    second: Animation_collection_char_451
+  - first:
+      213: 6101766424783538848
+    second: Animation_collection_char_452
+  - first:
+      213: -3613680854160612068
+    second: Animation_collection_char_453
+  - first:
+      213: 5650639856484790211
+    second: Animation_collection_char_454
+  - first:
+      213: 3716677992013498124
+    second: Animation_collection_char_455
+  - first:
+      213: 7526049647727860861
+    second: Animation_collection_char_456
+  - first:
+      213: -3586259965760772264
+    second: Animation_collection_char_457
+  - first:
+      213: 4902949773236342760
+    second: Animation_collection_char_458
+  - first:
+      213: -3272431828201705699
+    second: Animation_collection_char_459
+  - first:
+      213: -1957088709166775975
+    second: Animation_collection_char_460
+  - first:
+      213: -57747807255800122
+    second: Animation_collection_char_461
+  - first:
+      213: -7684302323768694126
+    second: Animation_collection_char_462
+  - first:
+      213: 1446232260464377658
+    second: Animation_collection_char_463
+  - first:
+      213: -1016418423506385445
+    second: Animation_collection_char_464
+  - first:
+      213: -1624973276767641825
+    second: Animation_collection_char_465
+  - first:
+      213: 704649257451210066
+    second: Animation_collection_char_466
+  - first:
+      213: 8823728802000650607
+    second: Animation_collection_char_467
+  - first:
+      213: 4980328092222780216
+    second: Animation_collection_char_468
+  - first:
+      213: -8077573318042252192
+    second: Animation_collection_char_469
+  - first:
+      213: 3474834328273441385
+    second: Animation_collection_char_470
+  - first:
+      213: -5168380113436111531
+    second: Animation_collection_char_471
+  - first:
+      213: 7295375334212419860
+    second: Animation_collection_char_472
+  - first:
+      213: -2579640969058863941
+    second: Animation_collection_char_473
+  - first:
+      213: 3831755409217168717
+    second: Animation_collection_char_474
+  - first:
+      213: -4737684753796074031
+    second: Animation_collection_char_475
+  - first:
+      213: 7387737617399558083
+    second: Animation_collection_char_476
+  - first:
+      213: -2990943690353610043
+    second: Animation_collection_char_477
+  - first:
+      213: -412222528776427720
+    second: Animation_collection_char_478
+  - first:
+      213: -5530459116947840894
+    second: Animation_collection_char_479
+  - first:
+      213: 8735085125888132358
+    second: Animation_collection_char_480
+  - first:
+      213: 5658728177997038528
+    second: Animation_collection_char_481
+  - first:
+      213: -4165792504668735681
+    second: Animation_collection_char_482
+  - first:
+      213: 8342620216323015925
+    second: Animation_collection_char_483
+  - first:
+      213: 6385882124281665783
+    second: Animation_collection_char_484
+  - first:
+      213: 6788597028731862769
+    second: Animation_collection_char_485
+  - first:
+      213: 5137023027835588024
+    second: Animation_collection_char_486
+  - first:
+      213: 7756834317429276128
+    second: Animation_collection_char_487
+  - first:
+      213: 8028237595587184881
+    second: Animation_collection_char_488
+  - first:
+      213: 7368181991049371760
+    second: Animation_collection_char_489
+  - first:
+      213: -5770208864044285891
+    second: Animation_collection_char_490
+  - first:
+      213: 426314290824625318
+    second: Animation_collection_char_491
+  - first:
+      213: 4976303503068083793
+    second: Animation_collection_char_492
+  - first:
+      213: -3704139595081041333
+    second: Animation_collection_char_493
+  - first:
+      213: -1489854998991852830
+    second: Animation_collection_char_494
+  - first:
+      213: -5205638048630669936
+    second: Animation_collection_char_495
+  - first:
+      213: 5270896569937802974
+    second: Animation_collection_char_496
+  - first:
+      213: 4300078897999894174
+    second: Animation_collection_char_497
+  - first:
+      213: 2448887704810387586
+    second: Animation_collection_char_498
+  - first:
+      213: -8479950148573213018
+    second: Animation_collection_char_499
+  - first:
+      213: 2948978182984284228
+    second: Animation_collection_char_500
+  - first:
+      213: 7962366601635499077
+    second: Animation_collection_char_501
+  - first:
+      213: -6789210687081712601
+    second: Animation_collection_char_502
+  - first:
+      213: -4909330088301784336
+    second: Animation_collection_char_503
+  - first:
+      213: 2965437859251864356
+    second: Animation_collection_char_504
+  - first:
+      213: -4585444042639810697
+    second: Animation_collection_char_505
+  - first:
+      213: 4952662564893767853
+    second: Animation_collection_char_506
+  - first:
+      213: -6140019489966989909
+    second: Animation_collection_char_507
+  - first:
+      213: -2279459731781910017
+    second: Animation_collection_char_508
+  - first:
+      213: 7649908270503880440
+    second: Animation_collection_char_509
+  - first:
+      213: -7378822302550909018
+    second: Animation_collection_char_510
+  - first:
+      213: -8586253910701542322
+    second: Animation_collection_char_511
+  - first:
+      213: 8855155227353857706
+    second: Animation_collection_char_512
+  - first:
+      213: -2327908418657995677
+    second: Animation_collection_char_513
+  - first:
+      213: -5862027740335750909
+    second: Animation_collection_char_514
+  - first:
+      213: 1787690251226131732
+    second: Animation_collection_char_515
+  - first:
+      213: -5887614930431430061
+    second: Animation_collection_char_516
+  - first:
+      213: -3094636567246701332
+    second: Animation_collection_char_517
+  - first:
+      213: 1771388339330131542
+    second: Animation_collection_char_518
+  - first:
+      213: -588053465008257072
+    second: Animation_collection_char_519
+  - first:
+      213: 7508103385337962005
+    second: Animation_collection_char_520
+  - first:
+      213: 5943606558859735241
+    second: Animation_collection_char_521
+  - first:
+      213: 1757902417251432164
+    second: Animation_collection_char_522
+  - first:
+      213: 845732532381520026
+    second: Animation_collection_char_523
+  - first:
+      213: 1153933368083471155
+    second: Animation_collection_char_524
+  - first:
+      213: -1126535189112253918
+    second: Animation_collection_char_525
+  - first:
+      213: 7319058513859365342
+    second: Animation_collection_char_526
+  - first:
+      213: -3379926233298576116
+    second: Animation_collection_char_527
+  - first:
+      213: -343061787956687317
+    second: Animation_collection_char_528
+  - first:
+      213: 1933232055014775324
+    second: Animation_collection_char_529
+  - first:
+      213: -1697144166988109495
+    second: Animation_collection_char_530
+  - first:
+      213: -4359427970867347528
+    second: Animation_collection_char_531
+  - first:
+      213: -7811134998032383922
+    second: Animation_collection_char_532
+  - first:
+      213: -5649140124240476642
+    second: Animation_collection_char_533
+  - first:
+      213: 6912849346204767497
+    second: Animation_collection_char_534
+  - first:
+      213: 650694953048272955
+    second: Animation_collection_char_535
+  - first:
+      213: 2614313097166754964
+    second: Animation_collection_char_536
+  - first:
+      213: 1812665239593571348
+    second: Animation_collection_char_537
+  - first:
+      213: -3018822953088147163
+    second: Animation_collection_char_538
+  - first:
+      213: 8774101583550917507
+    second: Animation_collection_char_539
+  - first:
+      213: -6992231425933196357
+    second: Animation_collection_char_540
+  - first:
+      213: 7200039513812981945
+    second: Animation_collection_char_541
+  - first:
+      213: -4584515613468114001
+    second: Animation_collection_char_542
+  - first:
+      213: -7814615213517940371
+    second: Animation_collection_char_543
+  - first:
+      213: 85026112969129018
+    second: Animation_collection_char_544
+  - first:
+      213: -6010414217567200387
+    second: Animation_collection_char_545
+  - first:
+      213: 5329163377377230760
+    second: Animation_collection_char_546
+  - first:
+      213: -7122394777150156140
+    second: Animation_collection_char_547
+  - first:
+      213: -3143216568216983464
+    second: Animation_collection_char_548
+  - first:
+      213: 3555786463814561962
+    second: Animation_collection_char_549
+  - first:
+      213: 1117059581305948543
+    second: Animation_collection_char_550
+  - first:
+      213: 729058337009017349
+    second: Animation_collection_char_551
+  - first:
+      213: 8818897162079644929
+    second: Animation_collection_char_552
+  - first:
+      213: 3147760849802918893
+    second: Animation_collection_char_553
+  - first:
+      213: 7589720153331545445
+    second: Animation_collection_char_554
+  - first:
+      213: 3714646975247255166
+    second: Animation_collection_char_555
+  - first:
+      213: 3796834991079410572
+    second: Animation_collection_char_556
+  - first:
+      213: -4497768848899574598
+    second: Animation_collection_char_557
+  - first:
+      213: -8387241098286680814
+    second: Animation_collection_char_558
+  - first:
+      213: 8471725341767365063
+    second: Animation_collection_char_559
+  - first:
+      213: -3620485661762192832
+    second: Animation_collection_char_560
+  - first:
+      213: 506629855258804920
+    second: Animation_collection_char_561
+  - first:
+      213: 3420094519290447710
+    second: Animation_collection_char_562
+  - first:
+      213: -6997423075288427577
+    second: Animation_collection_char_563
+  - first:
+      213: -6973681483251545365
+    second: Animation_collection_char_564
+  - first:
+      213: -2588728164305444709
+    second: Animation_collection_char_565
+  - first:
+      213: 664097728863744467
+    second: Animation_collection_char_566
+  - first:
+      213: 1638216945627633349
+    second: Animation_collection_char_567
+  - first:
+      213: -2856448699250965823
+    second: Animation_collection_char_568
+  - first:
+      213: 7965459133764616076
+    second: Animation_collection_char_569
+  - first:
+      213: -4361836852973467371
+    second: Animation_collection_char_570
+  - first:
+      213: 2254977153039207861
+    second: Animation_collection_char_571
+  - first:
+      213: -2399701837900365804
+    second: Animation_collection_char_572
+  - first:
+      213: 159242318946672309
+    second: Animation_collection_char_573
+  - first:
+      213: 8572642503122965791
+    second: Animation_collection_char_574
+  - first:
+      213: 5295104451652412208
+    second: Animation_collection_char_575
+  - first:
+      213: -8772117475757448827
+    second: Animation_collection_char_576
+  - first:
+      213: -2095339312499205943
+    second: Animation_collection_char_577
+  - first:
+      213: 2562098914859933588
+    second: Animation_collection_char_578
+  - first:
+      213: 4098245908889887771
+    second: Animation_collection_char_579
+  - first:
+      213: -5119675694427533691
+    second: Animation_collection_char_580
+  - first:
+      213: 5396166621356363528
+    second: Animation_collection_char_581
+  - first:
+      213: -3549804187238373980
+    second: Animation_collection_char_582
+  - first:
+      213: -140691572186915524
+    second: Animation_collection_char_583
+  - first:
+      213: -5614436155730171934
+    second: Animation_collection_char_584
+  - first:
+      213: -4001486190832851427
+    second: Animation_collection_char_585
+  - first:
+      213: -1290858602510472299
+    second: Animation_collection_char_586
+  - first:
+      213: 8921494675936326564
+    second: Animation_collection_char_587
+  - first:
+      213: 9033077859160991888
+    second: Animation_collection_char_588
+  - first:
+      213: 3692098420190702032
+    second: Animation_collection_char_589
+  - first:
+      213: 3057547810567526473
+    second: Animation_collection_char_590
+  - first:
+      213: 3699150204076803516
+    second: Animation_collection_char_591
+  - first:
+      213: 4844488312621873991
+    second: Animation_collection_char_592
+  - first:
+      213: 1423034375379306204
+    second: Animation_collection_char_593
+  - first:
+      213: 6842448659240426049
+    second: Animation_collection_char_594
+  - first:
+      213: 5833101681860690390
+    second: Animation_collection_char_595
+  - first:
+      213: 3982259672826355272
+    second: Animation_collection_char_596
+  - first:
+      213: -4126784338991148669
+    second: Animation_collection_char_597
+  - first:
+      213: -4923241317862721638
+    second: Animation_collection_char_598
+  - first:
+      213: -9018608274557766373
+    second: Animation_collection_char_599
+  - first:
+      213: 8992065616036144027
+    second: Animation_collection_char_600
+  - first:
+      213: 8372824689819934737
+    second: Animation_collection_char_601
+  - first:
+      213: -7729090953721005451
+    second: Animation_collection_char_602
+  - first:
+      213: -8893268578462641578
+    second: Animation_collection_char_603
+  - first:
+      213: 2746074677401656759
+    second: Animation_collection_char_604
+  - first:
+      213: -3228123255933674216
+    second: Animation_collection_char_605
+  - first:
+      213: -8275821457265470720
+    second: Animation_collection_char_606
+  - first:
+      213: 5880825351179803669
+    second: Animation_collection_char_607
+  - first:
+      213: 6977689860616577506
+    second: Animation_collection_char_608
+  - first:
+      213: 1059494277754713832
+    second: Animation_collection_char_609
+  - first:
+      213: 3608132016915925088
+    second: Animation_collection_char_610
+  - first:
+      213: -983416833543312499
+    second: Animation_collection_char_611
+  - first:
+      213: -3207413498160444358
+    second: Animation_collection_char_612
+  - first:
+      213: -821201166450191297
+    second: Animation_collection_char_613
+  - first:
+      213: -4951103729786242754
+    second: Animation_collection_char_614
+  - first:
+      213: 302043514963986793
+    second: Animation_collection_char_615
+  - first:
+      213: 3683778364059832559
+    second: Animation_collection_char_616
+  - first:
+      213: -6984251003282504282
+    second: Animation_collection_char_617
+  - first:
+      213: -3647530742246121440
+    second: Animation_collection_char_618
+  - first:
+      213: 7271562737251127597
+    second: Animation_collection_char_619
+  - first:
+      213: 2757582623648809352
+    second: Animation_collection_char_620
+  - first:
+      213: -3221042723394449250
+    second: Animation_collection_char_621
+  - first:
+      213: 1609537580483526414
+    second: Animation_collection_char_622
+  - first:
+      213: 1728418597528141696
+    second: Animation_collection_char_623
+  - first:
+      213: 6038113660775458479
+    second: Animation_collection_char_624
+  - first:
+      213: 8981690351139946499
+    second: Animation_collection_char_625
+  - first:
+      213: 4571836356873029731
+    second: Animation_collection_char_626
+  - first:
+      213: 8820172682534097317
+    second: Animation_collection_char_627
+  - first:
+      213: -6985750042127651557
+    second: Animation_collection_char_628
+  - first:
+      213: 3530991158919673933
+    second: Animation_collection_char_629
+  - first:
+      213: -3003381911835785893
+    second: Animation_collection_char_630
+  - first:
+      213: -12909363640680553
+    second: Animation_collection_char_631
+  - first:
+      213: -1964864106221865047
+    second: Animation_collection_char_632
+  - first:
+      213: 7778690347052645052
+    second: Animation_collection_char_633
+  - first:
+      213: 8880413653232223724
+    second: Animation_collection_char_634
+  - first:
+      213: -1699636999550731013
+    second: Animation_collection_char_635
+  - first:
+      213: 3520157489791429255
+    second: Animation_collection_char_636
+  - first:
+      213: -8236936463114344187
+    second: Animation_collection_char_637
+  - first:
+      213: 6416754018364011528
+    second: Animation_collection_char_638
+  - first:
+      213: 7516836339121375616
+    second: Animation_collection_char_639
+  - first:
+      213: -1467047045860995813
+    second: Animation_collection_char_640
+  - first:
+      213: -7854379742196118609
+    second: Animation_collection_char_641
+  - first:
+      213: 6213409358335914115
+    second: Animation_collection_char_642
+  - first:
+      213: -3136281203407810598
+    second: Animation_collection_char_643
+  - first:
+      213: 140105938436166330
+    second: Animation_collection_char_644
+  - first:
+      213: 2670884644257554282
+    second: Animation_collection_char_645
+  - first:
+      213: 1434775848394540209
+    second: Animation_collection_char_646
+  - first:
+      213: -5179802085563661380
+    second: Animation_collection_char_647
+  - first:
+      213: -2997284880204454889
+    second: Animation_collection_char_648
+  - first:
+      213: 1996641986769244159
+    second: Animation_collection_char_649
+  - first:
+      213: 5100758006902619851
+    second: Animation_collection_char_650
+  - first:
+      213: -2363783493975559754
+    second: Animation_collection_char_651
+  - first:
+      213: -2219024947752610043
+    second: Animation_collection_char_652
+  - first:
+      213: 9098279006764207511
+    second: Animation_collection_char_653
+  - first:
+      213: -7527182386851239840
+    second: Animation_collection_char_654
+  - first:
+      213: 7624612166283240075
+    second: Animation_collection_char_655
+  - first:
+      213: -5079643965981079095
+    second: Animation_collection_char_656
+  - first:
+      213: -4229845232598978699
+    second: Animation_collection_char_657
+  - first:
+      213: -6686531520743593058
+    second: Animation_collection_char_658
+  - first:
+      213: 4108980950929379292
+    second: Animation_collection_char_659
+  - first:
+      213: -5028988775105489481
+    second: Animation_collection_char_660
+  - first:
+      213: 1395415685998489652
+    second: Animation_collection_char_661
+  - first:
+      213: -4641120631088088010
+    second: Animation_collection_char_662
+  - first:
+      213: -9100863270616021842
+    second: Animation_collection_char_663
+  - first:
+      213: 9190426964320248657
+    second: Animation_collection_char_664
+  - first:
+      213: -7257038240790315491
+    second: Animation_collection_char_665
+  - first:
+      213: 8203693315039025416
+    second: Animation_collection_char_666
+  - first:
+      213: -7663683688484759850
+    second: Animation_collection_char_667
+  - first:
+      213: 1507012456365159774
+    second: Animation_collection_char_668
+  - first:
+      213: 2310570261872772059
+    second: Animation_collection_char_669
+  - first:
+      213: 2339306033345677321
+    second: Animation_collection_char_670
+  - first:
+      213: -5152331894172797871
+    second: Animation_collection_char_671
+  - first:
+      213: -430502725449527229
+    second: Animation_collection_char_672
+  - first:
+      213: -3928494678560187245
+    second: Animation_collection_char_673
+  - first:
+      213: -7096733886945492987
+    second: Animation_collection_char_674
+  - first:
+      213: -3111712318207869797
+    second: Animation_collection_char_675
+  - first:
+      213: 3372066389105402118
+    second: Animation_collection_char_676
+  - first:
+      213: -5590417021330984769
+    second: Animation_collection_char_677
+  - first:
+      213: 3416038185846607403
+    second: Animation_collection_char_678
+  - first:
+      213: -5458221511239035533
+    second: Animation_collection_char_679
+  - first:
+      213: -2534193374211214990
+    second: Animation_collection_char_680
+  - first:
+      213: 8348661086308231431
+    second: Animation_collection_char_681
+  - first:
+      213: 4815767870203370308
+    second: Animation_collection_char_682
+  - first:
+      213: 1748823274661397486
+    second: Animation_collection_char_683
+  - first:
+      213: -6747585020996116375
+    second: Animation_collection_char_684
+  - first:
+      213: -1740844152302482092
+    second: Animation_collection_char_685
+  - first:
+      213: 7092072010740322960
+    second: Animation_collection_char_686
+  - first:
+      213: -7441192218193189215
+    second: Animation_collection_char_687
+  - first:
+      213: 600619735659573872
+    second: Animation_collection_char_688
+  - first:
+      213: 467394400043016263
+    second: Animation_collection_char_689
+  - first:
+      213: 4199062640145834156
+    second: Animation_collection_char_690
+  - first:
+      213: -9181330100399317254
+    second: Animation_collection_char_691
+  - first:
+      213: -206328715341651851
+    second: Animation_collection_char_692
+  - first:
+      213: -6992409957785634434
+    second: Animation_collection_char_693
+  - first:
+      213: -9148112678910252393
+    second: Animation_collection_char_694
+  - first:
+      213: 8701654266077767837
+    second: Animation_collection_char_695
+  - first:
+      213: -8845025084724895693
+    second: Animation_collection_char_696
+  - first:
+      213: 8496602559496425272
+    second: Animation_collection_char_697
+  - first:
+      213: 1913071919634503528
+    second: Animation_collection_char_698
+  - first:
+      213: -5723985522528168424
+    second: Animation_collection_char_699
+  - first:
+      213: -1056633396503750303
+    second: Animation_collection_char_700
+  - first:
+      213: 8925228845514878460
+    second: Animation_collection_char_701
+  - first:
+      213: -8541497713040744740
+    second: Animation_collection_char_702
+  - first:
+      213: 6383511041365247283
+    second: Animation_collection_char_703
+  - first:
+      213: 243590378377394826
+    second: Animation_collection_char_704
+  - first:
+      213: -3857676374216873551
+    second: Animation_collection_char_705
+  - first:
+      213: -3657826401572887292
+    second: Animation_collection_char_706
+  - first:
+      213: 7054036899092064560
+    second: Animation_collection_char_707
+  - first:
+      213: 5716082638283779049
+    second: Animation_collection_char_708
+  - first:
+      213: 2002571625402279847
+    second: Animation_collection_char_709
+  - first:
+      213: 6348618797794728387
+    second: Animation_collection_char_710
+  - first:
+      213: 8100081493794313262
+    second: Animation_collection_char_711
+  - first:
+      213: 4872846482462637066
+    second: Animation_collection_char_712
+  - first:
+      213: 5216689700376828282
+    second: Animation_collection_char_713
+  - first:
+      213: -2326906396693694650
+    second: Animation_collection_char_714
+  - first:
+      213: -6213433645908772520
+    second: Animation_collection_char_715
+  - first:
+      213: 357006757794355883
+    second: Animation_collection_char_716
+  - first:
+      213: 840005184431061945
+    second: Animation_collection_char_717
+  - first:
+      213: -6300090753818689629
+    second: Animation_collection_char_718
+  - first:
+      213: -5188824403854272455
+    second: Animation_collection_char_719
+  - first:
+      213: -5769698853953203038
+    second: Animation_collection_char_720
+  - first:
+      213: -7212655482657502012
+    second: Animation_collection_char_721
+  - first:
+      213: -9194678232818645143
+    second: Animation_collection_char_722
+  - first:
+      213: -106880802954551567
+    second: Animation_collection_char_723
+  - first:
+      213: -8499519303064988632
+    second: Animation_collection_char_724
+  - first:
+      213: 5241450728665023346
+    second: Animation_collection_char_725
+  - first:
+      213: -1622786528857980496
+    second: Animation_collection_char_726
+  - first:
+      213: -3313997064007656574
+    second: Animation_collection_char_727
+  - first:
+      213: -1123491696327026891
+    second: Animation_collection_char_728
+  - first:
+      213: -2021947976092511032
+    second: Animation_collection_char_729
+  - first:
+      213: -5554909297563563383
+    second: Animation_collection_char_730
+  - first:
+      213: 5555832568095878777
+    second: Animation_collection_char_731
+  - first:
+      213: -4304680234761200817
+    second: Animation_collection_char_732
+  - first:
+      213: 4694348214891549062
+    second: Animation_collection_char_733
+  - first:
+      213: -4476947935871011223
+    second: Animation_collection_char_734
+  - first:
+      213: 4162612422916457229
+    second: Animation_collection_char_735
+  - first:
+      213: 2047129558671020599
+    second: Animation_collection_char_736
+  - first:
+      213: -8969220072828705192
+    second: Animation_collection_char_737
+  - first:
+      213: -8736738821381026846
+    second: Animation_collection_char_738
+  - first:
+      213: 8533135497560993973
+    second: Animation_collection_char_739
+  - first:
+      213: 4464923414503712647
+    second: Animation_collection_char_740
+  - first:
+      213: 2906062664517495617
+    second: Animation_collection_char_741
+  - first:
+      213: -1631394934843645963
+    second: Animation_collection_char_742
+  - first:
+      213: -2224970875079084336
+    second: Animation_collection_char_743
+  - first:
+      213: -4490268169204732807
+    second: Animation_collection_char_744
+  - first:
+      213: -5474534581604807830
+    second: Animation_collection_char_745
+  - first:
+      213: 2552029790250937681
+    second: Animation_collection_char_746
+  - first:
+      213: 264536949391791637
+    second: Animation_collection_char_747
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 16384
+    resizeAlgorithm: 0
+    textureFormat: 50
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Animation_collection_char_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 13440
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0b0585033f755fc498486880dd329d3f
+      internalID: 4748057691661210312
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_1
+      rect:
+        serializedVersion: 2
+        x: 960
+        y: 13440
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 721252e5114baa84b8818cfb8486b8bf
+      internalID: -8935551276074089220
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_2
+      rect:
+        serializedVersion: 2
+        x: 1920
+        y: 13440
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4020048e5e710ff439e30bfc54b0044b
+      internalID: -6002684363596387884
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_3
+      rect:
+        serializedVersion: 2
+        x: 2880
+        y: 13440
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 65659968927935b4c9d0ce486e7232f3
+      internalID: -6567422991903243261
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_4
+      rect:
+        serializedVersion: 2
+        x: 3840
+        y: 13440
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 16130145a14f47548b04ec56c8fac3d5
+      internalID: -1264702665187783958
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_5
+      rect:
+        serializedVersion: 2
+        x: 4800
+        y: 13440
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6d57e0bef5c8cdf4fb09d885d75fe29d
+      internalID: 680105774870456254
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_6
+      rect:
+        serializedVersion: 2
+        x: 5760
+        y: 13440
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c2d0dff9d69281542ba960af17907304
+      internalID: -1944427377893322226
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_7
+      rect:
+        serializedVersion: 2
+        x: 6720
+        y: 13440
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: db1b2e802ff589945822d44e3af613bc
+      internalID: -6492787203034829271
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_8
+      rect:
+        serializedVersion: 2
+        x: 7680
+        y: 13440
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d5bf7b637dbf63d49a3e470325b00134
+      internalID: -8573214616279381381
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_9
+      rect:
+        serializedVersion: 2
+        x: 8640
+        y: 13440
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c7b8d076ed47e164ba3e2f6b2fc6ee7b
+      internalID: 3588835079393969254
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_10
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 12480
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a7d3131324bcf854e99e50d171cfe4b3
+      internalID: -7595531484231768426
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_11
+      rect:
+        serializedVersion: 2
+        x: 960
+        y: 12480
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c178155fa67cbe74db9eff8b0ae3c269
+      internalID: 6566566930504162605
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_12
+      rect:
+        serializedVersion: 2
+        x: 1920
+        y: 12480
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 87c9588e4f513b14884724edf2cf802e
+      internalID: -7564641418996838866
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_13
+      rect:
+        serializedVersion: 2
+        x: 2880
+        y: 12480
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b45ef708824058d4abb1cbe9ac9e507d
+      internalID: -6258101843501942561
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_14
+      rect:
+        serializedVersion: 2
+        x: 3840
+        y: 12480
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fc556162532c0884d9dca45274dc53db
+      internalID: -3697551971334059193
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_15
+      rect:
+        serializedVersion: 2
+        x: 4800
+        y: 12480
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4e0e73f935ee9e745a431652d4ba8d53
+      internalID: -3174277651727578663
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_16
+      rect:
+        serializedVersion: 2
+        x: 5760
+        y: 12480
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 446ab9d7cea584e408ef389b47cc3941
+      internalID: 8738973298792776267
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_17
+      rect:
+        serializedVersion: 2
+        x: 6720
+        y: 12480
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fb0698d4f1b9b414185e7736afedeb5d
+      internalID: 3860385697332894035
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_18
+      rect:
+        serializedVersion: 2
+        x: 7680
+        y: 12480
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7db5b143ed007974698f4c985f31323f
+      internalID: -648029334275486183
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_19
+      rect:
+        serializedVersion: 2
+        x: 8640
+        y: 12480
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1a85af6d3fc4cab4085cb49a8ff07a9a
+      internalID: -8855467327034290140
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_20
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 11520
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5afdfe178c32b5447866790a80c6296d
+      internalID: 5419241092798881621
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_21
+      rect:
+        serializedVersion: 2
+        x: 960
+        y: 11520
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3e72519ac6a803548a380498880cc1c1
+      internalID: 1213108741199566470
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_22
+      rect:
+        serializedVersion: 2
+        x: 1920
+        y: 11520
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4edadd35f18b9544aafcf7ef6cf3742a
+      internalID: -8738679388865033163
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_23
+      rect:
+        serializedVersion: 2
+        x: 2880
+        y: 11520
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 27ad2b0c601743941ad8cd28959051f8
+      internalID: 1774041258167580181
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_24
+      rect:
+        serializedVersion: 2
+        x: 3840
+        y: 11520
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 422617737351557449163c5be332ba7d
+      internalID: 6732152591551163614
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_25
+      rect:
+        serializedVersion: 2
+        x: 4800
+        y: 11520
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a2d64c7d8d0fed04e97c3bc11910f61a
+      internalID: -5649512773646214014
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_26
+      rect:
+        serializedVersion: 2
+        x: 5760
+        y: 11520
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2a0f23b70599bf941bb89e7ab28913a8
+      internalID: 7416231080813570375
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_27
+      rect:
+        serializedVersion: 2
+        x: 6720
+        y: 11520
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8089501b09a4e014a979c850080d31c4
+      internalID: 3642681837484557936
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_28
+      rect:
+        serializedVersion: 2
+        x: 7680
+        y: 11520
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 84deee534d5c4d74dad95edc8b24125c
+      internalID: 3166044779292695805
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_29
+      rect:
+        serializedVersion: 2
+        x: 8640
+        y: 11520
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 789a92bdee042074a9e782d714e172a3
+      internalID: 2792452988327091915
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_30
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 10560
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 95d789ac0226b724ea36bb6cb866c137
+      internalID: 7442513034404220331
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_31
+      rect:
+        serializedVersion: 2
+        x: 960
+        y: 10560
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f7d354af42f48394197af5217043eb12
+      internalID: 4983214883889258508
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_32
+      rect:
+        serializedVersion: 2
+        x: 1920
+        y: 10560
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: eaf7f92f255dffe438d690e156a77834
+      internalID: 330150346202648400
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_33
+      rect:
+        serializedVersion: 2
+        x: 2880
+        y: 10560
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8e4a50cbff4cf2a45a0f8e6b36357056
+      internalID: 7592748343462193703
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_34
+      rect:
+        serializedVersion: 2
+        x: 3840
+        y: 10560
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 01b33dff7c0cb6642a14fa44353f4a47
+      internalID: 6029777729044796709
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_35
+      rect:
+        serializedVersion: 2
+        x: 4800
+        y: 10560
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3a0adeb949c797440872d410c6068ccd
+      internalID: 3311678793761818804
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_36
+      rect:
+        serializedVersion: 2
+        x: 5760
+        y: 10560
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 66bbc65fc8fab0645ba313d7dd101726
+      internalID: 7038897309030410258
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_37
+      rect:
+        serializedVersion: 2
+        x: 6720
+        y: 10560
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e64d78dace3145d45b101c64f3b2fd4f
+      internalID: 764230075236501127
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_38
+      rect:
+        serializedVersion: 2
+        x: 7680
+        y: 10560
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 01cf64b39e1e59441ad4d37d245eafb7
+      internalID: 8900452530336950549
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_39
+      rect:
+        serializedVersion: 2
+        x: 8640
+        y: 10560
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cca1ab261cc997645879e6196583b1b0
+      internalID: -4606326654763386035
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_40
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 9600
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 291c2ad7e90981549abb7b89f5a10ead
+      internalID: -9047394481781469500
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_41
+      rect:
+        serializedVersion: 2
+        x: 960
+        y: 9600
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: caedf90797f6f9341ba2c48251edc54f
+      internalID: -3223810570499026249
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_42
+      rect:
+        serializedVersion: 2
+        x: 1920
+        y: 9600
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1a25373d83622dc4a95ad11aebbf0c9a
+      internalID: -5690442669150465799
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_43
+      rect:
+        serializedVersion: 2
+        x: 2880
+        y: 9600
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4c4d385b9968ee044ae550ed99059ff9
+      internalID: -5048951649282936116
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_44
+      rect:
+        serializedVersion: 2
+        x: 3840
+        y: 9600
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e41b279ae8c8ac64dbd87b2c7a83c055
+      internalID: 968997557870754162
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_45
+      rect:
+        serializedVersion: 2
+        x: 4800
+        y: 9600
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6891805742055314fa109cf6a3beafcf
+      internalID: -6678177906876245118
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_46
+      rect:
+        serializedVersion: 2
+        x: 5760
+        y: 9600
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9b22c5b960c0f804db69be30b56bb60a
+      internalID: 6501821424559934179
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_47
+      rect:
+        serializedVersion: 2
+        x: 6720
+        y: 9600
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ec3d65868c824984cbabe1649fd04d8f
+      internalID: -7342296701445238874
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_48
+      rect:
+        serializedVersion: 2
+        x: 7680
+        y: 9600
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 23c6346868774984d999155f3df2b376
+      internalID: 8618397773946912009
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_49
+      rect:
+        serializedVersion: 2
+        x: 8640
+        y: 9600
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 40bb4021a36a40d469618020c2f35f6b
+      internalID: -9103565921536861959
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_50
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 8640
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6d890a67f3054df4f83f9008894bf758
+      internalID: -2924320566453942806
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_51
+      rect:
+        serializedVersion: 2
+        x: 960
+        y: 8640
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c9f7d3c1d9d51fc4e8cf8099604d2a0d
+      internalID: -7054517281021379244
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_52
+      rect:
+        serializedVersion: 2
+        x: 1920
+        y: 8640
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: de78297ffc5e74d4b98b21c2c46cb9e0
+      internalID: -344244226644199929
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_53
+      rect:
+        serializedVersion: 2
+        x: 2880
+        y: 8640
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: eb7baf64971583442afb70e34372baeb
+      internalID: -6603185906144209917
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_54
+      rect:
+        serializedVersion: 2
+        x: 3840
+        y: 8640
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0c2d40f10f1dfd440b2f3714a10fbabb
+      internalID: 3188969522784223954
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_55
+      rect:
+        serializedVersion: 2
+        x: 4800
+        y: 8640
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e63e086a61e7d82419a7e1509d2a6eb1
+      internalID: -13827139038127883
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_56
+      rect:
+        serializedVersion: 2
+        x: 5760
+        y: 8640
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 559f18355a244774496414e662d05969
+      internalID: -8758564689516040730
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_57
+      rect:
+        serializedVersion: 2
+        x: 6720
+        y: 8640
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f21d7d4561fdc2a42890739388cdea4c
+      internalID: 4728965197053503577
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_58
+      rect:
+        serializedVersion: 2
+        x: 7680
+        y: 8640
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c3202be9c36410a449d41c44d34f8850
+      internalID: -5037084311548594225
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_59
+      rect:
+        serializedVersion: 2
+        x: 8640
+        y: 8640
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ec3b177eae0ebc74ab4ba1048d445fc7
+      internalID: 2342635517196679
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_60
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 7680
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 90d91f5702e61ad498ea780c7e051237
+      internalID: -1480909711189903845
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_61
+      rect:
+        serializedVersion: 2
+        x: 960
+        y: 7680
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 51230a6b453c86c41ba86dc849b0756e
+      internalID: -6862194017192942732
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_62
+      rect:
+        serializedVersion: 2
+        x: 1920
+        y: 7680
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cb35f13bff8be234a9e3b0ad6029df9f
+      internalID: -6817376423583539055
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_63
+      rect:
+        serializedVersion: 2
+        x: 2880
+        y: 7680
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 91a8efe612580c147bced0c32511786d
+      internalID: 2079932652540841640
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_64
+      rect:
+        serializedVersion: 2
+        x: 3840
+        y: 7680
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 77bb214ee2722f54a95ec27246e943a8
+      internalID: -5857752117011956953
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_65
+      rect:
+        serializedVersion: 2
+        x: 4800
+        y: 7680
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d87c1d6e98c9fd8449d32b1bd8a1ccf8
+      internalID: 7873721910656153809
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_66
+      rect:
+        serializedVersion: 2
+        x: 5760
+        y: 7680
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f75ac3825f1f67747a876c8dcdd8587b
+      internalID: -2546965782033018807
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_67
+      rect:
+        serializedVersion: 2
+        x: 6720
+        y: 7680
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c24b9f190f4450044998ecffca709e54
+      internalID: -5868497315072248358
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_68
+      rect:
+        serializedVersion: 2
+        x: 7680
+        y: 7680
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: be77e1b4d53907845b45292a82f5f425
+      internalID: -590186049347117179
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_69
+      rect:
+        serializedVersion: 2
+        x: 8640
+        y: 7680
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a703f1d6ceafdf94e9cc54eb3d75a127
+      internalID: -1370266067527309647
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_70
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 6720
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8a3db85829ea0e444958853332c8b84a
+      internalID: 3535279158158981615
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_71
+      rect:
+        serializedVersion: 2
+        x: 960
+        y: 6720
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0310b32e3b654d44a97485bf995a7ac9
+      internalID: -2758571413445553631
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_72
+      rect:
+        serializedVersion: 2
+        x: 1920
+        y: 6720
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bfc81647200880140a907aff3549b31b
+      internalID: -2256834069670750651
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_73
+      rect:
+        serializedVersion: 2
+        x: 2880
+        y: 6720
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d854a5f2405798947ae42a6ea065a2bb
+      internalID: -2665293534607217507
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_74
+      rect:
+        serializedVersion: 2
+        x: 3840
+        y: 6720
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b25b9ef6d0570c8409f191911d61489f
+      internalID: 1572512716102493803
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_75
+      rect:
+        serializedVersion: 2
+        x: 4800
+        y: 6720
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4dac710c08727824586dd29b50f61b86
+      internalID: 7262613028953718068
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_76
+      rect:
+        serializedVersion: 2
+        x: 5760
+        y: 6720
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 29fa369c0cb1db346ab39ea2b24e5788
+      internalID: 4047918319992521384
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_77
+      rect:
+        serializedVersion: 2
+        x: 6720
+        y: 6720
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cd9f07fe150e14b43abf889410b579f4
+      internalID: 5987402120995736478
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_78
+      rect:
+        serializedVersion: 2
+        x: 7680
+        y: 6720
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b8fbcf0c2ff487e4b9f7a7f3077ef2f7
+      internalID: 1454742912818727602
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_79
+      rect:
+        serializedVersion: 2
+        x: 8640
+        y: 6720
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a0797cf0c05cb5b4aad184abdeb27f44
+      internalID: 4993601019288106012
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_80
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 5760
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 08a27fff804fbe2499662ebf6215253e
+      internalID: 4166173727626926693
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_81
+      rect:
+        serializedVersion: 2
+        x: 960
+        y: 5760
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c40a715c9aeff944983a069b44bb9fb1
+      internalID: -5150955517457326991
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_82
+      rect:
+        serializedVersion: 2
+        x: 1920
+        y: 5760
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d9521f042ba375446a20542ad8f7b91e
+      internalID: 6537950513459986898
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_83
+      rect:
+        serializedVersion: 2
+        x: 2880
+        y: 5760
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 928e7b28fcdfec54996cfff3c59fceff
+      internalID: 4780810499876304220
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_84
+      rect:
+        serializedVersion: 2
+        x: 3840
+        y: 5760
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 00acd370816f28847951dd30a9cde0a4
+      internalID: -7073338189043408724
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_85
+      rect:
+        serializedVersion: 2
+        x: 4800
+        y: 5760
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b87294b9426d98c478262b262f83df39
+      internalID: -4583900111215694320
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_86
+      rect:
+        serializedVersion: 2
+        x: 5760
+        y: 5760
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 62fc22676f939bf4ab32307db6313717
+      internalID: 6600866221482555142
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_87
+      rect:
+        serializedVersion: 2
+        x: 6720
+        y: 5760
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 537b33076161cac43a9290a0c5fd4aab
+      internalID: -3650385173463530453
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_88
+      rect:
+        serializedVersion: 2
+        x: 7680
+        y: 5760
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7f00753a9508d22479e43915d52ed766
+      internalID: 4855843842890492218
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_89
+      rect:
+        serializedVersion: 2
+        x: 8640
+        y: 5760
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9e5743cfa9c03844c983c82a71fdca7b
+      internalID: 4251878654973050781
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_90
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 4800
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0f7c37c19d0b9334e88b8dfc5be241eb
+      internalID: -4595811778532956234
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_91
+      rect:
+        serializedVersion: 2
+        x: 960
+        y: 4800
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d04285cfe6f7f29418734d5a08b844bb
+      internalID: -7493876973736011100
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_92
+      rect:
+        serializedVersion: 2
+        x: 1920
+        y: 4800
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e6a43262efe117843b5ac4492211ccac
+      internalID: 3109898237158051793
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_93
+      rect:
+        serializedVersion: 2
+        x: 2880
+        y: 4800
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cde3dbc19e8b9f1448e681704ede0af6
+      internalID: -5838066628757294819
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_94
+      rect:
+        serializedVersion: 2
+        x: 3840
+        y: 4800
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 44a97466dbe9bf2478df449a5e4d3a39
+      internalID: 85780678937315063
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_95
+      rect:
+        serializedVersion: 2
+        x: 4800
+        y: 4800
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bf591ee174f84fa4aaf16b441892db78
+      internalID: 4172668384135245135
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_96
+      rect:
+        serializedVersion: 2
+        x: 5760
+        y: 4800
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 115764c45534aaa49abceb1604a6bcc7
+      internalID: 8567258764140172627
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_97
+      rect:
+        serializedVersion: 2
+        x: 6720
+        y: 4800
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f4df578f2a456374ca45cf339f175d8e
+      internalID: 3980294212054147787
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_98
+      rect:
+        serializedVersion: 2
+        x: 7680
+        y: 4800
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1dc4aadc11f275440afcf69602f09258
+      internalID: 7836538810681654832
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_99
+      rect:
+        serializedVersion: 2
+        x: 8640
+        y: 4800
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0d0ebfeafda243a409c74d159498ef0e
+      internalID: 2965883960112956899
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_100
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 3840
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 08a850cf900be8c449f77e4f37204e35
+      internalID: 86255666371031624
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_101
+      rect:
+        serializedVersion: 2
+        x: 960
+        y: 3840
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 98afb92091d9df34ba1ff7d6d27c7269
+      internalID: -1236164486061204739
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_102
+      rect:
+        serializedVersion: 2
+        x: 1920
+        y: 3840
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 21eafae3f21f01846960155abc2eef68
+      internalID: -1522969337942379261
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_103
+      rect:
+        serializedVersion: 2
+        x: 2880
+        y: 3840
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3a04a7156feac4044b73b61f914bb8ba
+      internalID: 8050069707021942166
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_104
+      rect:
+        serializedVersion: 2
+        x: 3840
+        y: 3840
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e55ee343092e1054b8c0986066e9d81d
+      internalID: 3780740463294432042
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_105
+      rect:
+        serializedVersion: 2
+        x: 4800
+        y: 3840
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4ed0e683afb7a67488e2813de64c635a
+      internalID: 8365490762903689104
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_106
+      rect:
+        serializedVersion: 2
+        x: 5760
+        y: 3840
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ec0d96fef724c8e418ee68cd088391bc
+      internalID: -6916576919902406819
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_107
+      rect:
+        serializedVersion: 2
+        x: 6720
+        y: 3840
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 78438896a936c4e43bb9d5dec871e6cd
+      internalID: 2449407408840250369
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_108
+      rect:
+        serializedVersion: 2
+        x: 7680
+        y: 3840
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 65709969cc9b87149b312f97cf69b553
+      internalID: -8636591162564859028
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_109
+      rect:
+        serializedVersion: 2
+        x: 8640
+        y: 3840
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e0d4356333f09674cb77f20caeed09e3
+      internalID: 1131210184107067731
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_110
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 2880
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 23e3c366e99ff644599cf7d7e029f1d6
+      internalID: -6105360586299415215
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_111
+      rect:
+        serializedVersion: 2
+        x: 960
+        y: 2880
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 73923617a674da6479e619cc15bc7dc3
+      internalID: 98600101798615151
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_112
+      rect:
+        serializedVersion: 2
+        x: 1920
+        y: 2880
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 91dbacc5a5a4a4a47b808d60ea9090d7
+      internalID: 3498761267203696517
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_113
+      rect:
+        serializedVersion: 2
+        x: 2880
+        y: 2880
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 67bdcaca7529ca543bd5e29e71ea2be1
+      internalID: -5348607613322950060
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_114
+      rect:
+        serializedVersion: 2
+        x: 3840
+        y: 2880
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7cbaa8b1ce87a95439c1dd2224869f62
+      internalID: -6271229720372649179
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_115
+      rect:
+        serializedVersion: 2
+        x: 4800
+        y: 2880
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b005fb2baaa27a2438969555bb11d1aa
+      internalID: 2739674763655289048
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_116
+      rect:
+        serializedVersion: 2
+        x: 5760
+        y: 2880
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d1f932ff71a031c4580d2295278f7625
+      internalID: 4143677738167324214
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_117
+      rect:
+        serializedVersion: 2
+        x: 6720
+        y: 2880
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ccc823d8eb9895f4fb32309ee47822ec
+      internalID: 894731633979522912
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_118
+      rect:
+        serializedVersion: 2
+        x: 7680
+        y: 2880
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0cd89d306e6b50141972672e8b3bc3cf
+      internalID: -3457031984565234428
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_119
+      rect:
+        serializedVersion: 2
+        x: 8640
+        y: 2880
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ad5fd0421b7dfc24fa84a5e282072f76
+      internalID: -5411782203935522167
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_120
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1920
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 393d1b51f5dda064bbe5e9cd2d57d736
+      internalID: 8170906558139305808
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_121
+      rect:
+        serializedVersion: 2
+        x: 960
+        y: 1920
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f62ae9296a89cb14dbc00c35a4af87a5
+      internalID: 1001989941837781358
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_122
+      rect:
+        serializedVersion: 2
+        x: 1920
+        y: 1920
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3e4f9e1ecb9c1a14cab4fd7464a481b7
+      internalID: 923082893686417721
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_123
+      rect:
+        serializedVersion: 2
+        x: 2880
+        y: 1920
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3725d4d847472f64b8f0eae8e50eb4a4
+      internalID: -7577146172929839063
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_124
+      rect:
+        serializedVersion: 2
+        x: 3840
+        y: 1920
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9d0326893f6a8b7458dbe67d58f5b5ec
+      internalID: -5454684821672166963
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_125
+      rect:
+        serializedVersion: 2
+        x: 4800
+        y: 1920
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b461295af55b77b4fba6110f9b28d501
+      internalID: -2234186005239546811
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_126
+      rect:
+        serializedVersion: 2
+        x: 5760
+        y: 1920
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c24aba517944fc642822a19d41728a67
+      internalID: -1003090665282518103
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_127
+      rect:
+        serializedVersion: 2
+        x: 6720
+        y: 1920
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b224bc573558ec14791c88597fe6422f
+      internalID: 8125037852093962540
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_128
+      rect:
+        serializedVersion: 2
+        x: 7680
+        y: 1920
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 852957c07a139334db3924355d54e28c
+      internalID: -4766669202252056060
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_129
+      rect:
+        serializedVersion: 2
+        x: 8640
+        y: 1920
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8dc15e988d79bd840acbf3eb4284dcb4
+      internalID: -3184836955154626489
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_130
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 960
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f23db42fd5178ca4e8cf7a6980a474b1
+      internalID: 2413793083066408759
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_131
+      rect:
+        serializedVersion: 2
+        x: 960
+        y: 960
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 85adc2d2ee0736c4c8333d61a83ecca0
+      internalID: -929179902552296780
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_132
+      rect:
+        serializedVersion: 2
+        x: 1920
+        y: 960
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fc7b5b919da61d94eb62224d62b60158
+      internalID: -7068619125146735387
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_133
+      rect:
+        serializedVersion: 2
+        x: 2880
+        y: 960
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f66124e985968e44595a9fc2277aaa61
+      internalID: -979158600102793
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_134
+      rect:
+        serializedVersion: 2
+        x: 3840
+        y: 960
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 41a911b9b80cd834e918408b6853a081
+      internalID: 7865382744955192316
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_135
+      rect:
+        serializedVersion: 2
+        x: 4800
+        y: 960
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1f3a738296b3f4e4ba694fdc9d763f4d
+      internalID: 5963403895267443100
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_136
+      rect:
+        serializedVersion: 2
+        x: 5760
+        y: 960
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 60bc6361c55eea54a8d5408f498a13f0
+      internalID: 3389816461634117448
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_137
+      rect:
+        serializedVersion: 2
+        x: 6720
+        y: 960
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cfe2806aa230f2845b2d78403064eb49
+      internalID: -366810899364185538
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_138
+      rect:
+        serializedVersion: 2
+        x: 7680
+        y: 960
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 796795b511d7ea24f96639bb1ac69b69
+      internalID: -8199607315904730577
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_139
+      rect:
+        serializedVersion: 2
+        x: 8640
+        y: 960
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ee6d7f9b731d65845aa8aef101259002
+      internalID: 2259559780706789148
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_140
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dbf48d93f5335b742a3fe8be57ab4e5d
+      internalID: 9074693549630316964
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_141
+      rect:
+        serializedVersion: 2
+        x: 960
+        y: 0
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2cade4d611ca74441afee7724ff0a148
+      internalID: 4986909829603499157
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_142
+      rect:
+        serializedVersion: 2
+        x: 1920
+        y: 0
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 562bf5513fb1d634e84d6e9d0205223e
+      internalID: -4850533719200838636
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_143
+      rect:
+        serializedVersion: 2
+        x: 2880
+        y: 0
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d0d7d860a307fb649a61e1d6bd2a224a
+      internalID: 7020765186083795259
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Animation_collection_char_144
+      rect:
+        serializedVersion: 2
+        x: 3840
+        y: 0
+        width: 960
+        height: 960
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e8227df20c4bff84fb7787dfc9c8f83e
+      internalID: 6398299528763925554
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Animation_collection_char_0: 4748057691661210312
+      Animation_collection_char_1: -8935551276074089220
+      Animation_collection_char_10: -7595531484231768426
+      Animation_collection_char_100: 86255666371031624
+      Animation_collection_char_101: -1236164486061204739
+      Animation_collection_char_102: -1522969337942379261
+      Animation_collection_char_103: 8050069707021942166
+      Animation_collection_char_104: 3780740463294432042
+      Animation_collection_char_105: 8365490762903689104
+      Animation_collection_char_106: -6916576919902406819
+      Animation_collection_char_107: 2449407408840250369
+      Animation_collection_char_108: -8636591162564859028
+      Animation_collection_char_109: 1131210184107067731
+      Animation_collection_char_11: 6566566930504162605
+      Animation_collection_char_110: -6105360586299415215
+      Animation_collection_char_111: 98600101798615151
+      Animation_collection_char_112: 3498761267203696517
+      Animation_collection_char_113: -5348607613322950060
+      Animation_collection_char_114: -6271229720372649179
+      Animation_collection_char_115: 2739674763655289048
+      Animation_collection_char_116: 4143677738167324214
+      Animation_collection_char_117: 894731633979522912
+      Animation_collection_char_118: -3457031984565234428
+      Animation_collection_char_119: -5411782203935522167
+      Animation_collection_char_12: -7564641418996838866
+      Animation_collection_char_120: 8170906558139305808
+      Animation_collection_char_121: 1001989941837781358
+      Animation_collection_char_122: 923082893686417721
+      Animation_collection_char_123: -7577146172929839063
+      Animation_collection_char_124: -5454684821672166963
+      Animation_collection_char_125: -2234186005239546811
+      Animation_collection_char_126: -1003090665282518103
+      Animation_collection_char_127: 8125037852093962540
+      Animation_collection_char_128: -4766669202252056060
+      Animation_collection_char_129: -3184836955154626489
+      Animation_collection_char_13: -6258101843501942561
+      Animation_collection_char_130: 2413793083066408759
+      Animation_collection_char_131: -929179902552296780
+      Animation_collection_char_132: -7068619125146735387
+      Animation_collection_char_133: -979158600102793
+      Animation_collection_char_134: 7865382744955192316
+      Animation_collection_char_135: 5963403895267443100
+      Animation_collection_char_136: 3389816461634117448
+      Animation_collection_char_137: -366810899364185538
+      Animation_collection_char_138: -8199607315904730577
+      Animation_collection_char_139: 2259559780706789148
+      Animation_collection_char_14: -3697551971334059193
+      Animation_collection_char_140: 9074693549630316964
+      Animation_collection_char_141: 4986909829603499157
+      Animation_collection_char_142: -4850533719200838636
+      Animation_collection_char_143: 7020765186083795259
+      Animation_collection_char_144: 6398299528763925554
+      Animation_collection_char_15: -3174277651727578663
+      Animation_collection_char_16: 8738973298792776267
+      Animation_collection_char_17: 3860385697332894035
+      Animation_collection_char_18: -648029334275486183
+      Animation_collection_char_19: -8855467327034290140
+      Animation_collection_char_2: -6002684363596387884
+      Animation_collection_char_20: 5419241092798881621
+      Animation_collection_char_21: 1213108741199566470
+      Animation_collection_char_22: -8738679388865033163
+      Animation_collection_char_23: 1774041258167580181
+      Animation_collection_char_24: 6732152591551163614
+      Animation_collection_char_25: -5649512773646214014
+      Animation_collection_char_26: 7416231080813570375
+      Animation_collection_char_27: 3642681837484557936
+      Animation_collection_char_28: 3166044779292695805
+      Animation_collection_char_29: 2792452988327091915
+      Animation_collection_char_3: -6567422991903243261
+      Animation_collection_char_30: 7442513034404220331
+      Animation_collection_char_31: 4983214883889258508
+      Animation_collection_char_32: 330150346202648400
+      Animation_collection_char_33: 7592748343462193703
+      Animation_collection_char_34: 6029777729044796709
+      Animation_collection_char_35: 3311678793761818804
+      Animation_collection_char_36: 7038897309030410258
+      Animation_collection_char_37: 764230075236501127
+      Animation_collection_char_38: 8900452530336950549
+      Animation_collection_char_39: -4606326654763386035
+      Animation_collection_char_4: -1264702665187783958
+      Animation_collection_char_40: -9047394481781469500
+      Animation_collection_char_41: -3223810570499026249
+      Animation_collection_char_42: -5690442669150465799
+      Animation_collection_char_43: -5048951649282936116
+      Animation_collection_char_44: 968997557870754162
+      Animation_collection_char_45: -6678177906876245118
+      Animation_collection_char_46: 6501821424559934179
+      Animation_collection_char_47: -7342296701445238874
+      Animation_collection_char_48: 8618397773946912009
+      Animation_collection_char_49: -9103565921536861959
+      Animation_collection_char_5: 680105774870456254
+      Animation_collection_char_50: -2924320566453942806
+      Animation_collection_char_51: -7054517281021379244
+      Animation_collection_char_52: -344244226644199929
+      Animation_collection_char_53: -6603185906144209917
+      Animation_collection_char_54: 3188969522784223954
+      Animation_collection_char_55: -13827139038127883
+      Animation_collection_char_56: -8758564689516040730
+      Animation_collection_char_57: 4728965197053503577
+      Animation_collection_char_58: -5037084311548594225
+      Animation_collection_char_59: 2342635517196679
+      Animation_collection_char_6: -1944427377893322226
+      Animation_collection_char_60: -1480909711189903845
+      Animation_collection_char_61: -6862194017192942732
+      Animation_collection_char_62: -6817376423583539055
+      Animation_collection_char_63: 2079932652540841640
+      Animation_collection_char_64: -5857752117011956953
+      Animation_collection_char_65: 7873721910656153809
+      Animation_collection_char_66: -2546965782033018807
+      Animation_collection_char_67: -5868497315072248358
+      Animation_collection_char_68: -590186049347117179
+      Animation_collection_char_69: -1370266067527309647
+      Animation_collection_char_7: -6492787203034829271
+      Animation_collection_char_70: 3535279158158981615
+      Animation_collection_char_71: -2758571413445553631
+      Animation_collection_char_72: -2256834069670750651
+      Animation_collection_char_73: -2665293534607217507
+      Animation_collection_char_74: 1572512716102493803
+      Animation_collection_char_75: 7262613028953718068
+      Animation_collection_char_76: 4047918319992521384
+      Animation_collection_char_77: 5987402120995736478
+      Animation_collection_char_78: 1454742912818727602
+      Animation_collection_char_79: 4993601019288106012
+      Animation_collection_char_8: -8573214616279381381
+      Animation_collection_char_80: 4166173727626926693
+      Animation_collection_char_81: -5150955517457326991
+      Animation_collection_char_82: 6537950513459986898
+      Animation_collection_char_83: 4780810499876304220
+      Animation_collection_char_84: -7073338189043408724
+      Animation_collection_char_85: -4583900111215694320
+      Animation_collection_char_86: 6600866221482555142
+      Animation_collection_char_87: -3650385173463530453
+      Animation_collection_char_88: 4855843842890492218
+      Animation_collection_char_89: 4251878654973050781
+      Animation_collection_char_9: 3588835079393969254
+      Animation_collection_char_90: -4595811778532956234
+      Animation_collection_char_91: -7493876973736011100
+      Animation_collection_char_92: 3109898237158051793
+      Animation_collection_char_93: -5838066628757294819
+      Animation_collection_char_94: 85780678937315063
+      Animation_collection_char_95: 4172668384135245135
+      Animation_collection_char_96: 8567258764140172627
+      Animation_collection_char_97: 3980294212054147787
+      Animation_collection_char_98: 7836538810681654832
+      Animation_collection_char_99: 2965883960112956899
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

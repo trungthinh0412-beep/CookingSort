@@ -76,6 +76,18 @@ public class BottomTabBar : MonoBehaviour
     private Vector2[] normalLabelPositions;
     private Vector3[] normalLabelScales;
     private MainTabSwipeController swipeController;
+    private RectTransform responsiveRoot;
+    private Canvas responsiveCanvas;
+    private HorizontalLayoutGroup underLayoutGroup;
+    private Vector2 authoredRootSize;
+    private Vector2 authoredButtonPosition;
+    private Vector2 authoredUnderPosition;
+    private Vector2 authoredUnderSize;
+    private float authoredRootBottom;
+    private int authoredUnderBottomPadding;
+    private Rect lastSafeArea;
+    private Vector2Int lastScreenSize;
+    private bool hasResponsiveBaseline;
 
 
     // ============================================================
@@ -87,6 +99,9 @@ public class BottomTabBar : MonoBehaviour
     public int CurrentIndex => currentIndex;
     public int TabCount => tabs.Count;
     public bool IsAnimating => isAnimating;
+    private int DefaultIndex => tabs.Count == 0
+        ? 0
+        : Mathf.Clamp(defaultIndex, 0, tabs.Count - 1);
 
 
     // ============================================================
@@ -95,6 +110,8 @@ public class BottomTabBar : MonoBehaviour
 
     private void Awake()
     {
+        InitializeSafeAreaOffset();
+
         CacheNormalState();
 
         RegisterButtons();
@@ -103,9 +120,127 @@ public class BottomTabBar : MonoBehaviour
         // LUÔN KHỞI ĐỘNG Ở HOME
         // ========================================================
 
-        currentIndex = HOME_INDEX;
+        currentIndex = DefaultIndex;
 
-        ApplyStateInstant(HOME_INDEX);
+        ApplyStateInstant(currentIndex);
+    }
+
+    private void OnEnable()
+    {
+        InitializeSafeAreaOffset();
+        ApplySafeAreaOffset();
+    }
+
+    private void Update()
+    {
+        Rect safeArea = Screen.safeArea;
+        Vector2Int screenSize = new Vector2Int(Screen.width, Screen.height);
+        if (safeArea == lastSafeArea && screenSize == lastScreenSize)
+        {
+            return;
+        }
+
+        ApplySafeAreaOffset();
+    }
+
+    private void InitializeSafeAreaOffset()
+    {
+        if (responsiveRoot == null)
+        {
+            responsiveRoot = transform as RectTransform;
+        }
+
+        if (responsiveCanvas == null)
+        {
+            responsiveCanvas = GetComponentInParent<Canvas>();
+        }
+
+        if (!hasResponsiveBaseline && responsiveRoot != null)
+        {
+            authoredRootSize = responsiveRoot.sizeDelta;
+            authoredRootBottom = responsiveRoot.anchoredPosition.y -
+                                 authoredRootSize.y * responsiveRoot.pivot.y;
+
+            if (buttonLayoutRoot != null)
+            {
+                authoredButtonPosition = buttonLayoutRoot.anchoredPosition;
+            }
+
+            if (underLayoutRoot != null)
+            {
+                authoredUnderPosition = underLayoutRoot.anchoredPosition;
+                authoredUnderSize = underLayoutRoot.sizeDelta;
+                underLayoutGroup = underLayoutRoot.GetComponent<HorizontalLayoutGroup>();
+                if (underLayoutGroup != null)
+                {
+                    authoredUnderBottomPadding = underLayoutGroup.padding.bottom;
+                }
+            }
+
+            hasResponsiveBaseline = true;
+        }
+    }
+
+    private void ApplySafeAreaOffset()
+    {
+        if (!hasResponsiveBaseline || responsiveRoot == null)
+        {
+            return;
+        }
+
+        float canvasHeight = Screen.height;
+        if (responsiveCanvas != null &&
+            responsiveCanvas.transform is RectTransform canvasRect)
+        {
+            canvasHeight = canvasRect.rect.height;
+        }
+
+        float bottomInset = Screen.height > 0
+            ? Mathf.Max(0f, Screen.safeArea.yMin / Screen.height * canvasHeight)
+            : 0f;
+
+        // Keep the blue bar touching the physical bottom edge. Only its
+        // interactive content moves above the home indicator. Expanding the
+        // opaque underlay prevents a blank strip from appearing below it.
+        Vector2 rootSize = authoredRootSize;
+        rootSize.y += bottomInset;
+        responsiveRoot.sizeDelta = rootSize;
+
+        Vector2 rootPosition = responsiveRoot.anchoredPosition;
+        rootPosition.y = authoredRootBottom + rootSize.y * responsiveRoot.pivot.y;
+        responsiveRoot.anchoredPosition = rootPosition;
+
+        if (buttonLayoutRoot != null)
+        {
+            Vector2 buttonPosition = authoredButtonPosition;
+            buttonPosition.y += bottomInset;
+            buttonLayoutRoot.anchoredPosition = buttonPosition;
+        }
+
+        if (underLayoutRoot != null)
+        {
+            Vector2 underSize = authoredUnderSize;
+            underSize.y += bottomInset;
+            underLayoutRoot.sizeDelta = underSize;
+
+            Vector2 underPosition = authoredUnderPosition;
+            underPosition.y += bottomInset * 0.5f;
+            underLayoutRoot.anchoredPosition = underPosition;
+        }
+
+        if (underLayoutGroup != null)
+        {
+            RectOffset padding = underLayoutGroup.padding;
+            underLayoutGroup.padding = new RectOffset(
+                padding.left,
+                padding.right,
+                padding.top,
+                authoredUnderBottomPadding + Mathf.RoundToInt(bottomInset)
+            );
+        }
+
+        lastSafeArea = Screen.safeArea;
+        lastScreenSize = new Vector2Int(Screen.width, Screen.height);
     }
 
 
@@ -129,9 +264,9 @@ public class BottomTabBar : MonoBehaviour
 
         isAnimating = false;
 
-        currentIndex = HOME_INDEX;
+        currentIndex = DefaultIndex;
 
-        ApplyStateInstant(HOME_INDEX);
+        ApplyStateInstant(currentIndex);
     }
 
 
@@ -203,6 +338,8 @@ public class BottomTabBar : MonoBehaviour
 
         if (newIndex == currentIndex)
             return;
+
+        SoundController.Instance.PlayFX(SoundName.MenuBar);
 
         if (swipeController != null)
         {

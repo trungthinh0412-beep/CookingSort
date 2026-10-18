@@ -6,6 +6,8 @@ using UnityEngine;
 public partial class PlayerData
 {
     public const int MaxNameLength = 8;
+    public const string UnsetNameDisplay = "Edit Your Name";
+    private const string LegacyUnsetName = "Default";
 
     [SerializeField] private bool isFirstPlaying = true;
     [SerializeField] private int currentLevelIndex = 1;
@@ -14,7 +16,7 @@ public partial class PlayerData
     [SerializeField] private int currentHeart = 5;
     [SerializeField] private int currentIndexFrame = 0;
     [SerializeField] private int currentIndexAvatar = 0;
-    [SerializeField] private string currentName = "Default";
+    [SerializeField] private string currentName = string.Empty;
     [SerializeField] private string refillHeartPoint = DateTime.UtcNow.ToString(Utility.DateTimeFormat, CultureInfo.InvariantCulture);
     [SerializeField] private string infiniteHeartExpiryPoint = string.Empty;
     [SerializeField] private RewardData savingReward = new RewardData();
@@ -80,8 +82,9 @@ public partial class PlayerData
         get => currentGold;
         set
         {
-            Observer.GoldChanged?.Invoke(value - currentGold);
+            int change = value - currentGold;
             currentGold = value;
+            Observer.GoldChanged?.Invoke(change);
             Observer.GoldChangedDone?.Invoke();
         }
     }
@@ -129,9 +132,22 @@ public partial class PlayerData
 
     public static string NormalizeName(string value)
     {
-        string safeValue = string.IsNullOrWhiteSpace(value)
-            ? "Default"
-            : value.Trim();
+        string safeValue = value?.Trim() ?? string.Empty;
+
+        if (string.IsNullOrWhiteSpace(safeValue) ||
+            string.Equals(
+                safeValue,
+                LegacyUnsetName,
+                StringComparison.OrdinalIgnoreCase
+            ) ||
+            string.Equals(
+                safeValue,
+                UnsetNameDisplay,
+                StringComparison.OrdinalIgnoreCase
+            ))
+        {
+            return string.Empty;
+        }
 
         int[] characterIndexes =
             StringInfo.ParseCombiningCharacters(safeValue);
@@ -145,6 +161,14 @@ public partial class PlayerData
         }
 
         return safeValue;
+    }
+
+    public static string GetDisplayName(string value)
+    {
+        string normalizedName = NormalizeName(value);
+        return string.IsNullOrEmpty(normalizedName)
+            ? UnsetNameDisplay
+            : normalizedName;
     }
 
     public string RefillHeartPoint

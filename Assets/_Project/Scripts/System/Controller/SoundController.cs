@@ -11,6 +11,7 @@ public class SoundController : SingletonDontDestroy<SoundController>
     [SerializeField] private SoundConfig soundConfig;
 
     private List<SoundName> _cacheDelaySounds = new List<SoundName>();
+    private bool _isBackgroundPaused;
     public void Start()
     {
         Setup();
@@ -68,7 +69,7 @@ public class SoundController : SingletonDontDestroy<SoundController>
             var soundClip = soundPlayerData.GetRandomAudioClip();
             if (soundClip)
             {
-                fxAudio.PlayOneShot(soundClip);
+                fxAudio.PlayOneShot(soundClip, soundPlayerData.VolumeScale);
             }
             else
             {
@@ -96,6 +97,16 @@ public class SoundController : SingletonDontDestroy<SoundController>
                     backgroundAudio.clip = clip;
                     backgroundAudio.Play();
                 }
+                else if (_isBackgroundPaused)
+                {
+                    backgroundAudio.UnPause();
+                }
+                else if (!backgroundAudio.isPlaying)
+                {
+                    backgroundAudio.Play();
+                }
+
+                _isBackgroundPaused = false;
             }
             else
             {
@@ -106,6 +117,15 @@ public class SoundController : SingletonDontDestroy<SoundController>
         {
             Debug.LogWarning($"<color=Red>Missing {soundName}</color>");
         }
+    }
+
+    public void PauseBackground()
+    {
+        if (backgroundAudio == null || !backgroundAudio.isPlaying)
+            return;
+
+        backgroundAudio.Pause();
+        _isBackgroundPaused = true;
     }
 
     public void ChangeBackgroundVolume(float volume)

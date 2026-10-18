@@ -9,6 +9,8 @@ public class PopupLeague : Popup
 {
     private const int MaxRankingPlayerCount = 999;
     private const float RankingTabMaskGap = 12f;
+    private const string FriendComingSoonMessage = "Coming Soon";
+    private const float FriendComingSoonFontSize = 76.8f;
 
     [Header("References")]
 
@@ -271,9 +273,105 @@ public class PopupLeague : Popup
             }
 
             friendRankingScrollView.gameObject.SetActive(false);
+            ConfigureFriendComingSoonMessage();
         }
 
         friendRankingReferencesReady = true;
+    }
+
+    private void ConfigureFriendComingSoonMessage()
+    {
+        if (friendRankingScrollView == null)
+            return;
+
+        TextMeshProUGUI styleSource = null;
+        TextMeshProUGUI[] existingTexts =
+            friendRankingScrollView.GetComponentsInChildren<TextMeshProUGUI>(true);
+
+        for (int i = 0; i < existingTexts.Length; i++)
+        {
+            if (existingTexts[i] != null &&
+                existingTexts[i].text.Contains("Connect with Facebook"))
+            {
+                styleSource = existingTexts[i];
+                break;
+            }
+        }
+
+        RectTransform featureImage = null;
+        RectTransform messageRect = null;
+
+        for (int i = friendRankingScrollView.childCount - 1; i >= 0; i--)
+        {
+            Transform child = friendRankingScrollView.GetChild(i);
+
+            if (child.name == "Image_Feature")
+            {
+                featureImage = child as RectTransform;
+                child.gameObject.SetActive(true);
+                continue;
+            }
+
+            if (child.name == "FriendComingSoonText")
+            {
+                messageRect = child as RectTransform;
+                child.gameObject.SetActive(true);
+                continue;
+            }
+
+            child.gameObject.SetActive(false);
+        }
+
+        GameObject messageObject;
+
+        if (messageRect == null)
+        {
+            messageObject = new GameObject(
+                "FriendComingSoonText",
+                typeof(RectTransform),
+                typeof(CanvasRenderer),
+                typeof(TextMeshProUGUI)
+            );
+            messageObject.transform.SetParent(friendRankingScrollView, false);
+            messageRect = messageObject.GetComponent<RectTransform>();
+        }
+        else
+        {
+            messageObject = messageRect.gameObject;
+        }
+
+        messageRect.anchorMin = new Vector2(0.5f, 0.5f);
+        messageRect.anchorMax = new Vector2(0.5f, 0.5f);
+        messageRect.pivot = new Vector2(0.5f, 0.5f);
+        messageRect.anchoredPosition = new Vector2(0f, -190f);
+        messageRect.sizeDelta = new Vector2(900f, 192f);
+
+        if (featureImage != null)
+        {
+            featureImage.anchoredPosition = new Vector2(
+                featureImage.anchoredPosition.x,
+                150f
+            );
+            featureImage.SetAsFirstSibling();
+        }
+
+        messageRect.SetAsLastSibling();
+
+        TextMeshProUGUI friendComingSoonText =
+            messageObject.GetComponent<TextMeshProUGUI>();
+        friendComingSoonText.text = FriendComingSoonMessage;
+        friendComingSoonText.alignment = TextAlignmentOptions.Center;
+        friendComingSoonText.fontSize = FriendComingSoonFontSize;
+        friendComingSoonText.raycastTarget = false;
+
+        if (styleSource != null)
+        {
+            friendComingSoonText.font = styleSource.font;
+            friendComingSoonText.fontSharedMaterial =
+                styleSource.fontSharedMaterial;
+            friendComingSoonText.color = styleSource.color;
+            friendComingSoonText.fontStyle = styleSource.fontStyle;
+        }
     }
 
     private void ApplyTabSpacing()
@@ -1228,7 +1326,7 @@ public class PopupLeague : Popup
             return;
 
         string playerName =
-            PlayerData.NormalizeName(
+            PlayerData.GetDisplayName(
                 Data.PlayerData != null
                     ? Data.PlayerData.CurrentName
                     : "Player"

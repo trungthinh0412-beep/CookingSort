@@ -3,13 +3,15 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// A light pass used only by the New_frame_royal frame in PopupProfile.
+/// A diagonal light pass clipped to the attached UI image.
 /// </summary>
 public sealed class ProfileRoyalFrameShine : MonoBehaviour
 {
     private const float TravelDistance = 170f;
     private const float TravelDuration = 1.5f;
     private const float PauseDuration = 1.2f;
+
+    [SerializeField, Range(0f, 1f)] private float maxAlpha = 0.72f;
 
     private Image shineImage;
     private RectTransform shineRect;
@@ -87,7 +89,7 @@ public sealed class ProfileRoyalFrameShine : MonoBehaviour
                     0f
                 );
 
-                float alpha = Mathf.Sin(progress * Mathf.PI) * 0.72f;
+                float alpha = Mathf.Sin(progress * Mathf.PI) * maxAlpha;
                 Color color = shineImage.color;
                 color.a = alpha;
                 shineImage.color = color;

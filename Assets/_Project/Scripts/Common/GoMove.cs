@@ -67,7 +67,7 @@ public class GoMove : MonoBehaviour
                     Gizmos.DrawSphere(item.transform.position, 0.2f);
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 points = new List<Transform>();
                 throw;

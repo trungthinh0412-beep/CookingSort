@@ -36,6 +36,9 @@ public class CustomSwitchButton : UIBehaviour, IPointerDownHandler, IPointerUpHa
         set => isOn = value;
     }
 
+    public SwitchButtonChangeStyle ChangeStyle => switchButtonChangeStyle;
+    public SwitchButtonPressState PressState => switchButtonPressState;
+
     [Serializable]
     public class ButtonClickedEvent : UnityEvent
     {

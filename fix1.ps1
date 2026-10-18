@@ -1,0 +1,1 @@
+ = Get-Content Assets\_Project\Scripts\System\UI\BotomBarMenu.cs -Raw;  =  -replace '(?s)//case 2:.*?break;', 'case 2: break;';  =  -replace '(?s)//case 3:.*?break;', 'case 3: break;'; [IO.File]::WriteAllText('Assets\_Project\Scripts\System\UI\BotomBarMenu.cs', )

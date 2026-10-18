@@ -36,8 +36,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 245.2, y: -136.7}
-  m_SizeDelta: {x: 445, y: 204}
+  m_AnchoredPosition: {x: 263, y: -113}
+  m_SizeDelta: {x: 520, y: 201}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3739629409740625190
 CanvasRenderer:
@@ -67,7 +67,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: b861ca9627877904c9f1e2ccf78458b6, type: 3}
+  m_Sprite: {fileID: -768553956, guid: 26f8d6eadfae6684886359d007c89ef6, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -429,7 +429,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 2.6414032, y: -2.3516998}
+  m_AnchoredPosition: {x: 2.6414185, y: -2.3516998}
   m_SizeDelta: {x: -52.1378, y: -53.9358}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1336305853378418845
@@ -547,7 +547,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &7369280869976230401
 RectTransform:
   m_ObjectHideFlags: 0
@@ -634,7 +634,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Your progress will be lost.
+  m_text: You will lose all Coins and Gems earned in this level.
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 6d1505f7492dcf542abb09e316e02886, type: 2}
   m_sharedMaterial: {fileID: 6947035531298493992, guid: 6d1505f7492dcf542abb09e316e02886, type: 2}
@@ -817,7 +817,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 500.5, y: -955.0902}
-  m_SizeDelta: {x: 490, y: 283}
+  m_SizeDelta: {x: 537, y: 228}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4720020516275442438
 CanvasRenderer:
@@ -847,7 +847,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 6565ae59f4d40384a84d5d440039ad79, type: 3}
+  m_Sprite: {fileID: 1266320962, guid: 26f8d6eadfae6684886359d007c89ef6, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1764,6 +1764,7 @@ RectTransform:
   m_Children:
   - {fileID: 8898178649127318808}
   - {fileID: 7529689787645073172}
+  - {fileID: 9100000000000000102}
   m_Father: {fileID: 7369280869976230401}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -1821,7 +1822,7 @@ GameObject:
   - component: {fileID: 7358294817766592397}
   - component: {fileID: 240073572932194029}
   m_Layer: 5
-  m_Name: Image
+  m_Name: CoinReward
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1843,8 +1844,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 33, y: 54}
-  m_SizeDelta: {x: 127, y: 170}
+  m_AnchoredPosition: {x: -45, y: 62}
+  m_SizeDelta: {x: 145, y: 95}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7358294817766592397
 CanvasRenderer:
@@ -1874,9 +1875,84 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: c0aea46b89659da42ac5c934658cedad, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 98ee3fb664702204fb4d91e0fefe0884, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!1 &9100000000000000101
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 9100000000000000102}
+  - component: {fileID: 9100000000000000103}
+  - component: {fileID: 9100000000000000104}
+  m_Layer: 5
+  m_Name: GemReward
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &9100000000000000102
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9100000000000000101}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6462081414022419629}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 95, y: 62}
+  m_SizeDelta: {x: 145, y: 95}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &9100000000000000103
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9100000000000000101}
+  m_CullTransparentMesh: 1
+--- !u!114 &9100000000000000104
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9100000000000000101}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: 56ca3827b6bdd4b4b965a9aae109c6f7, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1

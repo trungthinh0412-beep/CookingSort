@@ -18,7 +18,10 @@ public static class ObjectUtils
         List<KeyValuePair<T, string>> l = new List<KeyValuePair<T, string>>();
         if (scene)
         {
-            foreach (T t0 in Object.FindObjectsOfType<T>())
+            foreach (T t0 in Object.FindObjectsByType<T>(
+                         FindObjectsInactive.Exclude,
+                         FindObjectsSortMode.InstanceID
+                     ))
             {
                 l.Add(new KeyValuePair<T, string>(t0, "scene"));
             }

@@ -127,7 +127,7 @@ namespace custom.find.reference
 			foreach (string instID in instSet)
 			{
 				var id = int.Parse(instID);
-				var obj = EditorUtility.InstanceIDToObject(id);
+                var obj = EditorUtility.EntityIdToObject(id);
 				if (obj != null) list.Add(obj);
 			}
 
@@ -239,7 +239,7 @@ namespace custom.find.reference
 			
 			foreach (var instId in instSet)
 			{
-				refs.Add(instId, new CustomSceneRef(0, EditorUtility.InstanceIDToObject(int.Parse(instId))));
+                refs.Add(instId, new CustomSceneRef(0, EditorUtility.EntityIdToObject(int.Parse(instId))));
 			}
 
 			

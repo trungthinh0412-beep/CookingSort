@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using CustomInspector;
 using UnityEngine;
+using UnityEngine.Networking;
 
 public class InternetController : SingletonDontDestroy<InternetController>
 {
@@ -13,6 +14,9 @@ public class InternetController : SingletonDontDestroy<InternetController>
     [ReadOnly] public bool isConnected;
 
     private const float TimeStart = 0f;
+    private const string ConnectivityUrl = "https://www.google.com/generate_204";
+    private const int ConnectivityTimeoutSeconds = 5;
+    private bool _isChecking;
 
     void Start()
     {
@@ -22,6 +26,9 @@ public class InternetController : SingletonDontDestroy<InternetController>
 
     private void CheckInternet()
     {
+        if (_isChecking)
+            return;
+
         StartCoroutine(CheckInternetConnection((isConnect) =>
         {
             isConnected = isConnect;
@@ -43,10 +50,20 @@ public class InternetController : SingletonDontDestroy<InternetController>
         PopupController.Instance.Show<PopupNoInternet>();
     }
 
-    IEnumerator CheckInternetConnection(Action<bool> action)
+    private IEnumerator CheckInternetConnection(Action<bool> action)
     {
-        WWW www = new WWW("https://google.com");
-        yield return www;
-        action(www.error == null);
+        _isChecking = true;
+
+        using (UnityWebRequest request = UnityWebRequest.Head(ConnectivityUrl))
+        {
+            request.timeout = ConnectivityTimeoutSeconds;
+            yield return request.SendWebRequest();
+
+            bool hasConnection = request.result != UnityWebRequest.Result.ConnectionError &&
+                                 request.result != UnityWebRequest.Result.DataProcessingError;
+            action?.Invoke(hasConnection);
+        }
+
+        _isChecking = false;
     }
 }

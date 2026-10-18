@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -37,6 +36,8 @@ public class PopupController : SingletonDontDestroy<PopupController>
     // ============================================================
 
     [Header("Persistent Bottom Bar")]
+    [SerializeField] private BottomTabBar bottomBarPrefab;
+
     [Tooltip("Sorting Order của BottomBar.")]
     [SerializeField] private int bottomBarSortingOrder = 500;
 
@@ -53,11 +54,6 @@ public class PopupController : SingletonDontDestroy<PopupController>
 
     private BottomTabBar bottomBarInstance;
     private MainTabSwipeController mainTabSwipeController;
-    private Coroutine pictureCollectionSlide;
-    private const float PictureCollectionSlideDuration = .22f;
-    private Popup slideFrom, slideTo;
-    private Vector2 slideFromPosition, slideToPosition;
-    public bool IsPicturePageSliding => pictureCollectionSlide != null;
 
     private GameObject _currentHighlightObj = null;
 
@@ -66,6 +62,12 @@ public class PopupController : SingletonDontDestroy<PopupController>
 
     private readonly Dictionary<Type, Popup> _dictionary =
         new Dictionary<Type, Popup>();
+    private readonly Dictionary<Type, Popup> _popupPrefabs =
+        new Dictionary<Type, Popup>();
+    private readonly Dictionary<Type, int> _popupSortingOrders =
+        new Dictionary<Type, int>();
+    private readonly List<Type> _inactivePopupTypes =
+        new List<Type>();
 
     private readonly List<Popup> _savingPopups =
         new List<Popup>();
@@ -129,6 +131,35 @@ public class PopupController : SingletonDontDestroy<PopupController>
     public void Initialize()
     {
         InitializePopups();
+        InitializeBottomBar();
+        InitializeMainTabSwipe();
+    }
+
+    private void InitializeMainTabSwipe()
+    {
+        if (bottomBarInstance == null)
+            return;
+
+        if (mainTabSwipeController == null)
+        {
+            mainTabSwipeController =
+                GetComponent<MainTabSwipeController>();
+        }
+
+        if (mainTabSwipeController == null)
+        {
+            mainTabSwipeController =
+                gameObject.AddComponent<MainTabSwipeController>();
+        }
+
+        mainTabSwipeController.Initialize(
+            this,
+            bottomBarInstance
+        );
+
+        bottomBarInstance.BindSwipeController(
+            mainTabSwipeController
+        );
     }
 
 
@@ -138,10 +169,10 @@ public class PopupController : SingletonDontDestroy<PopupController>
 
     private void InitializePopups()
     {
-        if (popupConfig == null)
+        if (popupConfig == null || popupConfig.popups == null)
         {
             Debug.LogError(
-                "[PopupController] PopupConfig is null."
+                "[PopupController] PopupConfig or its popup list is null."
             );
 
             return;
@@ -156,178 +187,203 @@ public class PopupController : SingletonDontDestroy<PopupController>
             return;
         }
 
-        int index = 0;
+        int sortingOrder = 0;
 
-        popupConfig.popups.ForEach(popup =>
+        for (int i = 0; i < popupConfig.popups.Count; i++)
         {
+            Popup popup = popupConfig.popups[i];
             if (popup == null)
-                return;
+                continue;
 
-            Popup popupInstance =
-                Instantiate(
-                    popup,
-                    canvasTransform
-                );
+            Type popupType = popup.GetType();
 
-            popupInstance.gameObject
-                .SetActive(false);
-
-            popupInstance.Canvas.sortingOrder =
-                index++;
-
-            Type popupType =
-                popupInstance.GetType();
-
-            if (_dictionary.ContainsKey(popupType))
+            // Keep prefab metadata only. Instantiating every popup at startup
+            // retains all of their canvases, scripts and referenced textures
+            // in memory even when the player never opens them.
+            if (!_popupPrefabs.ContainsKey(popupType))
             {
-                Debug.LogWarning(
-                    $"[PopupController] Duplicate popup: {popupType.Name}"
-                );
-
-                Destroy(
-                    popupInstance.gameObject
-                );
-
-                return;
+                _popupPrefabs.Add(popupType, popup);
+                _popupSortingOrders.Add(popupType, sortingOrder);
             }
 
-            _dictionary.Add(
-                popupType,
-                popupInstance
+            sortingOrder++;
+
+            // Initialize can be called again after a popup prefab has been
+            // imported while the editor is already running. Existing runtime
+            // instances remain registered and are not duplicated.
+            if (_dictionary.TryGetValue(popupType, out Popup existing) &&
+                existing != null)
+            {
+                AttachLifecycleNotifier(existing);
+            }
+        }
+    }
+
+    private Popup GetOrCreatePopup(Type popupType)
+    {
+        if (popupType == null)
+            return null;
+
+        // Other singleton Start methods can request a popup before this
+        // controller's Start method has run. Register prefab metadata on
+        // demand so script execution order cannot make that request fail.
+        if (!_dictionary.ContainsKey(popupType) &&
+            !_popupPrefabs.ContainsKey(popupType))
+        {
+            InitializePopups();
+        }
+
+        if (_dictionary.TryGetValue(popupType, out Popup existing) &&
+            existing != null)
+        {
+            return existing;
+        }
+
+        if (!_popupPrefabs.TryGetValue(popupType, out Popup popupPrefab) ||
+            popupPrefab == null || canvasTransform == null)
+        {
+            return null;
+        }
+
+        Popup popupInstance = Instantiate(popupPrefab, canvasTransform);
+        AttachLifecycleNotifier(popupInstance);
+        popupInstance.gameObject.SetActive(false);
+
+        if (popupInstance.Canvas != null &&
+            _popupSortingOrders.TryGetValue(popupType, out int sortingOrder))
+        {
+            popupInstance.Canvas.sortingOrder = sortingOrder;
+        }
+
+        _dictionary[popupType] = popupInstance;
+        return popupInstance;
+    }
+
+    private void AttachLifecycleNotifier(Popup popup)
+    {
+        if (popup == null)
+            return;
+
+        PopupLifecycleNotifier notifier =
+            popup.GetComponent<PopupLifecycleNotifier>();
+
+        if (notifier == null)
+        {
+            notifier =
+                popup.gameObject.AddComponent<PopupLifecycleNotifier>();
+        }
+
+        notifier.Initialize(this, popup);
+    }
+
+
+    // ============================================================
+    // INITIALIZE BOTTOM BAR
+    // ============================================================
+
+    private void InitializeBottomBar()
+    {
+        if (bottomBarPrefab == null)
+        {
+            Debug.LogWarning(
+                "[PopupController] BottomBar Prefab chưa được gán."
             );
-        });
+
+            return;
+        }
+
+        if (canvasTransform == null)
+        {
+            Debug.LogError(
+                "[PopupController] Canvas Transform is null."
+            );
+
+            return;
+        }
+
+        if (bottomBarInstance != null)
+            return;
+
+
+        bottomBarInstance =
+            Instantiate(
+                bottomBarPrefab,
+                canvasTransform
+            );
+
+
+        GameObject bottomBarObject =
+            bottomBarInstance.gameObject;
+
+
+        // ========================================================
+        // CANVAS RIÊNG
+        // ========================================================
+
+        Canvas bottomCanvas =
+            bottomBarObject.GetComponent<Canvas>();
+
+        if (bottomCanvas == null)
+        {
+            bottomCanvas =
+                bottomBarObject.AddComponent<Canvas>();
+        }
+
+        bottomCanvas.overrideSorting = true;
+
+        bottomCanvas.sortingOrder =
+            bottomBarSortingOrder;
+
+
+        // ========================================================
+        // GRAPHIC RAYCASTER
+        // ========================================================
+
+        GraphicRaycaster raycaster =
+            bottomBarObject.GetComponent<GraphicRaycaster>();
+
+        if (raycaster == null)
+        {
+            bottomBarObject
+                .AddComponent<GraphicRaycaster>();
+        }
+
+
+        // ========================================================
+        // ĐƯA VỀ CUỐI HIERARCHY
+        // ========================================================
+
+        bottomBarObject.transform
+            .SetAsLastSibling();
+
+
+        // ========================================================
+        // RESET VISUAL VỀ HOME
+        // ========================================================
+
+        bottomBarInstance.ResetToHome();
+
+
+        // ========================================================
+        // BAN ĐẦU ẨN
+        //
+        // PopupHome khi Show sẽ bật nó lên.
+        // ========================================================
+
+        bottomBarObject.SetActive(false);
+
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        Debug.Log(
+            "[PopupController] Persistent BottomBar created at HOME " +
+            $"| SortingOrder = {bottomBarSortingOrder}"
+        );
+#endif
     }
 
 
     // ============================================================
-    // HOME / PICTURE COLLECTION PAGE SLIDE
-    // ============================================================
-
-    public bool ShowPictureCollectionFromHome()
-    {
-        return TrySlidePictureCollection(Get<PopupHome>(), Get<PictureCollectionPopup>(), false);
-    }
-
-    public bool ReturnHomeFromPictureCollection()
-    {
-        return TrySlidePictureCollection(Get<PictureCollectionPopup>(), Get<PopupHome>(), true);
-    }
-
-    public bool ShowPictureAlbum(PictureAlbumData album)
-    {
-        var target = Get<PictureAlbumPopup>() as PictureAlbumPopup;
-        var collection = LevelController.Instance != null ? LevelController.Instance.PictureCollection : null;
-        if (IsPicturePageSliding || currentPopup != Get<PictureCollectionPopup>() || target == null ||
-            collection == null || album == null || !collection.IsUnlocked(album, Data.PlayerData)) return false;
-        target.SelectAlbum(album);
-        return TrySlidePictureCollection(currentPopup, target, false);
-    }
-
-    public bool ReturnLibraryFromAlbum() => TrySlidePictureCollection(Get<PictureAlbumPopup>(), Get<PictureCollectionPopup>(), true);
-    public bool ReturnAlbumFromPreview() => TrySlidePictureCollection(Get<PicturePreviewPopup>(), Get<PictureAlbumPopup>(), true);
-
-    public bool ShowPicturePreview(PictureAlbumData album, PictureLevelEntry entry)
-    {
-        var target = Get<PicturePreviewPopup>() as PicturePreviewPopup;
-        if (IsPicturePageSliding || currentPopup != Get<PictureAlbumPopup>() || target == null || album == null ||
-            entry == null || !album.levels.Contains(entry) || !Data.PlayerData.HasCompletedPicture(entry.levelId)) return false;
-        target.SelectPicture(album, entry);
-        return TrySlidePictureCollection(currentPopup, target, false);
-    }
-
-    public void ShowPictureReplayReturn(PictureAlbumData album, PictureLevelEntry entry, string message)
-    {
-        if (!(Get<PicturePreviewPopup>() is PicturePreviewPopup target)) return;
-        HideAll();
-        if (Get<PictureAlbumPopup>() is PictureAlbumPopup albumPage) albumPage.SelectAlbum(album);
-        target.SelectPicture(album, entry, message);
-        Show<PicturePreviewPopup>();
-    }
-
-    private void CancelPictureSlide()
-    {
-        if (pictureCollectionSlide == null) return;
-        StopCoroutine(pictureCollectionSlide);
-        pictureCollectionSlide = null;
-        if (slideFrom != null)
-        {
-            ((RectTransform)slideFrom.transform).anchoredPosition = slideFromPosition;
-            slideFrom.CanvasGroup.interactable = slideFrom.CanvasGroup.blocksRaycasts = true;
-            if (slideFrom is PopupHome home) home.SetHomeInputEnabled(true);
-        }
-        if (slideTo != null)
-        {
-            ((RectTransform)slideTo.transform).anchoredPosition = slideToPosition;
-            slideTo.Hide(PopupAnimation.None);
-        }
-        slideFrom = slideTo = null;
-    }
-
-    private bool TrySlidePictureCollection(Popup from, Popup to, bool returningHome)
-    {
-        if (pictureCollectionSlide != null || from == null || to == null ||
-            currentPopup != from || !from.isActiveAndEnabled ||
-            !(from.transform is RectTransform) || !(to.transform is RectTransform) ||
-            from.CanvasGroup == null || to.CanvasGroup == null)
-            return false;
-
-        pictureCollectionSlide = StartCoroutine(SlidePictureCollection(from, to, returningHome));
-        return true;
-    }
-
-    private IEnumerator SlidePictureCollection(Popup from, Popup to, bool returningHome)
-    {
-        var fromRect = (RectTransform)from.transform;
-        var toRect = (RectTransform)to.transform;
-        var fromBase = fromRect.anchoredPosition;
-        var toBase = toRect.anchoredPosition;
-        slideFrom = from; slideTo = to;
-        slideFromPosition = fromBase; slideToPosition = toBase;
-        var canvasRect = canvasTransform as RectTransform;
-        var canvas = canvasRect != null ? canvasRect.GetComponentInParent<Canvas>() : null;
-        float scale = canvas != null ? Mathf.Max(.001f, canvas.rootCanvas.scaleFactor) : 1f;
-        float width = canvasRect != null && canvasRect.rect.width > 0f
-            ? canvasRect.rect.width : Screen.width / scale;
-        float direction = returningHome ? 1f : -1f;
-
-        if (from is PopupHome home) home.SetHomeInputEnabled(false);
-        from.CanvasGroup.interactable = false;
-        from.CanvasGroup.blocksRaycasts = false;
-
-        to.Show(PopupAnimation.None);
-        if (to is PopupHome returningHomePopup) returningHomePopup.SetHomeInputEnabled(false);
-        to.CanvasGroup.interactable = false;
-        to.CanvasGroup.blocksRaycasts = false;
-        if (from.Canvas != null) from.Canvas.sortingOrder = bottomBarSortingOrder - 1;
-        if (to.Canvas != null) to.Canvas.sortingOrder = bottomBarSortingOrder;
-        to.transform.SetAsLastSibling();
-
-        toRect.anchoredPosition = toBase - Vector2.right * width * direction;
-        float elapsed = 0f;
-        while (elapsed < PictureCollectionSlideDuration)
-        {
-            elapsed += Time.unscaledDeltaTime;
-            float progress = Mathf.SmoothStep(0f, 1f,
-                Mathf.Clamp01(elapsed / PictureCollectionSlideDuration));
-            fromRect.anchoredPosition = fromBase + Vector2.right * width * direction * progress;
-            toRect.anchoredPosition = toBase - Vector2.right * width * direction * (1f - progress);
-            yield return null;
-        }
-
-        fromRect.anchoredPosition = fromBase;
-        toRect.anchoredPosition = toBase;
-        from.Hide(PopupAnimation.None);
-        if (to.Canvas != null) to.Canvas.sortingOrder = bottomBarSortingOrder - 1;
-        currentPopup = to;
-        to.CanvasGroup.interactable = true;
-        to.CanvasGroup.blocksRaycasts = true;
-        if (to is PopupHome shownHome) shownHome.SetHomeInputEnabled(true);
-        pictureCollectionSlide = null;
-        slideFrom = slideTo = null;
-    }
-
-    // ============================================================
-    // BOTTOM BAR VISIBILITY (legacy callers)
+    // BOTTOM BAR VISIBILITY
     // ============================================================
 
     public void SetBottomBarVisible(bool visible)
@@ -355,9 +411,9 @@ public class PopupController : SingletonDontDestroy<PopupController>
             go.transform.SetAsLastSibling();
         }
 
-        Debug.Log(
-            $"[PopupController] BottomBar = {(visible ? "ON" : "OFF")}"
-        );
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        Debug.Log($"[PopupController] BottomBar = {(visible ? "ON" : "OFF")}");
+#endif
     }
 
 
@@ -384,9 +440,6 @@ public class PopupController : SingletonDontDestroy<PopupController>
             popupType == typeof(PopupShop) ||
             popupType == typeof(PopupLeague) ||
             popupType == typeof(PopupHome) ||
-            popupType == typeof(PictureCollectionPopup) ||
-            popupType == typeof(PictureAlbumPopup) ||
-            popupType == typeof(PicturePreviewPopup) ||
             popupType == typeof(PopupCollection) ||
             popupType == typeof(PopupKingdom);
     }
@@ -433,6 +486,63 @@ public class PopupController : SingletonDontDestroy<PopupController>
     public int GetCurrentMainTabIndex()
     {
         return GetMainTabIndex(currentPopup);
+    }
+
+    public void NotifyPopupDisabled(Popup disabledPopup)
+    {
+        if (disabledPopup == null || currentPopup != disabledPopup)
+            return;
+
+        currentPopup = FindTopActivePopup(disabledPopup);
+
+        bool hasActiveMainPopup = HasActiveMainBottomBarPopup();
+        SetBottomBarVisible(hasActiveMainPopup);
+
+        int mainTabIndex = GetMainTabIndex(currentPopup);
+
+        if (mainTabIndex >= 0 && bottomBarInstance != null &&
+            (mainTabSwipeController == null ||
+             !mainTabSwipeController.IsTransitioning))
+        {
+            bottomBarInstance.SetSelectedInstant(mainTabIndex);
+        }
+    }
+
+    private Popup FindTopActivePopup(Popup excludedPopup)
+    {
+        Popup topPopup = null;
+        int topSortingOrder = int.MinValue;
+        int topSiblingIndex = int.MinValue;
+
+        foreach (Popup candidate in _dictionary.Values)
+        {
+            if (candidate == null || candidate == excludedPopup ||
+                !candidate.isActiveAndEnabled)
+            {
+                continue;
+            }
+
+            Canvas candidateCanvas = candidate.Canvas;
+            int sortingOrder = candidateCanvas != null
+                ? candidateCanvas.sortingOrder
+                : 0;
+            int siblingIndex = candidate.transform.GetSiblingIndex();
+
+            if (topPopup != null && sortingOrder < topSortingOrder)
+                continue;
+
+            if (topPopup != null && sortingOrder == topSortingOrder &&
+                siblingIndex <= topSiblingIndex)
+            {
+                continue;
+            }
+
+            topPopup = candidate;
+            topSortingOrder = sortingOrder;
+            topSiblingIndex = siblingIndex;
+        }
+
+        return topPopup;
     }
 
     public bool PrepareMainTabTransition(
@@ -640,13 +750,11 @@ public class PopupController : SingletonDontDestroy<PopupController>
         PopupAnimation popupAnimation =
             PopupAnimation.None)
     {
-        CancelPictureSlide();
         Type popupType =
             typeof(T);
 
-        if (!_dictionary.TryGetValue(
-            popupType,
-            out Popup popup))
+        Popup popup = GetOrCreatePopup(popupType);
+        if (popup == null)
         {
             Debug.LogWarning(
                 $"[PopupController] Popup not found: {popupType.Name}"
@@ -767,7 +875,6 @@ public class PopupController : SingletonDontDestroy<PopupController>
 
     public void HideAll()
     {
-        CancelPictureSlide();
         foreach (Popup item
                  in _dictionary.Values)
         {
@@ -782,7 +889,6 @@ public class PopupController : SingletonDontDestroy<PopupController>
 
     public void HideAllExcept<T>() where T : Popup
     {
-        CancelPictureSlide();
         foreach (Popup item
                  in _dictionary.Values)
         {
@@ -795,6 +901,48 @@ public class PopupController : SingletonDontDestroy<PopupController>
         }
     }
 
+    /// <summary>
+    /// Destroys popup hierarchies that are currently hidden. The prefab metadata is
+    /// kept, so the popup is recreated automatically the next time it is requested.
+    /// Intended for an operating system low-memory event, not normal navigation.
+    /// </summary>
+    public int ReleaseInactivePopups()
+    {
+        _inactivePopupTypes.Clear();
+
+        foreach (KeyValuePair<Type, Popup> pair in _dictionary)
+        {
+            Popup popup = pair.Value;
+
+            if (popup == null || !popup.isActiveAndEnabled)
+            {
+                _inactivePopupTypes.Add(pair.Key);
+            }
+        }
+
+        int releasedCount = 0;
+
+        foreach (Type popupType in _inactivePopupTypes)
+        {
+            if (!_dictionary.TryGetValue(popupType, out Popup popup))
+                continue;
+
+            _dictionary.Remove(popupType);
+            _savingPopups.Remove(popup);
+
+            if (currentPopup == popup)
+                currentPopup = null;
+
+            if (popup != null)
+                Destroy(popup.gameObject);
+
+            releasedCount++;
+        }
+
+        _inactivePopupTypes.Clear();
+        return releasedCount;
+    }
+
 
     // ============================================================
     // GET
@@ -802,25 +950,12 @@ public class PopupController : SingletonDontDestroy<PopupController>
 
     public Popup Get<T>()
     {
-        if (_dictionary.TryGetValue(
-            typeof(T),
-            out Popup popup))
-        {
-            return popup;
-        }
-
-        return null;
+        return GetOrCreatePopup(typeof(T));
     }
 
     public Popup Get(Type popupType)
     {
-        if (popupType != null &&
-            _dictionary.TryGetValue(popupType, out Popup popup))
-        {
-            return popup;
-        }
-
-        return null;
+        return GetOrCreatePopup(popupType);
     }
 
 
@@ -1241,5 +1376,24 @@ public class PopupController : SingletonDontDestroy<PopupController>
         RemoveCanvasFromHighlight(
             go
         );
+    }
+}
+
+[DisallowMultipleComponent]
+internal sealed class PopupLifecycleNotifier : MonoBehaviour
+{
+    private PopupController owner;
+    private Popup popup;
+
+    public void Initialize(PopupController popupController, Popup targetPopup)
+    {
+        owner = popupController;
+        popup = targetPopup;
+    }
+
+    private void OnDisable()
+    {
+        if (owner != null && popup != null)
+            owner.NotifyPopupDisabled(popup);
     }
 }

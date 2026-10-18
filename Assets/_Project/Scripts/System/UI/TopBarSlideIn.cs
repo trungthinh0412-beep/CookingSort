@@ -22,6 +22,9 @@ public class TopBarSlideIn : MonoBehaviour
 
     private void Awake()
     {
+        if (!Application.isPlaying)
+            return;
+
         if (target == null)
             target = transform as RectTransform;
 
@@ -33,6 +36,9 @@ public class TopBarSlideIn : MonoBehaviour
 
     private void OnEnable()
     {
+        if (!Application.isPlaying)
+            return;
+
         if (target == null)
             return;
 
@@ -54,6 +60,9 @@ public class TopBarSlideIn : MonoBehaviour
 
     private void OnDisable()
     {
+        if (!Application.isPlaying)
+            return;
+
         TransitionManager.OnTransitionFinished -= HandleTransitionFinished;
 
         if (routine != null)
@@ -64,6 +73,17 @@ public class TopBarSlideIn : MonoBehaviour
 
         waitingForTransition = false;
         hasPlayed = false;
+        RestoreShownPosition();
+    }
+
+    private void RestoreShownPosition()
+    {
+        if (target == null)
+            return;
+
+        Vector2 position = target.anchoredPosition;
+        position.y = shownY;
+        target.anchoredPosition = position;
     }
 
     private void HandleTransitionFinished()

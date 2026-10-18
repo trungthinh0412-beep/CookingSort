@@ -14,5 +14,7 @@ public static partial class Observer
     public static Action CurrentChapterChanged;
     public static Action ProfileChanged;
     public static Action<int> LevelChanged;
+    public static Action CollectionChanged;
+    public static Action<CardAddResult> CollectionCardAdded;
     public static Action<string, Vector3> Notify;
 }

@@ -5,11 +5,19 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Avatar picker used by the profile popup.
+/// Avatar picker opened directly from the Home profile button.
 /// The selected avatar is only previewed until the blue save button is pressed.
 /// </summary>
 public sealed class PopupAvatar : Popup
 {
+    private const int UnlockedAvatarCount = 3;
+    private static readonly Color LockedAvatarTint = new Color(
+        0.45f,
+        0.45f,
+        0.45f,
+        1f
+    );
+
     [Header("Avatar Selection")]
     [SerializeField] private ProfileConfig profileConfig;
     [SerializeField] private RectTransform avatarContent;
@@ -23,6 +31,8 @@ public sealed class PopupAvatar : Popup
     [SerializeField] private GameObject changeNamePanel;
 
     private readonly List<Transform> avatarItems = new List<Transform>();
+    private readonly Dictionary<Graphic, Color> avatarGraphicColors =
+        new Dictionary<Graphic, Color>();
 
     private CustomButton greySaveButtonComponent;
     private CustomButton activeSaveButtonComponent;
@@ -230,7 +240,7 @@ public sealed class PopupAvatar : Popup
         if (Data.PlayerData != null)
             currentName = Data.PlayerData.CurrentName;
 
-        string displayName = PlayerData.NormalizeName(currentName);
+        string displayName = PlayerData.GetDisplayName(currentName);
 
         if (playerNameText != null)
         {
@@ -252,6 +262,9 @@ public sealed class PopupAvatar : Popup
 
         if (nameInputField != null)
         {
+            nameInputField.characterLimit = editing
+                ? PlayerData.MaxNameLength
+                : 0;
             nameInputField.readOnly = !editing;
             nameInputField.interactable = editing;
         }
@@ -430,6 +443,7 @@ public sealed class PopupAvatar : Popup
         }
 
         LayoutRebuilder.ForceRebuildLayoutImmediate(avatarContent);
+        UpdateAvatarAvailabilityVisuals();
     }
 
     private void ResetSelection()
@@ -496,6 +510,53 @@ public sealed class PopupAvatar : Popup
         }
     }
 
+    private void UpdateAvatarAvailabilityVisuals()
+    {
+        for (int i = 0; i < avatarItems.Count; i++)
+        {
+            Transform avatarItem = avatarItems[i];
+            bool isUnlocked = IsAvatarUnlocked(i);
+
+            foreach (Graphic graphic in
+                     avatarItem.GetComponentsInChildren<Graphic>(true))
+            {
+                if (IsPartOfSelectionTick(graphic.transform, avatarItem))
+                    continue;
+
+                if (!avatarGraphicColors.TryGetValue(
+                        graphic,
+                        out Color originalColor))
+                {
+                    originalColor = graphic.color;
+                    avatarGraphicColors.Add(graphic, originalColor);
+                }
+
+                graphic.color = isUnlocked
+                    ? originalColor
+                    : new Color(
+                        originalColor.r * LockedAvatarTint.r,
+                        originalColor.g * LockedAvatarTint.g,
+                        originalColor.b * LockedAvatarTint.b,
+                        originalColor.a
+                    );
+            }
+        }
+    }
+
+    private static bool IsPartOfSelectionTick(
+        Transform target,
+        Transform avatarItem
+    )
+    {
+        Transform tickBox = FindChildByName(avatarItem, "TickeyBox");
+        return tickBox != null && target.IsChildOf(tickBox);
+    }
+
+    private static bool IsAvatarUnlocked(int avatarIndex)
+    {
+        return avatarIndex >= 0 && avatarIndex < UnlockedAvatarCount;
+    }
+
     private void BindSaveButton()
     {
         CacheReferences();
@@ -511,7 +572,9 @@ public sealed class PopupAvatar : Popup
     {
         CacheReferences();
 
-        bool canSave = hasPendingSelection && Data.PlayerData != null;
+        bool canSave = hasPendingSelection &&
+                       Data.PlayerData != null &&
+                       IsAvatarUnlocked(selectedAvatarIndex);
 
         if (greySaveButton != null)
             greySaveButton.SetActive(!canSave);
@@ -536,13 +599,14 @@ public sealed class PopupAvatar : Popup
         if (isEditingName)
             CommitNameEdit(true);
 
-        if (!hasPendingSelection || Data.PlayerData == null)
+        if (!hasPendingSelection || Data.PlayerData == null ||
+            !IsAvatarUnlocked(selectedAvatarIndex))
         {
             UpdateSaveButton();
             return;
         }
 
-        SoundController.Instance.PlayFX(SoundName.ClickButton);
+        PlayMenuBarSound();
 
         Data.PlayerData.CurrentIndexAvatar = selectedAvatarIndex;
         Data.SaveData();
@@ -550,17 +614,32 @@ public sealed class PopupAvatar : Popup
         originalAvatarIndex = selectedAvatarIndex;
         hasPendingSelection = false;
 
-        Hide(PopupAnimation.None);
+        CloseAndReturnHome();
     }
 
     public void OnClose()
     {
-        SoundController.Instance.PlayFX(SoundName.ClickButton);
+        PlayMenuBarSound();
 
         if (isEditingName)
             CommitNameEdit(true);
 
+        CloseAndReturnHome();
+    }
+
+    private void CloseAndReturnHome()
+    {
         Hide(PopupAnimation.None);
+
+        if (PopupController.Instance != null)
+        {
+            PopupController.Instance.Show<PopupHome>(PopupAnimation.None);
+        }
+    }
+
+    private static void PlayMenuBarSound()
+    {
+        SoundController.Instance?.PlayFX(SoundName.MenuBar);
     }
 
     private int GetAvatarCount()

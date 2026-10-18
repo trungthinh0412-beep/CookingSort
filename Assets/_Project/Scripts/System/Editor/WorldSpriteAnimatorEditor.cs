@@ -73,6 +73,17 @@ public class WorldSpriteAnimatorEditor : Editor
         DrawDefaultAnimationPopup();
         EditorGUILayout.PropertyField(_ignoreTimeScale);
 
+        EditorGUILayout.Space(6f);
+        EditorGUILayout.LabelField("Idle Variation", EditorStyles.boldLabel);
+        SerializedProperty idleVariation = serializedObject.FindProperty("enableIdleVariation");
+        EditorGUILayout.PropertyField(idleVariation);
+        if (idleVariation.boolValue || idleVariation.hasMultipleDifferentValues)
+        {
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("primaryIdleAnimation"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("alternateIdleAnimation"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("idleVariationChance"));
+        }
+
         serializedObject.ApplyModifiedProperties();
 
         if (Application.isPlaying && targets.Length == 1)

@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d08f5515cd1b07b4aae64bd95725f05d, type: 3}
+  m_Name: Insect
+  m_EditorClassIdentifier: 
+  id: collection_insect
+  displayName: Insect
+  coverSprite: {fileID: 7130780240808642480, guid: a549ce6c8edd4b5468b51d3de921762f, type: 3}
+  buttonSprite: {fileID: 21300000, guid: 5ee92dea87d98b045b17f54fa7bf0167, type: 3}
+  unlockLevel: 39
+  cards:
+  - id: collection_insect_card_01
+    displayName: Insect 01
+    icon: {fileID: 0}
+    unlockLevel: 1
+  - id: collection_insect_card_02
+    displayName: Insect 02
+    icon: {fileID: 0}
+    unlockLevel: 1
+  - id: collection_insect_card_03
+    displayName: Insect 03
+    icon: {fileID: 0}
+    unlockLevel: 1
+  - id: collection_insect_card_04
+    displayName: Insect 04
+    icon: {fileID: 0}
+    unlockLevel: 1
+  - id: collection_insect_card_05
+    displayName: Insect 05
+    icon: {fileID: 0}
+    unlockLevel: 1
+  - id: collection_insect_card_06
+    displayName: Insect 06
+    icon: {fileID: 0}
+    unlockLevel: 1
+  - id: collection_insect_card_07
+    displayName: Insect 07
+    icon: {fileID: 0}
+    unlockLevel: 1
+  - id: collection_insect_card_08
+    displayName: Insect 08
+    icon: {fileID: 0}
+    unlockLevel: 1
+  - id: collection_insect_card_09
+    displayName: Insect 09
+    icon: {fileID: 0}
+    unlockLevel: 1
+  rewardData:
+    totalGold: 0
+    totalStar: 0

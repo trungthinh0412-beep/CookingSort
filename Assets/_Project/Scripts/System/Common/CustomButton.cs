@@ -98,7 +98,12 @@ public class CustomButton : UIBehaviour, IPointerDownHandler, IPointerUpHandler,
         set => disablePressContent = value;
     }
 
-    private Image targetImage => GetComponent<Image>();
+    private Image _targetImage;
+    private List<MaskableGraphic> _maskableGraphics;
+
+    private Image targetImage => _targetImage ??= GetComponent<Image>();
+    private List<MaskableGraphic> MaskableGraphic =>
+        _maskableGraphics ??= GetComponentsInChildren<MaskableGraphic>(true).ToList();
     private bool isHolding;
     private float holdTimer;
     private Vector3 _currentScale;
@@ -118,8 +123,8 @@ public class CustomButton : UIBehaviour, IPointerDownHandler, IPointerUpHandler,
     public ButtonHoldEvent Hold => m_OnHold;
     public ButtonMouseUpEvent MouseUp => m_OnMouseUp;
     public ButtonPointerDownEvent onPointerDown => m_OnPointerDown;  // ✅ NEW
-
-    private List<MaskableGraphic> MaskableGraphic => GetComponentsInChildren<MaskableGraphic>(true).ToList();
+    public ButtonPressState PressState => buttonPressState;
+    public float HoldDuration => holdDuration;
 
 #if UNITY_EDITOR
     protected override void OnValidate()
@@ -132,8 +137,14 @@ public class CustomButton : UIBehaviour, IPointerDownHandler, IPointerUpHandler,
     protected override void Awake()
     {
         base.Awake();
+        _targetImage = GetComponent<Image>();
         _currentScale = transform.localScale;
         _rectTransform = GetComponent<RectTransform>();
+    }
+
+    private void OnTransformChildrenChanged()
+    {
+        _maskableGraphics = null;
     }
 
     private void Press()

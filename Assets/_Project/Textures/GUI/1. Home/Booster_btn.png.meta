@@ -117,7 +117,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 576
+        y: 864
         width: 288
         height: 288
       alignment: 0
@@ -139,7 +139,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 288
+        y: 576
         width: 288
         height: 288
       alignment: 0
@@ -161,7 +161,7 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 0
+        y: 288
         width: 288
         height: 288
       alignment: 0
@@ -174,6 +174,28 @@ TextureImporter:
       bones: []
       spriteID: a00d7f5af740b54479819518ddfa486f
       internalID: -1318183509
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Booster_btn_3
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 288
+        height: 288
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 568e25c01959afc48848031a9b436c23
+      internalID: 1724158753
       vertices: []
       indices: 
       edges: []
@@ -197,6 +219,7 @@ TextureImporter:
       Booster_btn_0: 6317657357396553048
       Booster_btn_1: -1428599254
       Booster_btn_2: -1318183509
+      Booster_btn_3: 1724158753
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

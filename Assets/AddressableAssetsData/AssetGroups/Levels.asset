@@ -14,17 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
   m_GroupName: Levels
   m_GUID: 44f06ca8eba7f0d4287f4928b2ed7705
-  m_SerializeEntries:
-  - m_GUID: 5bd87b1b2bcf5ec45888c0da190fe798
-    m_Address: Level 2
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 6b4149c9da4299e43a2c0cb0e069af5f
-    m_Address: Level 1
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
+  m_SerializeEntries: []
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: b0a0bde5cc649464a9d4f3445b3c33ae, type: 2}
   m_SchemaSet:

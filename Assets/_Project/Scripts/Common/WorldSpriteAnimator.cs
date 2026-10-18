@@ -17,6 +17,9 @@ public sealed class WorldSpriteAnimation
     [Tooltip("Bat de chay tu dau den cuoi roi chay nguoc ve dau.")]
     [SerializeField] private bool pingPong;
 
+    [Tooltip("Only enable for clips authored with redundant first and last frames.")]
+    [SerializeField] private bool skipBoundaryFrames = true;
+
     [Tooltip("Thoi gian doi sau khi hoan thanh mot vong truoc khi chay lai.")]
     [SerializeField, Min(0f)] private float loopDelay;
 
@@ -25,6 +28,7 @@ public sealed class WorldSpriteAnimation
     public float Fps => fps;
     public bool Loop => loop;
     public bool PingPong => pingPong;
+    public bool SkipBoundaryFrames => skipBoundaryFrames;
     public float LoopDelay => loopDelay;
     public bool HasFrames => frames != null && frames.Length > 0;
 
@@ -85,6 +89,13 @@ public class WorldSpriteAnimator : MonoBehaviour
 
     [Tooltip("Bat neu animation van phai chay khi Time.timeScale = 0.")]
     [SerializeField] private bool ignoreTimeScale;
+
+    [Header("Idle Variation")]
+    [SerializeField] private bool enableIdleVariation;
+    [SerializeField] private string primaryIdleAnimation = "Idle_1";
+    [SerializeField] private string alternateIdleAnimation = "Idle_2";
+    [Tooltip("Chance to play the alternate idle after a complete primary idle cycle.")]
+    [SerializeField, Range(0f, 1f)] private float idleVariationChance = 0.2f;
 
     // Du lieu cua phien ban cu. Tu dong chuyen vao Animation Library mot lan.
     [FormerlySerializedAs("frames")]
@@ -199,6 +210,10 @@ public class WorldSpriteAnimator : MonoBehaviour
         {
             _elapsedTime -= frameDuration;
             AdvanceFrame(animation);
+            animation = CurrentAnimation;
+            if (animation == null || !animation.HasFrames)
+                break;
+            frameDuration = 1f / Mathf.Max(0.01f, animation.Fps);
         }
     }
 
@@ -240,6 +255,8 @@ public class WorldSpriteAnimator : MonoBehaviour
 
         _currentAnimationIndex = animationIndex;
         _currentFrame = GetLoopStartFrame(animations[animationIndex]);
+        if (animations[animationIndex] != null && !animations[animationIndex].SkipBoundaryFrames)
+            _currentFrame = 0;
         _direction = 1;
         _elapsedTime = 0f;
         _isWaitingForLoop = false;
@@ -393,6 +410,9 @@ public class WorldSpriteAnimator : MonoBehaviour
 
         if (animationFrames.Length == 1)
         {
+            if (TryPlayIdleVariation(animation))
+                return;
+
             if (!animation.Loop)
             {
                 _isPlaying = false;
@@ -408,7 +428,7 @@ public class WorldSpriteAnimator : MonoBehaviour
         // frame at loop boundaries so the animation does not visibly pause or
         // jump when it wraps around.
         bool skipLoopBoundaryFrames =
-            animation.Loop && animationFrames.Length > 2;
+            animation.Loop && animation.SkipBoundaryFrames && animationFrames.Length > 2;
 
         if (skipLoopBoundaryFrames && !animation.PingPong &&
             nextFrame == animationFrames.Length - 1)
@@ -448,6 +468,9 @@ public class WorldSpriteAnimator : MonoBehaviour
             }
             else
             {
+                if (TryPlayIdleVariation(animation))
+                    return;
+
                 _currentFrame = animationFrames.Length - 1;
                 _isPlaying = false;
                 ShowCurrentFrame();
@@ -471,6 +494,9 @@ public class WorldSpriteAnimator : MonoBehaviour
         }
         else
         {
+            if (TryPlayIdleVariation(animation))
+                return;
+
             _currentFrame = 0;
             _isPlaying = false;
         }
@@ -480,11 +506,11 @@ public class WorldSpriteAnimator : MonoBehaviour
 
     private void BeginLoopRestart(WorldSpriteAnimation animation)
     {
-        _elapsedTime = 0f;
         _direction = 1;
 
         if (animation.LoopDelay > 0f)
         {
+            _elapsedTime = 0f;
             _isWaitingForLoop = true;
             _loopDelayRemaining = animation.LoopDelay;
             return;
@@ -492,6 +518,9 @@ public class WorldSpriteAnimator : MonoBehaviour
 
         // Ping Pong da hien frame 0 khi quay nguoc, nen tiep tuc tu frame 1
         // de khong lap frame dau hai lan khi Loop Delay = 0.
+        if (TryPlayIdleVariation(animation))
+            return;
+
         _currentFrame = GetLoopStartFrame(animation);
         ShowCurrentFrame();
     }
@@ -503,12 +532,44 @@ public class WorldSpriteAnimator : MonoBehaviour
         _loopDelayRemaining = 0f;
         _elapsedTime = 0f;
         _direction = 1;
+        if (TryPlayIdleVariation(animation))
+            return;
+
         _currentFrame = GetLoopStartFrame(animation);
         ShowCurrentFrame();
     }
 
+    private bool TryPlayIdleVariation(WorldSpriteAnimation completedAnimation)
+    {
+        if (!enableIdleVariation || completedAnimation == null ||
+            primaryIdleAnimation == alternateIdleAnimation)
+            return false;
+
+        bool returningToPrimary = completedAnimation.Name == alternateIdleAnimation;
+        if (!returningToPrimary && completedAnimation.Name != primaryIdleAnimation)
+            return false;
+
+        int nextIndex = FindAnimationIndex(returningToPrimary ? primaryIdleAnimation : alternateIdleAnimation);
+        if (nextIndex < 0 || !animations[nextIndex].HasFrames)
+            return false;
+
+        if (!returningToPrimary && UnityEngine.Random.value >= idleVariationChance)
+            return false;
+
+        float remainingTime = _elapsedTime;
+        PlayAnimation(nextIndex);
+        _elapsedTime = remainingTime;
+        // A different clip must start at its first frame, even when marked Loop.
+        _currentFrame = 0;
+        ShowCurrentFrame();
+        return true;
+    }
+
     private static int GetLoopStartFrame(WorldSpriteAnimation animation)
     {
+        if (animation != null && !animation.SkipBoundaryFrames)
+            return animation.PingPong && animation.Frames != null && animation.Frames.Length > 1 ? 1 : 0;
+
         return animation != null && animation.Loop &&
                animation.Frames != null && animation.Frames.Length > 2
             ? 1

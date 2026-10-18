@@ -4,6 +4,7 @@ using UnityEngine;
 public class PlayerDataController : SingletonDontDestroy<PlayerDataController>
 {
     [ReadOnly] [SerializeField] private PlayerData playerDataReader;
+    [SerializeField] private CollectionConfig collectionConfig;
 
     private static bool _isFetchPlayerDataSucceed;
     private bool _cacheFirstPlaying;
@@ -24,6 +25,7 @@ public class PlayerDataController : SingletonDontDestroy<PlayerDataController>
     {
         base.Awake();
         playerDataReader = Data.PlayerData;
+        CollectionManager.Initialize(collectionConfig);
     }
 
     void OnApplicationFocus(bool hasFocus)
