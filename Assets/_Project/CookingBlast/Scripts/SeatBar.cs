@@ -153,6 +153,7 @@ private IEnumerator LeaveRoutine(CustomerView customer)
             // The slot is free immediately. Animate the departing customer in world
             // space so a newly seated customer cannot pull this one back into place.
             _departingCustomers.Add(customer);
+            customer.StopServePulse();
             customer.transform.SetParent(transform, true);
             customer.SetSortingOrder(70);
 

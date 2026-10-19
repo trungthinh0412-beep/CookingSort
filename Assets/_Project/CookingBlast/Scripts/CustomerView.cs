@@ -18,6 +18,7 @@ namespace CookingSort2D
         private bool _seated;
         
         private Coroutine _pulseRoutine;
+        private Vector3 _seatedBaseScale = Vector3.one;
 private Coroutine _moveRoutine;
 
         public FoodColor ColorType { get; private set; }
@@ -59,8 +60,7 @@ private Coroutine _moveRoutine;
 public void SetSeated()
         {
             AutoBind();
-            // A queued customer may still be sliding forward when the player taps rapidly.
-            // Stop that queue-local tween before the object changes parent to a seat.
+            // Stop queue movement before changing the customer's parent to a seat.
             if (_moveRoutine != null)
             {
                 StopCoroutine(_moveRoutine);
@@ -72,31 +72,40 @@ public void SetSeated()
             if (body != null) body.color = CookingSortPalette.Get(ColorType);
             if (hitbox != null) hitbox.enabled = false;
             if (countBadge != null) countBadge.gameObject.SetActive(true);
-            transform.localScale = Vector3.one;
+
+            // Every serving pulse must return to this fixed seat scale.
+            _seatedBaseScale = Vector3.one;
+            StopServePulse();
             RefreshCount();
         }
 
 public bool ServeOne()
         {
             if (Remaining <= 0) return true;
+            // Never start a new pulse using the enlarged frame of an old pulse.
+            StopServePulse();
             Remaining--;
             RefreshCount();
-            if (_pulseRoutine != null) StopCoroutine(_pulseRoutine);
             _pulseRoutine = StartCoroutine(PulseRoutine());
             return Remaining <= 0;
         }
 
 public void PrepareForMerge()
         {
-            // A tile's serving pulse may still be running when its flight ends.
-            // Hand scale control entirely to the jelly merge animation.
+            // The jelly merge owns scale until its animation finishes.
+            StopServePulse();
+        }
+
+public void StopServePulse()
+        {
             if (_pulseRoutine != null)
             {
                 StopCoroutine(_pulseRoutine);
                 _pulseRoutine = null;
             }
-            transform.localScale = Vector3.one;
+            if (_seated) transform.localScale = _seatedBaseScale;
         }
+
 
 
 public void AnimateTo(Vector3 localPosition, float duration = 0.16f)
@@ -167,7 +176,7 @@ private IEnumerator MoveRoutine(Vector3 target, float duration)
 
 private IEnumerator PulseRoutine()
         {
-            Vector3 baseScale = transform.localScale;
+            Vector3 baseScale = _seatedBaseScale;
             float duration = 0.12f;
             float elapsed = 0f;
             while (elapsed < duration)
