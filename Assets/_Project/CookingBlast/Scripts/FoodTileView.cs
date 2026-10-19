@@ -61,7 +61,7 @@ private IEnumerator ConsumeRoutine(Transform target, Action onComplete)
             Vector3 start = transform.position;
             Vector3 end = target.position;
             Vector3 startScale = transform.localScale;
-            const float duration = 0.18f;
+            const float duration = 0.22f;
             float elapsed = 0f;
 
             Vector3 direction = end - start;
@@ -76,12 +76,12 @@ private IEnumerator ConsumeRoutine(Transform target, Action onComplete)
                 float eased = 1f - Mathf.Pow(1f - t, 3f);
                 Vector3 curve = side * sideSign * Mathf.Sin(t * Mathf.PI) * 0.12f;
                 transform.position = Vector3.LerpUnclamped(start, end, eased) + curve;
-                transform.localScale = Vector3.Lerp(startScale, Vector3.one * 0.35f, eased);
+                transform.localScale = Vector3.Lerp(startScale, Vector3.one * 0.5f, eased);
                 yield return null;
             }
 
             transform.position = end;
-            transform.localScale = Vector3.zero;
+            transform.localScale = Vector3.one * 0.5f;
             SetSortingOrder(oldOrder);
             onComplete?.Invoke();
         }

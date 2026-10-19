@@ -11,6 +11,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_Project/Scenes/GameplayScene.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
+  - enabled: 1
+    path: Assets/_Project/CookingBlast/Scenes/CookingBlastGameplay.unity
+    guid: f64b4930cc60bf048b9f993ad4ed0ddf
   m_configObjects:
     com.unity.addressableassets: {fileID: 11400000, guid: 982013efb1fd6ee44b60b95abe225999, type: 2}
   m_UseUCBPForAssetBundles: 0

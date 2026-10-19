@@ -142,6 +142,10 @@ public void ContinueAfterWin()
         {
             if (_gameEnded || board == null || seatBar == null) return;
 
+            // Airborne tiles have left the board but are not served yet.
+            // Wait for the scan pipeline and any merge before deciding win/fail.
+            if (board.IsServing || seatBar.IsMerging || seatBar.HasDepartingCustomers) return;
+
             if (board.IsEmpty)
             {
                 _gameEnded = true;

@@ -16,7 +16,9 @@ namespace CookingSort2D
         private int _laneIndex = -1;
         private bool _front;
         private bool _seated;
-        private Coroutine _moveRoutine;
+        
+        private Coroutine _pulseRoutine;
+private Coroutine _moveRoutine;
 
         public FoodColor ColorType { get; private set; }
         public int Remaining { get; private set; }
@@ -74,14 +76,28 @@ public void SetSeated()
             RefreshCount();
         }
 
-        public bool ServeOne()
+public bool ServeOne()
         {
             if (Remaining <= 0) return true;
             Remaining--;
             RefreshCount();
-            StartCoroutine(PulseRoutine());
+            if (_pulseRoutine != null) StopCoroutine(_pulseRoutine);
+            _pulseRoutine = StartCoroutine(PulseRoutine());
             return Remaining <= 0;
         }
+
+public void PrepareForMerge()
+        {
+            // A tile's serving pulse may still be running when its flight ends.
+            // Hand scale control entirely to the jelly merge animation.
+            if (_pulseRoutine != null)
+            {
+                StopCoroutine(_pulseRoutine);
+                _pulseRoutine = null;
+            }
+            transform.localScale = Vector3.one;
+        }
+
 
 public void AnimateTo(Vector3 localPosition, float duration = 0.16f)
         {
@@ -149,7 +165,7 @@ private IEnumerator MoveRoutine(Vector3 target, float duration)
             _moveRoutine = null;
         }
 
-        private IEnumerator PulseRoutine()
+private IEnumerator PulseRoutine()
         {
             Vector3 baseScale = transform.localScale;
             float duration = 0.12f;
@@ -163,6 +179,7 @@ private IEnumerator MoveRoutine(Vector3 target, float duration)
                 yield return null;
             }
             transform.localScale = baseScale;
+            _pulseRoutine = null;
         }
 
         private void AutoBind()

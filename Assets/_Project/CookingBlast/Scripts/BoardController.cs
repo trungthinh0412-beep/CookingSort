@@ -12,12 +12,23 @@ namespace CookingSort2D
         [SerializeField] private float gap = 0.04f;
 [SerializeField] private float serveInterval = 0.025f;
         [SerializeField, Min(0.01f)] private float dropDuration = 0.13f;
+        [Header("Tile scanning")]
+        [Tooltip("Starting delay between tile launches for each customer")]
+        [SerializeField, Min(0f)] private float scanInterval = 0.18f;
+        [Tooltip("Fastest interval for a customer after building combo")]
+        [SerializeField, Min(0f)] private float minimumScanInterval = 0.06f;
+        [Tooltip("Seconds removed from a customer's scan interval per delivered tile")]
+        [SerializeField, Min(0f)] private float scanAccelerationPerTile = 0.0075f;
 
         
         private readonly List<CustomerView> _customerBuffer = new List<CustomerView>();
         private readonly List<List<FoodTileView>> _columns = new List<List<FoodTileView>>();
-        private readonly List<bool> _columnBusy = new List<bool>();
+        
+        private readonly List<int> _columnFrontRows = new List<int>();
+private readonly List<bool> _columnBusy = new List<bool>();
         private readonly Dictionary<CustomerView, int> _customerFlights = new Dictionary<CustomerView, int>();
+        private readonly Dictionary<CustomerView, int> _customerDeliveredCount = new Dictionary<CustomerView, int>();
+        private readonly Dictionary<CustomerView, float> _customerNextScanAt = new Dictionary<CustomerView, float>();
         private CookingSortGameController _game;
         private bool _serving;
         private int _maxRows;
@@ -62,7 +73,9 @@ public void Initialize(CookingSortGameController game, CookingBlastLevel data)
                 _maxRows = Mathf.Max(_maxRows, count);
                 var column = new List<FoodTileView>();
                 _columns.Add(column);
-                _columnBusy.Add(false);
+                
+                _columnFrontRows.Add(0);
+_columnBusy.Add(false);
                 for (int row = 0; row < count; row++)
                 {
                     FoodTileView tile = Instantiate(tilePrefab, tileRoot);
@@ -97,8 +110,12 @@ public void ClearBoard()
             _serving = false;
             StopAllCoroutines();
             _columns.Clear();
-            _columnBusy.Clear();
+            
+            _columnFrontRows.Clear();
+_columnBusy.Clear();
             _customerFlights.Clear();
+            _customerDeliveredCount.Clear();
+            _customerNextScanAt.Clear();
             if (tileRoot == null) return;
             for (int i = tileRoot.childCount - 1; i >= 0; i--)
                 Destroy(tileRoot.GetChild(i).gameObject);
@@ -113,9 +130,9 @@ private IEnumerator ServeRoutine(SeatBar seats)
                 bool anyColumnBusy = false;
                 bool startedAny = false;
 
+                // Repair missing tiles before selecting the next exposed layer.
                 for (int col = 0; col < _columns.Count; col++)
                 {
-                    if (col >= _columnBusy.Count) _columnBusy.Add(false);
                     if (_columnBusy[col])
                     {
                         anyColumnBusy = true;
@@ -127,6 +144,7 @@ private IEnumerator ServeRoutine(SeatBar seats)
                     while (column.Count > 0 && column[0] == null)
                     {
                         column.RemoveAt(0);
+                        _columnFrontRows[col]++;
                         removedMissingTile = true;
                     }
                     if (removedMissingTile)
@@ -134,25 +152,42 @@ private IEnumerator ServeRoutine(SeatBar seats)
                         _columnBusy[col] = true;
                         anyColumnBusy = true;
                         StartCoroutine(WaitForColumnFall(col));
-                        continue;
                     }
-                    if (column.Count == 0) continue;
-
-                    FoodTileView tile = column[0];
-                    CustomerView customer = FindFreeCustomer(seats, tile.ColorType);
-                    if (customer == null) continue;
-
-                    // One flight at a time per seated customer/color chain.
-                    // Blue and Pink chains can run simultaneously, but Blue tiles themselves still arrive one-by-one.
-                    _customerFlights[customer] = 1;
-                    column.RemoveAt(0);
-                    _columnBusy[col] = true;
-                    anyColumnBusy = true;
-                    startedAny = true;
-                    StartCoroutine(ServeSingleTile(col, tile, customer, seats));
                 }
 
-                if (!anyColumnBusy && !startedAny)
+                // Visit visible tiles in bottom-row / left-to-right order.
+                // Every seated customer has its own launch clock and combo speed.
+                for (int row = 0; row < _maxRows; row++)
+                {
+                    for (int col = 0; col < _columns.Count; col++)
+                    {
+                        if (_columnBusy[col] || _columnFrontRows[col] != row) continue;
+
+                        List<FoodTileView> column = _columns[col];
+                        if (column.Count == 0) continue;
+
+                        FoodTileView tile = column[0];
+                        CustomerView customer = FindFreeCustomer(seats, tile.ColorType);
+                        if (customer == null) continue;
+
+                        // Reserve demand before the tile flies, so overlapping
+                        // flights can never overfill a customer.
+                        _customerFlights.TryGetValue(customer, out int inFlight);
+                        _customerFlights[customer] = inFlight + 1;
+                        _customerNextScanAt[customer] = Time.unscaledTime + GetCustomerScanInterval(customer);
+                        column.RemoveAt(0);
+                        _columnFrontRows[col]++;
+                        _columnBusy[col] = true;
+                        anyColumnBusy = true;
+                        startedAny = true;
+                        StartCoroutine(ServeSingleTile(col, tile, customer, seats));
+                    }
+                }
+
+                // Keep scanning while any customer is cooling down or while
+                // outstanding flights are still moving towards seats.
+                if (!anyColumnBusy && !startedAny && _customerFlights.Count == 0 &&
+                    !HasServiceableTile(seats))
                     break;
 
                 yield return null;
@@ -218,8 +253,16 @@ private CustomerView FindFreeCustomer(SeatBar seats, FoodColor color)
             for (int i = 0; i < _customerBuffer.Count; i++)
             {
                 CustomerView customer = _customerBuffer[i];
-                if (customer == null || customer.Remaining <= 0 || seats.IsMergingCustomer(customer)) continue;
-                if (_customerFlights.TryGetValue(customer, out int flights) && flights > 0) continue;
+                if (customer == null || customer.Remaining <= 0 || seats.IsMergingCustomer(customer))
+                    continue;
+
+                _customerFlights.TryGetValue(customer, out int inFlight);
+                if (inFlight >= customer.Remaining) continue;
+
+                if (_customerNextScanAt.TryGetValue(customer, out float nextScan) &&
+                    Time.unscaledTime < nextScan)
+                    continue;
+
                 return customer;
             }
             return null;
@@ -230,38 +273,57 @@ private IEnumerator ServeSingleTile(int col, FoodTileView tile, CustomerView cus
             bool flightDone = false;
             FoodColor servedColor = tile != null ? tile.ColorType : default;
 
-            // The column starts falling as soon as its bottom tile leaves.
-            // Other columns/colors remain independent.
+            // Falling and flying are independent; release the column after its fall.
             var fallingTiles = new List<Coroutine>();
             LayoutColumn(col, true, fallingTiles);
 
-            // Flight duration stays constant; seat occupancy never accelerates it.
             if (tile != null && customer != null)
                 tile.ConsumeTo(customer.transform, () => flightDone = true);
             else
                 flightDone = true;
 
-            while (!flightDone) yield return null;
-
-            // Never dispatch the newly exposed tile while it is still falling.
             for (int i = 0; i < fallingTiles.Count; i++)
                 if (fallingTiles[i] != null) yield return fallingTiles[i];
-
-            bool completed = customer != null && customer.ServeOne();
-            if (_game != null) _game.OnTileServed(servedColor);
-            if (tile != null) Destroy(tile.gameObject);
-
-            if (customer != null)
-                _customerFlights.Remove(customer);
-
-            if (completed && customer != null)
-                seats.CompleteCustomer(customer);
 
             if (serveInterval > 0f)
                 yield return new WaitForSecondsRealtime(serveInterval);
 
             if (col >= 0 && col < _columnBusy.Count)
                 _columnBusy[col] = false;
+
+            while (!flightDone) yield return null;
+
+            bool completed = customer != null && customer.ServeOne();
+            if (_game != null) _game.OnTileServed(servedColor);
+            if (tile != null) Destroy(tile.gameObject);
+
+            if (customer != null)
+            {
+                if (_customerFlights.TryGetValue(customer, out int inFlight))
+                {
+                    if (inFlight <= 1)
+                        _customerFlights.Remove(customer);
+                    else
+                        _customerFlights[customer] = inFlight - 1;
+                }
+
+                // Combo increases only when a tile actually reaches this customer.
+                // Move the already scheduled launch earlier as the interval shrinks.
+                int delivered = 0;
+                _customerDeliveredCount.TryGetValue(customer, out delivered);
+                float oldInterval = GetCustomerScanInterval(customer);
+                _customerDeliveredCount[customer] = delivered + 1;
+                float newInterval = GetCustomerScanInterval(customer);
+                if (_customerNextScanAt.TryGetValue(customer, out float nextScan))
+                    _customerNextScanAt[customer] = Mathf.Min(nextScan, nextScan - oldInterval + newInterval);
+
+                if (completed)
+                {
+                    _customerDeliveredCount.Remove(customer);
+                    _customerNextScanAt.Remove(customer);
+                    seats.CompleteCustomer(customer);
+                }
+            }
         }
 
 
@@ -282,6 +344,15 @@ private IEnumerator WaitForColumnFall(int col)
                 if (fallingTiles[i] != null) yield return fallingTiles[i];
             if (col >= 0 && col < _columnBusy.Count)
                 _columnBusy[col] = false;
+        }
+
+
+private float GetCustomerScanInterval(CustomerView customer)
+        {
+            _customerDeliveredCount.TryGetValue(customer, out int delivered);
+            float start = Mathf.Max(0f, scanInterval);
+            float minimum = Mathf.Clamp(minimumScanInterval, 0f, start);
+            return Mathf.Max(minimum, start - delivered * Mathf.Max(0f, scanAccelerationPerTile));
         }
 }
 }

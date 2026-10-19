@@ -109,6 +109,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff06a1611f9286b47aa901c18a4a52bc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CookingSort2D.SeatBar
+  mergeDuration: 0.22
+  mergePopDuration: 0.16
+  mergeFuseDuration: 0.14
+  mergeDropDuration: 0.24
+  mergeLift: 0.25
+  mergeReboundHeight: 0.055
+  exitFlyDuration: 0.48
+  exitSpinDegrees: 450
+  exitThrowHeight: 1
+  exitDropDistance: 0.28
+  exitOffscreenMargin: 0.2
 --- !u!1001 &1088012871170821249
 PrefabInstance:
   m_ObjectHideFlags: 0

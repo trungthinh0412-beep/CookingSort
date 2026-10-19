@@ -141,3 +141,7 @@ MonoBehaviour:
   cellSize: 0.48
   gap: 0.04
   serveInterval: 0.025
+  dropDuration: 0.13
+  scanInterval: 0.18
+  minimumScanInterval: 0.06
+  scanAccelerationPerTile: 0.0075
