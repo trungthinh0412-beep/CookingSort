@@ -342,9 +342,9 @@ private void TestInGameplayScene()
             if (levelAsset == null) throw new InvalidOperationException("Level prefab is missing CookingBlastLevel.");
 
             SyncPlayableLevels();
-            var scene = EditorSceneManager.OpenScene("Assets/_Project/Scenes/GameplayScene.unity", OpenSceneMode.Single);
+            var scene = EditorSceneManager.OpenScene("Assets/_Project/CookingBlast/Scenes/CookingBlastGameplay.unity", OpenSceneMode.Single);
             CookingSortGameController game = UnityEngine.Object.FindFirstObjectByType<CookingSortGameController>();
-            if (game == null) throw new InvalidOperationException("GameplayScene is missing CookingSortGameController.");
+            if (game == null) throw new InvalidOperationException("CookingBlastGameplay scene is missing CookingSortGameController.");
 
             CookingBlastLevelLoader loader = UnityEngine.Object.FindFirstObjectByType<CookingBlastLevelLoader>();
             if (loader == null)

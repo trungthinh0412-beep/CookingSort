@@ -12,7 +12,7 @@ using UnityEngine.UI;
 public static class CookingSort2DBuilder
 {
     private const string PrefabFolder = "Assets/_Project/CookingBlast/Prefabs";
-    private const string ScenePath = "Assets/_Project/Scenes/GameplayScene.unity";
+    private const string ScenePath = "Assets/_Project/CookingBlast/Scenes/CookingBlastGameplay.unity";
 
     private static Sprite _worldSprite;
     private static Sprite _uiSprite;
@@ -219,7 +219,7 @@ private static GameObject CreateQueuePrefab(GameObject customerPrefab, GameObjec
 private static void CreateGameplayScene(GameObject hudPrefab, GameObject gameRootPrefab)
     {
         Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
-        scene.name = "GameplayScene";
+        scene.name = "CookingBlastGameplay";
 
         GameObject cameraGo = new GameObject("Main Camera", typeof(Camera), typeof(AudioListener), typeof(Physics2DRaycaster));
         cameraGo.transform.position = new Vector3(0f, 0f, -10f);

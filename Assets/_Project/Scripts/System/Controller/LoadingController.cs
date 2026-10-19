@@ -1,4 +1,4 @@
-﻿using CustomTween;
+using CustomTween;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -24,7 +24,7 @@ public class LoadingController : MonoBehaviour
     private bool _isLoadingTextRunning;
 
     private const string GameplaySceneStr =
-        "GameplayScene";
+        "CookingBlastGameplay";
 
     private void Start()
     {
