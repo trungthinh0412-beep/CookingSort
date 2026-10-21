@@ -73,6 +73,52 @@ internal static class CookingBlastLevelEditing
         Dirty(level);
     }
 
+internal static int FloodFillBoard(CookingBlastLevel level, int startColumn, int startRow, FoodColor newColor)
+    {
+        if (level == null || level.BoardColumns == null) return 0;
+        if (startColumn < 0 || startColumn >= level.BoardColumns.Count) return 0;
+
+        BoardColumnData originColumn = level.BoardColumns[startColumn];
+        if (originColumn == null || originColumn.bottomToTop == null ||
+            startRow < 0 || startRow >= originColumn.bottomToTop.Count) return 0;
+
+        FoodColor originalColor = originColumn.bottomToTop[startRow];
+        if (originalColor == newColor) return 0;
+
+        // Collect the complete 4-connected region before editing its colors.
+        var stack = new Stack<Vector2Int>();
+        var visited = new HashSet<Vector2Int>();
+        var region = new List<Vector2Int>();
+        stack.Push(new Vector2Int(startColumn, startRow));
+
+        while (stack.Count > 0)
+        {
+            Vector2Int cell = stack.Pop();
+            if (!visited.Add(cell) || cell.x < 0 || cell.x >= level.BoardColumns.Count)
+                continue;
+
+            BoardColumnData column = level.BoardColumns[cell.x];
+            if (column == null || column.bottomToTop == null ||
+                cell.y < 0 || cell.y >= column.bottomToTop.Count ||
+                column.bottomToTop[cell.y] != originalColor)
+                continue;
+
+            region.Add(cell);
+            stack.Push(new Vector2Int(cell.x - 1, cell.y));
+            stack.Push(new Vector2Int(cell.x + 1, cell.y));
+            stack.Push(new Vector2Int(cell.x, cell.y - 1));
+            stack.Push(new Vector2Int(cell.x, cell.y + 1));
+        }
+
+        if (region.Count == 0) return 0;
+        Undo.RecordObject(level, "Bucket Fill Cooking Blast Tile Region");
+        foreach (Vector2Int cell in region)
+            level.BoardColumns[cell.x].bottomToTop[cell.y] = newColor;
+        Dirty(level);
+        return region.Count;
+    }
+
+
     internal static void RandomizeBoard(CookingBlastLevel level, IReadOnlyList<FoodColor> palette, int seed)
     {
         if (level == null || palette == null || palette.Count == 0) return;
@@ -86,6 +132,313 @@ internal static class CookingBlastLevelEditing
         }
         Dirty(level);
     }
+
+internal static bool TryAutoFillFromCustomers(CookingBlastLevel level, int seed, bool spreadColors, out string message)
+    {
+        message = "Open a level prefab first.";
+        if (level == null) return false;
+        var demand = DemandCounts(level);
+        int required = 0;
+        foreach (var pair in demand) required += pair.Value;
+        if (required != level.TotalTileCount)
+        {
+            message = "Cannot match customers: board has " + level.TotalTileCount + " tiles but customers require " + required + ". Adjust demand or use Random Fill + Rebuild Customers.";
+            return false;
+        }
+        if (required == 0) { message = "Add customer demand before auto filling."; return false; }
+        Undo.RecordObject(level, "Auto Fill Tile Colors From Customers");
+        ApplyColorDistribution(level, demand, seed, spreadColors);
+        Dirty(level);
+        message = "Filled " + required + " tiles matching customer demand exactly.";
+        return true;
+    }
+
+internal static bool TryAutoFillByCustomerOrder(CookingBlastLevel level, int clusterSize,
+        out string message)
+    {
+        message = "Open a level prefab first.";
+        if (level == null || level.BoardColumns == null || level.CustomerLanes == null)
+            return false;
+
+        int slots = level.TotalTileCount;
+        int lanes = level.CustomerLanes.Count;
+        if (slots == 0 || lanes == 0)
+        {
+            message = "Create a Board and Customer lanes first.";
+            return false;
+        }
+
+        int required = 0;
+        var orders = new List<List<CustomerOrderData>>();
+        for (int lane = 0; lane < lanes; lane++)
+        {
+            CustomerLaneData data = level.CustomerLanes[lane];
+            if (data == null || data.frontToBack == null || data.frontToBack.Count == 0)
+            {
+                message = "Lane " + (lane + 1) + " has no customers.";
+                return false;
+            }
+
+            var laneOrders = data.frontToBack;
+            foreach (CustomerOrderData customer in laneOrders)
+            {
+                if (customer == null || customer.demand <= 0)
+                {
+                    message = "Lane " + (lane + 1) + " has an invalid Customer.";
+                    return false;
+                }
+                required += customer.demand;
+            }
+            orders.Add(laneOrders);
+        }
+        if (required != slots)
+        {
+            message = "Cannot fill: Board has " + slots +
+                      " Tiles but Customers require " + required +
+                      ". Balance the total demand first.";
+            return false;
+        }
+
+        // Each lane advances Front -> Back independently. Distribute chunks
+        // across lanes so several front customers get playable bottom tiles.
+        clusterSize = Mathf.Clamp(clusterSize, 1, 10);
+        var orderIndex = new int[lanes];
+        var remaining = new int[lanes];
+        for (int lane = 0; lane < lanes; lane++)
+            remaining[lane] = orders[lane][0].demand;
+
+        var result = new List<FoodColor>(slots);
+        int cursor = 0;
+        int firstRowWidth = 0;
+        foreach (BoardColumnData column in level.BoardColumns)
+            if (column != null && column.bottomToTop != null &&
+                column.bottomToTop.Count > 0) firstRowWidth++;
+
+        // Where space allows, reserve at least one exposed bottom tile for
+        // every front lane before filling larger color clusters.
+        int frontTileCount = Mathf.Min(firstRowWidth, lanes);
+        for (int lane = 0; lane < frontTileCount; lane++)
+        {
+            result.Add(orders[lane][orderIndex[lane]].color);
+            remaining[lane]--;
+            if (remaining[lane] == 0)
+            {
+                orderIndex[lane]++;
+                if (orderIndex[lane] < orders[lane].Count)
+                    remaining[lane] = orders[lane][orderIndex[lane]].demand;
+            }
+        }
+
+        // Continue in lane order, advancing to the next customer only after
+        // that lane's current demand has been assigned.
+        while (result.Count < slots)
+        {
+            bool found = false;
+            for (int attempt = 0; attempt < lanes; attempt++)
+            {
+                int lane = (cursor + attempt) % lanes;
+                if (orderIndex[lane] >= orders[lane].Count) continue;
+                int count = Mathf.Min(clusterSize, remaining[lane]);
+                FoodColor color = orders[lane][orderIndex[lane]].color;
+                for (int i = 0; i < count; i++) result.Add(color);
+                remaining[lane] -= count;
+                if (remaining[lane] == 0)
+                {
+                    orderIndex[lane]++;
+                    if (orderIndex[lane] < orders[lane].Count)
+                        remaining[lane] = orders[lane][orderIndex[lane]].demand;
+                }
+                cursor = (lane + 1) % lanes;
+                found = true;
+                break;
+            }
+            if (!found)
+            {
+                message = "Could not distribute all customer demand.";
+                return false;
+            }
+        }
+
+        // The first list items become the lowest visible Tile row, left to right.
+        Undo.RecordObject(level, "Fill Tile Colors in Customer Queue Order");
+        int tileIndex = 0;
+        int maxRows = MaxRows(level);
+        for (int row = 0; row < maxRows; row++)
+        {
+            for (int col = 0; col < level.BoardColumns.Count; col++)
+            {
+                BoardColumnData column = level.BoardColumns[col];
+                if (column == null || column.bottomToTop == null ||
+                    row >= column.bottomToTop.Count) continue;
+                column.bottomToTop[row] = result[tileIndex++];
+            }
+        }
+        Dirty(level);
+        message = "Filled " + tileIndex +
+                  " Tiles following Customer Front-to-Back order, with chunks of " +
+                  clusterSize + " (balanced by color).";
+        return true;
+    }
+
+internal static bool TryAutoFillByPriority(CookingBlastLevel level,
+        IReadOnlyList<Vector2Int> priority, int tilesPerTurn, bool interleave,
+        out string message)
+    {
+        message = "Open a valid Cooking Blast level.";
+        if (level == null || priority == null ||
+            level.BoardColumns == null || level.CustomerLanes == null)
+            return false;
+
+        var all = new List<CustomerOrderData>();
+        var visited = new HashSet<Vector2Int>();
+        int totalDemand = 0;
+        for (int i = 0; i < priority.Count; i++)
+        {
+            Vector2Int id = priority[i];
+            if (!visited.Add(id) || id.x < 0 || id.x >= level.CustomerLanes.Count)
+            {
+                message = "Fill order contains a duplicate or invalid Customer.";
+                return false;
+            }
+            CustomerLaneData lane = level.CustomerLanes[id.x];
+            if (lane == null || lane.frontToBack == null ||
+                id.y < 0 || id.y >= lane.frontToBack.Count)
+            {
+                message = "Fill order no longer matches the Customer Queue. Reset the order.";
+                return false;
+            }
+            CustomerOrderData customer = lane.frontToBack[id.y];
+            if (customer == null || customer.demand < 1)
+            {
+                message = "A Customer has invalid Demand.";
+                return false;
+            }
+            all.Add(customer);
+            totalDemand += customer.demand;
+        }
+
+        int customerTotal = 0;
+        foreach (CustomerLaneData lane in level.CustomerLanes)
+            if (lane != null && lane.frontToBack != null)
+                customerTotal += lane.frontToBack.Count;
+
+        if (all.Count != customerTotal || customerTotal == 0)
+        {
+            message = "The order must include every Customer exactly once.";
+            return false;
+        }
+        if (totalDemand != level.TotalTileCount || totalDemand == 0)
+        {
+            message = "Cannot Auto Fill: " + level.TotalTileCount +
+                      " Tile slots but Customer Demand totals " + totalDemand + ".";
+            return false;
+        }
+
+        var result = new List<FoodColor>(totalDemand);
+        int[] remaining = new int[all.Count];
+        for (int i = 0; i < all.Count; i++)
+            remaining[i] = all[i].demand;
+
+        tilesPerTurn = Mathf.Clamp(tilesPerTurn, 1, 32);
+        if (!interleave)
+        {
+            for (int i = 0; i < all.Count; i++)
+                while (remaining[i]-- > 0)
+                    result.Add(all[i].color);
+        }
+        else
+        {
+            int pending = totalDemand;
+            while (pending > 0)
+            {
+                for (int i = 0; i < all.Count; i++)
+                {
+                    int chunk = Mathf.Min(tilesPerTurn, remaining[i]);
+                    for (int j = 0; j < chunk; j++)
+                        result.Add(all[i].color);
+                    remaining[i] -= chunk;
+                    pending -= chunk;
+                }
+            }
+        }
+
+        // Assign in the exact order the Board scans: bottom row, left to right,
+        // followed by higher rows. No Customer Queue data is modified.
+        Undo.RecordObject(level, "Auto Fill Tiles in Custom Customer Priority");
+        int index = 0;
+        int maxRows = MaxRows(level);
+        for (int row = 0; row < maxRows; row++)
+        {
+            for (int col = 0; col < level.BoardColumns.Count; col++)
+            {
+                BoardColumnData column = level.BoardColumns[col];
+                if (column == null || column.bottomToTop == null ||
+                    row >= column.bottomToTop.Count) continue;
+                column.bottomToTop[row] = result[index++];
+            }
+        }
+        Dirty(level);
+        message = "Filled " + index + " Tiles in your chosen Customer order. " +
+                  (interleave ? "Grouped in batches of " + tilesPerTurn + "." : "Entire Customer demands filled in sequence.");
+        return true;
+    }
+
+
+
+internal static bool ShuffleBoardKeepingCounts(CookingBlastLevel level, int seed, bool spreadColors)
+    {
+        if (level == null || level.TotalTileCount == 0) return false;
+        var totals = TileCounts(level);
+        Undo.RecordObject(level, "Shuffle Cooking Blast Tile Colors");
+        ApplyColorDistribution(level, totals, seed, spreadColors);
+        Dirty(level);
+        return true;
+    }
+
+private static void ApplyColorDistribution(CookingBlastLevel level, Dictionary<FoodColor, int> available, int seed, bool spreadColors)
+    {
+        var remaining = new Dictionary<FoodColor, int>(available);
+        var random = new System.Random(seed);
+        int maxRows = MaxRows(level);
+        for (int row = 0; row < maxRows; row++)
+        {
+            for (int col = 0; col < level.BoardColumns.Count; col++)
+            {
+                var column = level.BoardColumns[col];
+                if (column == null || column.bottomToTop == null || row >= column.bottomToTop.Count) continue;
+                int totalWeight = 0;
+                foreach (FoodColor color in Enum.GetValues(typeof(FoodColor)))
+                    if (remaining.TryGetValue(color, out int count) && count > 0)
+                        totalWeight += ColorPlacementWeight(level, remaining, color, col, row, spreadColors);
+                if (totalWeight <= 0) return;
+                int choice = random.Next(totalWeight);
+                FoodColor chosen = default(FoodColor);
+                foreach (FoodColor color in Enum.GetValues(typeof(FoodColor)))
+                {
+                    if (!remaining.TryGetValue(color, out int count) || count <= 0) continue;
+                    choice -= ColorPlacementWeight(level, remaining, color, col, row, spreadColors);
+                    if (choice < 0) { chosen = color; break; }
+                }
+                column.bottomToTop[row] = chosen;
+                remaining[chosen]--;
+            }
+        }
+    }
+
+private static int ColorPlacementWeight(CookingBlastLevel level, Dictionary<FoodColor, int> remaining, FoodColor color, int column, int row, bool spreadColors)
+    {
+        int count = remaining[color];
+        if (!spreadColors) return count;
+        bool sameBelow = row > 0 && GetCell(level, column, row - 1) == color;
+        bool sameLeft = column > 0 && level.BoardColumns[column - 1] != null && level.BoardColumns[column - 1].bottomToTop != null &&
+                        row < level.BoardColumns[column - 1].bottomToTop.Count && GetCell(level, column - 1, row) == color;
+        int factor = sameBelow && sameLeft ? 1 : (sameBelow || sameLeft ? 4 : 16);
+        return count * factor;
+    }
+
+
+
+
 
     internal static void EnsureLaneCount(CookingBlastLevel level, int laneCount)
     {

@@ -4,60 +4,101 @@ using UnityEditor;
 using UnityEngine;
 
 // Editor-only presentation. Level data remains on CookingBlastLevel.
+[Serializable]
 internal sealed class CookingBlastBoardPanel
 {
     private int selectedColumn;
     private bool showLists;
-    private bool showRandom;
+    
+    
+    
+    [SerializeField] private System.Collections.Generic.List<Vector2Int> chosenPriority = new System.Collections.Generic.List<Vector2Int>();
+    [SerializeField] private string priorityLevelKey;
+    [SerializeField] private int manualPriorityCount;
+    [SerializeField] private bool showAdvancedFillOptions;
+    [SerializeField] private int priorityGroupSize = 3;
+    [SerializeField] private bool priorityInterleave = true;
+    private string fillStatus;
+    private MessageType fillStatusType;
     private int strokeGroup = -1;
-    private bool painting;
+    
+    private bool bucketMode;
+private bool painting;
     private int lastColumn = -1;
     private int lastRow = -1;
 
     private Vector2 gridScroll;
     private static readonly FoodColor[] Colors = (FoodColor[])Enum.GetValues(typeof(FoodColor));
 
-    internal void Draw(CookingBlastLevel level, ref FoodColor brush, ref int columns, ref int rows,
-        ref int mask, ref int seed, float width)
+internal void Draw(CookingBlastLevel level, ref FoodColor brush, ref int columns, ref int rows,
+        ref int mask, ref int seed, float width, int laneCount, int minDemand, int maxDemand)
     {
         using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
         {
             EditorGUILayout.LabelField("BOARD DESIGNER", EditorStyles.boldLabel);
-            EditorGUILayout.LabelField("Choose a color • Drag to paint • Right-click to pick • Ctrl+Z to undo", EditorStyles.miniLabel);
+            EditorGUILayout.LabelField("Choose Customer priorities in Customer Designer below, then Fill Tile here.", EditorStyles.miniLabel);
+            GUILayout.Space(4);
             using (new EditorGUILayout.HorizontalScope())
             {
+                seed = EditorGUILayout.IntField("Fill Order Seed", seed);
+                if (GUILayout.Button("New Seed", GUILayout.Width(90)))
+                    seed = UnityEngine.Random.Range(1, int.MaxValue);
+            }
+            DrawGridPriorityTools(level, seed);
+            DrawBoardFillButton(level);
+            GUILayout.Space(8);
+
+            int tool = GUILayout.Toolbar(bucketMode ? 1 : 0,
+                new[] { "Brush  •  Paint Tiles", "Bucket  •  Fill Region" },
+                GUILayout.Height(28), GUILayout.Width(Mathf.Min(410f, Mathf.Max(230f, width - 38f))));
+            bool nextBucketMode = tool == 1;
+            if (nextBucketMode != bucketMode)
+            {
+                EndStroke();
+                bucketMode = nextBucketMode;
+            }
+
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                float oldWidth = EditorGUIUtility.labelWidth;
                 EditorGUIUtility.labelWidth = 60;
                 columns = Mathf.Clamp(EditorGUILayout.IntField("Columns", columns), 1, 14);
                 rows = Mathf.Clamp(EditorGUILayout.IntField("Rows", rows), 1, 18);
-                EditorGUIUtility.labelWidth = 0;
+                EditorGUIUtility.labelWidth = oldWidth;
                 if (GUILayout.Button("Resize", GUILayout.Width(75)))
                     CookingBlastLevelEditing.ResizeBoard(level, columns, rows, brush);
             }
-            GUILayout.Space(8);
+
+            GUILayout.Space(6);
             using (new EditorGUILayout.HorizontalScope())
             {
                 using (new EditorGUILayout.VerticalScope(GUILayout.Width(170)))
                 {
-                    EditorGUILayout.LabelField("COLOR LIST", EditorStyles.miniBoldLabel);
+                    EditorGUILayout.LabelField("TILES / DEMAND", EditorStyles.miniBoldLabel);
                     var counts = CookingBlastLevelEditing.TileCounts(level);
                     var demands = CookingBlastLevelEditing.DemandCounts(level);
-                    foreach (var color in Colors)
+                    foreach (FoodColor color in Colors)
                     {
-                        int count = counts.TryGetValue(color, out var n) ? n : 0;
-                        int demand = demands.TryGetValue(color, out var d) ? d : 0;
+                        int count = counts.TryGetValue(color, out int n) ? n : 0;
+                        int demand = demands.TryGetValue(color, out int d) ? d : 0;
                         Rect rect = GUILayoutUtility.GetRect(166, 29);
-                        EditorGUI.DrawRect(rect, color == brush ? new Color(.24f,.36f,.48f) : new Color(.16f,.18f,.22f));
-                        EditorGUI.DrawRect(new Rect(rect.x+5, rect.y+5, 19, 19), CookingSortPalette.Get(color));
-                        GUI.Label(new Rect(rect.x+30,rect.y+4,88,22), (color == brush ? "• " : "") + color);
-                        GUI.Label(new Rect(rect.xMax-44,rect.y+4,40,22), count.ToString(), EditorStyles.boldLabel);
-                        if (GUI.Button(rect, new GUIContent("", color + ": " + count + " tiles / " + demand + " demand"), GUIStyle.none))
+                        EditorGUI.DrawRect(rect, color == brush
+                            ? new Color(.24f, .36f, .48f)
+                            : new Color(.16f, .18f, .22f));
+                        EditorGUI.DrawRect(new Rect(rect.x + 5, rect.y + 5, 19, 19),
+                            CookingSortPalette.Get(color));
+                        GUI.Label(new Rect(rect.x + 30, rect.y + 4, 88, 22),
+                            (color == brush ? "• " : "") + color);
+                        GUI.Label(new Rect(rect.xMax - 58, rect.y + 4, 54, 22),
+                            count + "/" + demand, EditorStyles.miniBoldLabel);
+                        if (GUI.Button(rect,
+                            new GUIContent("", color + ": " + count + " tiles / " + demand + " demand"),
+                            GUIStyle.none))
                             brush = color;
                     }
                     GUILayout.Space(6);
                     EditorGUILayout.LabelField("Brush: " + brush, EditorStyles.boldLabel);
-                    if (GUILayout.Button("Fill board", GUILayout.Height(26)))
-                        CookingBlastLevelEditing.FillBoard(level, brush);
-                    EditorGUILayout.HelpBox("Highlighted bottom row is served first. Counts update as you paint.", MessageType.None);
+                    EditorGUILayout.LabelField("Right click picks color. Shift+click bucket fills. Ctrl+Z undoes.", EditorStyles.wordWrappedMiniLabel);
                 }
                 using (new EditorGUILayout.VerticalScope())
                 {
@@ -68,25 +109,13 @@ internal sealed class CookingBlastBoardPanel
                     EditorGUILayout.LabelField("BOTTOM / FIRST SERVED", EditorStyles.centeredGreyMiniLabel);
                 }
             }
-
-            showLists = EditorGUILayout.Foldout(showLists, "Column color lists — bottom to top", true);
+            showLists = EditorGUILayout.Foldout(showLists,
+                "Advanced: Edit individual column colors", true);
             if (showLists) DrawColumnList(level, brush);
-            showRandom = EditorGUILayout.Foldout(showRandom, "Random generation", true);
-            if (showRandom)
-            {
-                mask = EditorGUILayout.MaskField("Allowed colors", mask, Enum.GetNames(typeof(FoodColor)));
-                seed = EditorGUILayout.IntField("Seed", seed);
-                using (new EditorGUI.DisabledScope(mask == 0))
-                if (GUILayout.Button("Randomize board"))
-                {
-                    var palette = new System.Collections.Generic.List<FoodColor>();
-                    foreach (var color in Colors)
-                        if ((mask & (1 << (int)color)) != 0) palette.Add(color);
-                    CookingBlastLevelEditing.RandomizeBoard(level, palette, seed);
-                }
-            }
         }
-        if (Event.current.rawType == EventType.MouseUp) EndStroke();
+
+        if (Event.current.rawType == EventType.MouseUp)
+            EndStroke();
     }
 
     private void DrawGrid(CookingBlastLevel level, ref FoodColor brush, float available)
@@ -126,7 +155,20 @@ internal sealed class CookingBlastBoardPanel
                 brush = data.bottomToTop[r];
                 ev.Use();
             }
-            else if ((ev.type == EventType.MouseDown || (ev.type == EventType.MouseDrag && painting)) && ev.button == 0)
+            else if (ev.type == EventType.MouseDown && ev.button == 0 &&
+                     (bucketMode || ev.shift))
+            {
+                EndStroke();
+                int filled = CookingBlastLevelEditing.FloodFillBoard(level, c, r, brush);
+                fillStatus = filled > 0
+                    ? "Bucket filled " + filled + " connected tile(s) with " + brush + ". Ctrl+Z to undo."
+                    : "No tiles changed (this region already has " + brush + ").";
+                fillStatusType = MessageType.Info;
+                ev.Use();
+            }
+            else if (!bucketMode &&
+                     (ev.type == EventType.MouseDown || (ev.type == EventType.MouseDrag && painting)) &&
+                     ev.button == 0)
             {
                 if (!painting)
                 {
@@ -207,5 +249,201 @@ private void PaintLine(CookingBlastLevel level, int column, int row, FoodColor b
         }
         lastColumn=column;
         lastRow=row;
+    }
+
+
+
+
+
+internal void DrawGridPriorityTools(CookingBlastLevel level, int seed)
+    {
+        EnsurePriority(level);
+        using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+        {
+            EditorGUILayout.LabelField("CUSTOMER FILL PRIORITY", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Select customers #1, #2, #3... above. Use Fill Tile under Board Designer.", EditorStyles.miniLabel);
+
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                GUILayout.Label("Chosen: " + manualPriorityCount + " / " + chosenPriority.Count,
+                    EditorStyles.miniBoldLabel);
+                using (new EditorGUI.DisabledScope(manualPriorityCount == 0))
+                    if (GUILayout.Button("Undo Pick", GUILayout.Width(85)))
+                    {
+                        manualPriorityCount--;
+                        GUIUtility.ExitGUI();
+                    }
+
+                if (GUILayout.Button("Clear Order", GUILayout.Width(98)))
+                {
+                    ResetPriority(level);
+                    GUIUtility.ExitGUI();
+                }
+
+                if (GUILayout.Button(new GUIContent("Randomize Rest",
+                        "Preserve all customers pinned on the grid and shuffle the remaining customers by Seed."),
+                        GUILayout.Width(115)))
+                {
+                    var random = new System.Random(seed);
+                    for (int i = chosenPriority.Count - 1; i > manualPriorityCount; i--)
+                    {
+                        int j = random.Next(manualPriorityCount, i + 1);
+                        Vector2Int temp = chosenPriority[i];
+                        chosenPriority[i] = chosenPriority[j];
+                        chosenPriority[j] = temp;
+                    }
+                    fillStatus = "Shuffled the remaining Customer priorities.";
+                    fillStatusType = MessageType.Info;
+                    GUIUtility.ExitGUI();
+                }
+            }
+
+            if (chosenPriority.Count > 0)
+            {
+                string summary = "";
+                int shown = Mathf.Min(chosenPriority.Count, 8);
+                for (int i = 0; i < shown; i++)
+                {
+                    Vector2Int id = chosenPriority[i];
+                    var customer = level.CustomerLanes[id.x].frontToBack[id.y];
+                    if (i > 0) summary += "  >  ";
+                    summary += (i + 1) + ":" + customer.color;
+                }
+                if (chosenPriority.Count > shown) summary += " ...";
+                EditorGUILayout.LabelField("Order: " + summary, EditorStyles.wordWrappedMiniLabel);
+            }
+
+            showAdvancedFillOptions = EditorGUILayout.Foldout(showAdvancedFillOptions,
+                "Advanced fill settings", true);
+            if (showAdvancedFillOptions)
+            {
+                priorityGroupSize = EditorGUILayout.IntSlider("Tiles per turn", priorityGroupSize, 1, 12);
+                priorityInterleave = EditorGUILayout.ToggleLeft("Alternate customer colors", priorityInterleave);
+            }
+        }
+    }
+
+
+private void EnsurePriority(CookingBlastLevel level)
+    {
+        if (level == null) return;
+        string key = UnityEditor.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage()?.assetPath;
+        if (string.IsNullOrEmpty(key))
+            key = level.gameObject.name + ":" + level.LevelNumber;
+        if (priorityLevelKey != key)
+        {
+            priorityLevelKey = key;
+            chosenPriority.Clear();
+            manualPriorityCount = 0;
+        }
+
+        var available = new System.Collections.Generic.List<Vector2Int>();
+        int depth = 0;
+        foreach (CustomerLaneData lane in level.CustomerLanes)
+            if (lane != null && lane.frontToBack != null)
+                depth = Mathf.Max(depth, lane.frontToBack.Count);
+        for (int row = 0; row < depth; row++)
+            for (int lane = 0; lane < level.CustomerLanes.Count; lane++)
+                if (level.CustomerLanes[lane] != null &&
+                    level.CustomerLanes[lane].frontToBack != null &&
+                    row < level.CustomerLanes[lane].frontToBack.Count)
+                    available.Add(new Vector2Int(lane, row));
+
+        int remainingPins = 0;
+        for (int i = 0; i < manualPriorityCount && i < chosenPriority.Count; i++)
+            if (available.Contains(chosenPriority[i])) remainingPins++;
+
+        chosenPriority.RemoveAll(id => !available.Contains(id));
+        manualPriorityCount = Mathf.Clamp(remainingPins, 0, chosenPriority.Count);
+        foreach (Vector2Int id in available)
+            if (!chosenPriority.Contains(id))
+                chosenPriority.Add(id);
+    }
+
+
+internal void ResetPriority(CookingBlastLevel level)
+    {
+        chosenPriority.Clear();
+        manualPriorityCount = 0;
+        EnsurePriority(level);
+    }
+
+
+internal int GetPriorityRank(CookingBlastLevel level, int lane, int row)
+    {
+        EnsurePriority(level);
+        int index = chosenPriority.IndexOf(new Vector2Int(lane, row));
+        return index >= 0 && index < manualPriorityCount ? index + 1 : 0;
+    }
+
+
+internal void TogglePriority(CookingBlastLevel level, int lane, int row)
+    {
+        EnsurePriority(level);
+        var id = new Vector2Int(lane, row);
+        int index = chosenPriority.IndexOf(id);
+        if (index < 0) return;
+
+        chosenPriority.RemoveAt(index);
+        if (index < manualPriorityCount)
+        {
+            // Clicking a pinned customer again unpins them.
+            manualPriorityCount--;
+            chosenPriority.Add(id);
+        }
+        else
+        {
+            // The next customer clicked gets the next priority number.
+            chosenPriority.Insert(manualPriorityCount, id);
+            manualPriorityCount++;
+        }
+    }
+
+
+private void DrawBoardFillButton(CookingBlastLevel level)
+    {
+        EnsurePriority(level);
+        int totalDemand = 0;
+        foreach (int count in CookingBlastLevelEditing.DemandCounts(level).Values)
+            totalDemand += count;
+        bool ready = level.TotalTileCount > 0 && totalDemand == level.TotalTileCount;
+        using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+        {
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                EditorGUILayout.LabelField("Auto fill from Customer order", EditorStyles.boldLabel,
+                    GUILayout.Width(230));
+                GUILayout.FlexibleSpace();
+                GUILayout.Label("Priority selected: " + manualPriorityCount,
+                    EditorStyles.miniLabel, GUILayout.Width(145));
+            }
+            using (new EditorGUI.DisabledScope(!ready || chosenPriority.Count == 0))
+            {
+                if (GUILayout.Button(new GUIContent("Fill Tile",
+                    "Fill this Board starting from the bottom row, using Customer priority selected in Customer Designer."),
+                    GUILayout.Height(38)))
+                {
+                    EndStroke();
+                    if (CookingBlastLevelEditing.TryAutoFillByPriority(
+                        level, chosenPriority, priorityGroupSize, priorityInterleave, out string message))
+                    {
+                        fillStatus = message;
+                        fillStatusType = MessageType.Info;
+                    }
+                    else
+                    {
+                        fillStatus = message;
+                        fillStatusType = MessageType.Warning;
+                    }
+                    GUIUtility.ExitGUI();
+                }
+            }
+            if (!ready)
+                EditorGUILayout.HelpBox("Board Tile count (" + level.TotalTileCount +
+                    ") must match Customer Demand (" + totalDemand + ") to Fill Tile.",
+                    MessageType.Warning);
+            if (!string.IsNullOrEmpty(fillStatus))
+                EditorGUILayout.HelpBox(fillStatus, fillStatusType);
+        }
     }
 }

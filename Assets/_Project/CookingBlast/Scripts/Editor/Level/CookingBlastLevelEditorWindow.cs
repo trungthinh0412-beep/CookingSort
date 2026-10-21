@@ -19,8 +19,12 @@ public sealed class CookingBlastLevelEditorWindow : EditorWindow
     [SerializeField] private int randomSeed = 1001;
     [SerializeField] private int paletteMask = (1 << (int)FoodColor.Blue) | (1 << (int)FoodColor.Pink);
 
-    private readonly CookingBlastBoardPanel boardPanel = new CookingBlastBoardPanel();
-    [SerializeField] private bool showCustomerDetails;
+    [SerializeField] private CookingBlastBoardPanel boardPanel = new CookingBlastBoardPanel();
+    
+    
+    [SerializeField] private bool deleteCustomerTool;
+[SerializeField] private bool customerPriorityPicking;
+[SerializeField] private bool showCustomerDetails;
     private Vector2 customerGridScroll;
     private bool customerPainting;
     private int customerStrokeGroup = -1;
@@ -129,6 +133,8 @@ private void OnLostFocus()
                 SetStatus("Choose a prefab containing CookingBlastLevel.", MessageType.Warning);
             GUIUtility.ExitGUI();
         }
+        if (GUILayout.Button("Undo", EditorStyles.toolbarButton, GUILayout.Width(49))) Undo.PerformUndo();
+        if (GUILayout.Button("Redo", EditorStyles.toolbarButton, GUILayout.Width(49))) Undo.PerformRedo();
         if (GUILayout.Button("Setup", EditorStyles.toolbarButton, GUILayout.Width(55)))
         {
             CookingBlastPrefabSetup.SetupLevelSystem();
@@ -173,7 +179,7 @@ private void DrawSettings()
 
 private void DrawBoardEditor()
     {
-        boardPanel.Draw(level, ref paintColor, ref boardColumns, ref boardRows, ref paletteMask, ref randomSeed, position.width);
+        boardPanel.Draw(level, ref paintColor, ref boardColumns, ref boardRows, ref paletteMask, ref randomSeed, position.width, laneCount, minDemand, maxDemand);
     }
 
 private void DrawCustomerEditor()
@@ -181,8 +187,26 @@ private void DrawCustomerEditor()
         using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
         {
             EditorGUILayout.LabelField("CUSTOMER DESIGNER", EditorStyles.boldLabel);
-            EditorGUILayout.LabelField("Choose a color • Click/drag to paint • Right-click to pick • Ctrl+Z to undo", EditorStyles.miniLabel);
-            EditorGUILayout.HelpBox("Each column is one lane, FRONT at the top and BACK below. Click + to append a customer. Color and demand are saved directly in the level prefab.", MessageType.None);
+            EditorGUILayout.LabelField(customerPriorityPicking
+                ? "Click Customers to set priority #1, #2, #3... • Click again to unpin"
+                : deleteCustomerTool
+                    ? "DELETE TOOL ACTIVE • Click a Customer to remove it • Ctrl+Z to undo"
+                    : "Click/drag = paint • Right-click = pick color • Shift+click = delete • Ctrl+Z = Undo",
+                EditorStyles.miniLabel);
+            EditorGUILayout.HelpBox(customerPriorityPicking
+                ? "Choose Tile fill priority directly on the Customer grid; numbered badges show your picks."
+                : deleteCustomerTool
+                    ? "Delete Customer is selected from COLOR LIST. Click a Customer to remove it. Click a color to switch back to painting."
+                    : "Each lane is a column. FRONT at top, BACK below. Click + to add or select Delete Customer from COLOR LIST to remove.",
+                MessageType.None);
+            int currentMode = customerPriorityPicking ? 1 : 0;
+            int selectedMode = GUILayout.Toolbar(currentMode, new[] {"Paint Customer Colors", "Set Tile Fill Order"}, GUILayout.Height(29));
+            if (selectedMode != currentMode)
+            {
+                EndCustomerStroke();
+                customerPriorityPicking = selectedMode == 1;
+                if (customerPriorityPicking) deleteCustomerTool = false;
+            }
 
             using (new EditorGUILayout.HorizontalScope())
             {
@@ -233,23 +257,47 @@ private void DrawCustomerEditor()
         if (Event.current.rawType == EventType.MouseUp) EndCustomerStroke();
     }
 
-    private void DrawStats()
+private void DrawStats()
     {
-        EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-        EditorGUILayout.LabelField($"Level Stats   •   Tiles: {level.TotalTileCount}   •   Columns: {level.BoardColumns.Count}   •   Lanes: {level.CustomerLanes.Count}", EditorStyles.boldLabel);
-        var tiles = CookingBlastLevelEditing.TileCounts(level);
-        var demand = CookingBlastLevelEditing.DemandCounts(level);
-        foreach (FoodColor color in Enum.GetValues(typeof(FoodColor)))
+        using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
         {
-            int t = tiles.TryGetValue(color, out int tv) ? tv : 0;
-            int d = demand.TryGetValue(color, out int dv) ? dv : 0;
-            if (t == 0 && d == 0) continue;
-            Color old = GUI.color;
-            if (t != d) GUI.color = new Color(1f, .55f, .45f);
-            EditorGUILayout.LabelField($"{color}: board {t}  /  demand {d}" + (t == d ? "  ✓" : "  ✗"));
-            GUI.color = old;
+            int tileTotal = level.TotalTileCount;
+            var tiles = CookingBlastLevelEditing.TileCounts(level);
+            var demand = CookingBlastLevelEditing.DemandCounts(level);
+            int demandTotal = 0;
+            foreach (int count in demand.Values) demandTotal += count;
+
+            EditorGUILayout.LabelField("LEVEL HEALTH  |  " + tileTotal + " Tiles  •  " +
+                level.BoardColumns.Count + " Columns  •  " + level.CustomerLanes.Count +
+                " Lanes  •  " + level.SeatCount + " Seats", EditorStyles.boldLabel);
+
+            bool balanced = tileTotal == demandTotal && tileTotal > 0;
+            foreach (FoodColor color in Enum.GetValues(typeof(FoodColor)))
+            {
+                int t = tiles.TryGetValue(color, out int tv) ? tv : 0;
+                int d = demand.TryGetValue(color, out int dv) ? dv : 0;
+                if (t == 0 && d == 0) continue;
+                bool match = t == d;
+                if (!match) balanced = false;
+
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    Rect swatch = GUILayoutUtility.GetRect(16, 16, GUILayout.Width(16));
+                    EditorGUI.DrawRect(swatch, CookingSortPalette.Get(color));
+                    GUILayout.Label(color.ToString(), GUILayout.Width(80));
+                    GUILayout.Label("Tiles  " + t + "   /   Need  " + d, GUILayout.Width(185));
+                    string delta = match ? "OK" : (t > d ? "+" : "") + (t - d);
+                    Color previous = GUI.contentColor;
+                    GUI.contentColor = match ? new Color(.43f, .78f, .48f) : new Color(1f, .48f, .39f);
+                    GUILayout.Label(delta, EditorStyles.boldLabel);
+                    GUI.contentColor = previous;
+                }
+            }
+            EditorGUILayout.HelpBox(balanced
+                ? "Tile colors and customer demand are balanced. Validate to check the whole level."
+                : "Color totals do not match. Use AUTO FILL from Customers or rebuild Customers from the Board.",
+                balanced ? MessageType.Info : MessageType.Warning);
         }
-        EditorGUILayout.EndVertical();
     }
 
     private bool ValidateLevel()
@@ -413,6 +461,17 @@ private void AddCustomer(int lane, FoodColor color, int demand)
         CookingBlastLevelEditing.Dirty(level);
     }
 
+private void RemoveCustomer(int lane, int row)
+    {
+        if (lane < 0 || lane >= level.CustomerLanes.Count) return;
+        var orders = level.CustomerLanes[lane]?.frontToBack;
+        if (orders == null || row < 0 || row >= orders.Count) return;
+        Undo.RecordObject(level, "Delete Cooking Blast customer");
+        orders.RemoveAt(row);
+        CookingBlastLevelEditing.Dirty(level);
+    }
+
+
 
 private void PaintCustomer(int lane, int row, FoodColor color)
     {
@@ -546,21 +605,59 @@ private void DrawCustomerGrid(float available)
                     EditorGUI.DrawRect(new Rect(cell.x + 2, cell.y + 2, cell.width - 4, cell.height - 4), color);
                     var style = new GUIStyle(EditorStyles.centeredGreyMiniLabel);
                     style.normal.textColor = color.grayscale > .6f ? Color.black : Color.white;
-                    GUI.Label(cell, CookingSortPalette.ShortName(customer.color) + " " + customer.demand, style);
+                    int rank = boardPanel.GetPriorityRank(level, lane, row);
+                    if (rank > 0)
+                    {
+                        Rect rankRect = new Rect(cell.xMax - 29, cell.y + 3, 26, 17);
+                        EditorGUI.DrawRect(rankRect, new Color(.96f, .78f, .20f, 1f));
+                        var rankStyle = new GUIStyle(EditorStyles.miniBoldLabel);
+                        rankStyle.alignment = TextAnchor.MiddleCenter;
+                        rankStyle.normal.textColor = Color.black;
+                        GUI.Label(rankRect, "#" + rank, rankStyle);
+                    }
+                    Rect labelRect = rank > 0
+                        ? new Rect(cell.x + 1, cell.y + 18, cell.width - 2, cell.height - 19)
+                        : cell;
+                    GUI.Label(labelRect, CookingSortPalette.ShortName(customer.color) + " " + customer.demand, style);
                 }
 
                 if (!GUI.enabled || !cell.Contains(ev.mousePosition)) continue;
                 if (!append && ev.type == EventType.MouseDown && ev.button == 1)
                 {
                     paintColor = orders[row].color;
+                    deleteCustomerTool = false;
+                    customerPriorityPicking = false;
                     ev.Use();
                 }
                 else if (ev.type == EventType.MouseDown && ev.button == 0)
                 {
                     if (append)
                     {
+                        if (!customerPriorityPicking && !deleteCustomerTool)
+                        {
+                            EndCustomerStroke();
+                            AddCustomer(lane, paintColor, minDemand);
+                        }
+                    }
+                    else if (deleteCustomerTool)
+                    {
                         EndCustomerStroke();
-                        AddCustomer(lane, paintColor, minDemand);
+                        RemoveCustomer(lane, row);
+                        ev.Use();
+                        GUIUtility.ExitGUI(); // Rebuild the grid after the list size changes.
+                    }
+                    else if (customerPriorityPicking)
+                    {
+                        EndCustomerStroke();
+                        boardPanel.TogglePriority(level, lane, row);
+                        Repaint();
+                    }
+                    else if (ev.shift)
+                    {
+                        EndCustomerStroke();
+                        RemoveCustomer(lane, row);
+                        ev.Use();
+                        GUIUtility.ExitGUI();
                     }
                     else
                     {
@@ -569,7 +666,7 @@ private void DrawCustomerGrid(float available)
                     }
                     ev.Use();
                 }
-                else if (!append && customerPainting && ev.type == EventType.MouseDrag && ev.button == 0)
+                else if (!customerPriorityPicking && !deleteCustomerTool && !append && customerPainting && ev.type == EventType.MouseDrag && ev.button == 0)
                 {
                     PaintCustomer(lane, row, paintColor);
                     ev.Use();
@@ -587,20 +684,68 @@ private void DrawCustomerPalette()
         EditorGUILayout.LabelField("COLOR LIST", EditorStyles.miniBoldLabel);
         var demandCounts = CookingBlastLevelEditing.DemandCounts(level);
         var tileCounts = CookingBlastLevelEditing.TileCounts(level);
+
         foreach (FoodColor color in Enum.GetValues(typeof(FoodColor)))
         {
             int demand = demandCounts.TryGetValue(color, out int d) ? d : 0;
             int tiles = tileCounts.TryGetValue(color, out int t) ? t : 0;
+
             Rect rect = GUILayoutUtility.GetRect(166, 29);
-            EditorGUI.DrawRect(rect, color == paintColor ? new Color(.24f, .36f, .48f) : new Color(.16f, .18f, .22f));
-            EditorGUI.DrawRect(new Rect(rect.x + 5, rect.y + 5, 19, 19), CookingSortPalette.Get(color));
-            GUI.Label(new Rect(rect.x + 30, rect.y + 4, 94, 22), (color == paintColor ? "• " : "") + color);
-            GUI.Label(new Rect(rect.xMax - 38, rect.y + 4, 35, 22), demand.ToString(), EditorStyles.boldLabel);
-            if (GUI.Button(rect, new GUIContent("", color + ": " + demand + " customer demand / " + tiles + " tiles"), GUIStyle.none))
+            EditorGUI.DrawRect(rect,
+                !deleteCustomerTool && color == paintColor
+                    ? new Color(.24f, .36f, .48f)
+                    : new Color(.16f, .18f, .22f));
+            EditorGUI.DrawRect(new Rect(rect.x + 5, rect.y + 5, 19, 19),
+                CookingSortPalette.Get(color));
+            GUI.Label(new Rect(rect.x + 30, rect.y + 4, 94, 22),
+                (!deleteCustomerTool && color == paintColor ? "• " : "") + color);
+            GUI.Label(new Rect(rect.xMax - 38, rect.y + 4, 35, 22),
+                demand.ToString(), EditorStyles.boldLabel);
+
+            if (GUI.Button(rect, new GUIContent("",
+                color + ": " + demand + " customer demand / " + tiles + " board tiles"),
+                GUIStyle.none))
+            {
+                EndCustomerStroke();
                 paintColor = color;
+                deleteCustomerTool = false;
+                customerPriorityPicking = false;
+            }
         }
+
         GUILayout.Space(6);
-        EditorGUILayout.LabelField("Brush: " + paintColor, EditorStyles.boldLabel);
-        EditorGUILayout.HelpBox("Numbers show total demand for each color. Board tiles and customer demand must match to validate.", MessageType.None);
+        Rect deleteRect = GUILayoutUtility.GetRect(166, 30);
+        EditorGUI.DrawRect(deleteRect, deleteCustomerTool
+            ? new Color(.50f, .22f, .23f)
+            : new Color(.23f, .17f, .19f));
+        EditorGUI.DrawRect(new Rect(deleteRect.x + 5, deleteRect.y + 5, 19, 19),
+            new Color(.88f, .27f, .30f));
+        var iconStyle = new GUIStyle(EditorStyles.miniBoldLabel)
+        {
+            alignment = TextAnchor.MiddleCenter
+        };
+        iconStyle.normal.textColor = Color.white;
+        GUI.Label(new Rect(deleteRect.x + 5, deleteRect.y + 5, 19, 19), "X", iconStyle);
+        GUI.Label(new Rect(deleteRect.x + 30, deleteRect.y + 4, 131, 23),
+            (deleteCustomerTool ? "• " : "") + "Delete Customer",
+            EditorStyles.miniBoldLabel);
+
+        if (GUI.Button(deleteRect, new GUIContent("",
+            "Select the Delete Customer tool, then click a Customer in the grid. Ctrl+Z to undo."),
+            GUIStyle.none))
+        {
+            EndCustomerStroke();
+            deleteCustomerTool = true;
+            customerPriorityPicking = false;
+        }
+
+        GUILayout.Space(5);
+        EditorGUILayout.LabelField(deleteCustomerTool
+            ? "Tool: Delete Customer"
+            : "Brush: " + paintColor, EditorStyles.boldLabel);
+        EditorGUILayout.HelpBox(deleteCustomerTool
+            ? "Click any Customer cell to remove that Customer. Click a color above to return to painting. Ctrl+Z to undo."
+            : "Numbers show total demand for each color. Choose Delete Customer below the palette to remove one from the grid.",
+            MessageType.None);
     }
 }
