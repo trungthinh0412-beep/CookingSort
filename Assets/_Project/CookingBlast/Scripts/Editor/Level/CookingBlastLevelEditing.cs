@@ -4,9 +4,12 @@ using CookingSort2D;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
-
 internal static class CookingBlastLevelEditing
 {
+    private static readonly Vector2Int[] CardinalDirections =
+    {
+        Vector2Int.left, Vector2Int.right, Vector2Int.up, Vector2Int.down
+    };
     internal static SerializedProperty BoardColumns(SerializedObject so) => so.FindProperty("boardColumns");
     internal static SerializedProperty CustomerLanes(SerializedObject so) => so.FindProperty("customerLanes");
 
@@ -22,8 +25,8 @@ internal static class CookingBlastLevelEditing
     internal static void ResizeBoard(CookingBlastLevel level, int columns, int rows, FoodColor fill)
     {
         if (level == null) return;
-        columns = Mathf.Clamp(columns, 1, 14);
-        rows = Mathf.Clamp(rows, 1, 18);
+        columns = Mathf.Clamp(columns, 1, CookingBlastPixelGridDetector.MaxCellsX);
+        rows = Mathf.Clamp(rows, 1, CookingBlastPixelGridDetector.MaxCellsY);
         Undo.RecordObject(level, "Resize Cooking Blast board");
         var so = new SerializedObject(level);
         var cols = BoardColumns(so);
@@ -383,6 +386,226 @@ internal static bool TryAutoFillByPriority(CookingBlastLevel level,
         return true;
     }
 
+internal static bool TryAutoFillOrganicByPriority(
+        CookingBlastLevel level, IReadOnlyList<Vector2Int> priority, int tilesPerTurn,
+        bool interleave, int seed, int organicStrength, out string message)
+    {
+        // Reuse strict Customer/Board validation. Any invalid order or mismatched
+        // demand returns BEFORE we attempt to generate organic patterns.
+        if (!TryAutoFillByPriority(level, priority, tilesPerTurn, interleave, out message))
+            return false;
+
+        var cells = new List<Vector2Int>();
+        var lookup = new Dictionary<Vector2Int, int>();
+        int maxRows = MaxRows(level);
+        for (int row = 0; row < maxRows; row++)
+        {
+            for (int col = 0; col < level.BoardColumns.Count; col++)
+            {
+                BoardColumnData column = level.BoardColumns[col];
+                if (column == null || column.bottomToTop == null ||
+                    row >= column.bottomToTop.Count) continue;
+                var pos = new Vector2Int(col, row);
+                lookup[pos] = cells.Count;
+                cells.Add(pos);
+            }
+        }
+        if (cells.Count == 0) return true;
+
+        var orders = new List<CustomerOrderData>();
+        foreach (Vector2Int id in priority)
+            orders.Add(level.CustomerLanes[id.x].frontToBack[id.y]);
+
+        var remaining = new int[orders.Count];
+        for (int i = 0; i < orders.Count; i++)
+            remaining[i] = orders[i].demand;
+
+        var taken = new bool[cells.Count];
+        var result = new FoodColor[cells.Count];
+        var random = new System.Random(seed);
+        organicStrength = Mathf.Clamp(organicStrength, 0, 100);
+        int count = 0;
+        tilesPerTurn = Mathf.Clamp(tilesPerTurn, 1, 32);
+        int safety = 0;
+
+        // Grow each Customer's patches from already-placed tiles of the same
+        // color. A seeded jitter in frontier selection makes irregular shapes,
+        // while neighbor scoring keeps large areas visually coherent.
+        while (count < cells.Count && safety++ < cells.Count + orders.Count + 2)
+        {
+            bool progress = false;
+            for (int customer = 0; customer < orders.Count; customer++)
+            {
+                int batch = Mathf.Min(remaining[customer],
+                    interleave ? tilesPerTurn : remaining[customer]);
+                FoodColor color = orders[customer].color;
+
+                for (int step = 0; step < batch; step++)
+                {
+                    int best = -1;
+                    float bestScore = float.NegativeInfinity;
+                    bool hasFrontier = false;
+
+                    if (count == 0)
+                    {
+                        best = 0; // Ensure first priority color begins bottom-left.
+                    }
+                    else
+                    {
+                        for (int candidate = 0; candidate < cells.Count; candidate++)
+                        {
+                            if (taken[candidate]) continue;
+                            Vector2Int pos = cells[candidate];
+                            int matched = 0;
+                            int touched = 0;
+                            for (int n = 0; n < CardinalDirections.Length; n++)
+                            {
+                                if (!lookup.TryGetValue(pos + CardinalDirections[n], out int neighbor) ||
+                                    !taken[neighbor]) continue;
+                                touched++;
+                                if (result[neighbor] == color) matched++;
+                            }
+
+                            if (matched == 0) continue;
+                            hasFrontier = true;
+                            // A connected frontier with several matching
+                            // neighbors is preferable. Organic Shape controls
+                            // how wavy vs compact its edge becomes.
+                            float jitter = (float)random.NextDouble() *
+                                           (1.8f + organicStrength * 0.12f);
+                            float score = matched * 5.5f + jitter -
+                                          touched * 0.1f;
+                            if (score > bestScore)
+                            {
+                                bestScore = score;
+                                best = candidate;
+                            }
+                        }
+
+                        // A color appearing for the first time has no existing
+                        // frontier. Seed it near the next available bottom cell,
+                        // then future tiles grow out into their own patch.
+                        if (!hasFrontier)
+                        {
+                            for (int candidate = 0; candidate < cells.Count; candidate++)
+                            {
+                                if (taken[candidate]) continue;
+                                Vector2Int pos = cells[candidate];
+                                float jitter = (float)random.NextDouble() *
+                                               (0.2f + organicStrength * 0.01f);
+                                float score = -(pos.y * level.BoardColumns.Count + pos.x) +
+                                              jitter;
+                                if (score > bestScore)
+                                {
+                                    bestScore = score;
+                                    best = candidate;
+                                }
+                            }
+                        }
+                    }
+
+                    if (best < 0)
+                    {
+                        message = "Organic Fill could not locate an empty Board cell.";
+                        return false;
+                    }
+                    taken[best] = true;
+                    result[best] = color;
+                    remaining[customer]--;
+                    count++;
+                    progress = true;
+                }
+            }
+            if (!progress) break;
+        }
+
+        if (count != cells.Count)
+        {
+            message = "Organic Fill could not satisfy every Customer demand.";
+            return false;
+        }
+
+        int exposedFrontColors = ExposeFrontCustomerColors(level, cells, result);
+        Undo.RecordObject(level, "Shape Cooking Blast Organic Tile Regions");
+        for (int i = 0; i < cells.Count; i++)
+        {
+            Vector2Int pos = cells[i];
+            level.BoardColumns[pos.x].bottomToTop[pos.y] = result[i];
+        }
+        Dirty(level);
+        message = "Organic Clusters: " + count + " tiles, Seed " + seed +
+                  ". Customer demand preserved; first priority stays at the bottom. " +
+                  exposedFrontColors + " missing Front color(s) exposed.";
+        return true;
+    }
+
+private static int ExposeFrontCustomerColors(
+        CookingBlastLevel level, List<Vector2Int> positions,
+        FoodColor[] assigned)
+    {
+        if (level == null || positions.Count == 0) return 0;
+
+        var desired = new HashSet<FoodColor>();
+        foreach (CustomerLaneData lane in level.CustomerLanes)
+            if (lane != null && lane.frontToBack != null &&
+                lane.frontToBack.Count > 0 && lane.frontToBack[0] != null)
+                desired.Add(lane.frontToBack[0].color);
+
+        var bottomCounts = new Dictionary<FoodColor, int>();
+        for (int i = 0; i < positions.Count; i++)
+        {
+            if (positions[i].y != 0) continue;
+            FoodColor color = assigned[i];
+            if (!bottomCounts.ContainsKey(color)) bottomCounts[color] = 0;
+            bottomCounts[color]++;
+        }
+        int changed = 0;
+        foreach (FoodColor desiredColor in desired)
+        {
+            if (bottomCounts.TryGetValue(desiredColor, out int existing) && existing > 0)
+                continue;
+
+            // Prefer a source near the front rather than moving a Tile from
+            // the top of the board. Never move the first priority tile.
+            int source = -1;
+            for (int i = 1; i < positions.Count; i++)
+            {
+                if (positions[i].y > 0 && assigned[i] == desiredColor)
+                {
+                    source = i;
+                    break;
+                }
+            }
+            if (source < 0) continue;
+
+            int target = -1;
+            for (int i = positions.Count - 1; i >= 1; i--)
+            {
+                if (positions[i].y != 0) continue;
+                FoodColor displaced = assigned[i];
+                bottomCounts.TryGetValue(displaced, out int count);
+                // Don't hide the only exposed Tile for another front Customer.
+                if (count < 2 && desired.Contains(displaced)) continue;
+                target = i;
+                break;
+            }
+            if (target < 0) continue;
+
+            FoodColor replaced = assigned[target];
+            assigned[target] = desiredColor;
+            assigned[source] = replaced;
+            bottomCounts[replaced]--;
+            bottomCounts[desiredColor] = 1;
+            changed++;
+        }
+        return changed;
+    }
+
+
+
+
+
+
 
 
 internal static bool ShuffleBoardKeepingCounts(CookingBlastLevel level, int seed, bool spreadColors)
@@ -500,6 +723,117 @@ private static int ColorPlacementWeight(CookingBlastLevel level, Dictionary<Food
         so.ApplyModifiedProperties();
         Dirty(level);
     }
+
+internal static bool TryGenerateExactCustomerCount(
+        CookingBlastLevel level, int requestedCustomers, int requestedLanes, out string message)
+    {
+        message = "Open a Cooking Blast Level first.";
+        if (level == null) return false;
+
+        var counts = TileCounts(level);
+        var colors = new List<FoodColor>();
+        int total = 0;
+        foreach (FoodColor color in Enum.GetValues(typeof(FoodColor)))
+        {
+            if (!counts.TryGetValue(color, out int amount) || amount <= 0) continue;
+            colors.Add(color);
+            total += amount;
+        }
+
+        if (colors.Count == 0)
+        {
+            message = "No Tiles on Board.";
+            return false;
+        }
+        if (requestedCustomers < colors.Count || requestedCustomers > total)
+        {
+            message = "Customer count must be between " + colors.Count +
+                      " (one per used Tile color) and " + total +
+                      " (every Customer needs at least one Tile).";
+            return false;
+        }
+
+        int lanesCount = Mathf.Clamp(requestedLanes, 1, 8);
+        if (lanesCount > requestedCustomers) lanesCount = requestedCustomers;
+
+        // Each used FoodColor gets at least one Customer. Add the remaining
+        // Customers to the color with the largest average Tile count per
+        // Customer. This avoids generating a large number of single-Tile
+        // Customers while another color has disproportionately high demand.
+        var slots = new Dictionary<FoodColor, int>();
+        foreach (FoodColor color in colors) slots[color] = 1;
+
+        int allocated = colors.Count;
+        while (allocated < requestedCustomers)
+        {
+            FoodColor chosen = colors[0];
+            double highest = double.NegativeInfinity;
+            bool found = false;
+            foreach (FoodColor color in colors)
+            {
+                int pieces = counts[color];
+                int groups = slots[color];
+                if (groups >= pieces) continue;
+                double score = (double)pieces / groups;
+                if (!found || score > highest)
+                {
+                    highest = score;
+                    chosen = color;
+                    found = true;
+                }
+            }
+            if (!found)
+            {
+                message = "Could not assign the requested Customer count.";
+                return false;
+            }
+            slots[chosen]++;
+            allocated++;
+        }
+
+        var ordersByColor = new Dictionary<FoodColor, Queue<CustomerOrderData>>();
+        foreach (FoodColor color in colors)
+        {
+            int pieces = counts[color];
+            int groups = slots[color];
+            int perGroup = pieces / groups;
+            int remainder = pieces % groups;
+            var queue = new Queue<CustomerOrderData>();
+            for (int i = 0; i < groups; i++)
+                queue.Enqueue(new CustomerOrderData(color, perGroup + (i < remainder ? 1 : 0)));
+            ordersByColor[color] = queue;
+        }
+
+        // Build all queues before mutating Unity data.
+        var newLanes = new List<CustomerLaneData>();
+        for (int i = 0; i < lanesCount; i++)
+            newLanes.Add(new CustomerLaneData { frontToBack = new List<CustomerOrderData>() });
+
+        // Round-robin by color, then lane. Each lane gets a Front Customer.
+        int customerIndex = 0;
+        bool hasMore = true;
+        while (hasMore)
+        {
+            hasMore = false;
+            foreach (FoodColor color in colors)
+            {
+                Queue<CustomerOrderData> colorQueue = ordersByColor[color];
+                if (colorQueue.Count == 0) continue;
+                newLanes[customerIndex % lanesCount].frontToBack.Add(colorQueue.Dequeue());
+                customerIndex++;
+                hasMore = true;
+            }
+        }
+
+        Undo.RecordObject(level, "Generate Exact Cooking Blast Customer Count");
+        level.CustomerLanes.Clear();
+        level.CustomerLanes.AddRange(newLanes);
+        Dirty(level);
+        message = "Generated " + customerIndex + " Customers in " + lanesCount +
+                  " lanes, matching " + total + " Tiles of " + colors.Count + " colors.";
+        return true;
+    }
+
 
     internal static Dictionary<FoodColor, int> TileCounts(CookingBlastLevel level)
     {
