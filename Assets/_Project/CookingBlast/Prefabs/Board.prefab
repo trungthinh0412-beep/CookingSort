@@ -139,7 +139,7 @@ MonoBehaviour:
   tilePrefab: {fileID: 112428899413308147, guid: ea3e74737b6150a4ea6035a00534c5d8, type: 3}
   tileRoot: {fileID: 7174922274440986648}
   cellSize: 0.48
-  gap: 0.04
+  gap: 0.02
   serveInterval: 0.025
   dropDuration: 0.13
   scanInterval: 0.18

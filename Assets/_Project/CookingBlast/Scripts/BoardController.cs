@@ -9,7 +9,7 @@ namespace CookingSort2D
         [SerializeField] private FoodTileView tilePrefab;
         [SerializeField] private Transform tileRoot;
         [SerializeField] private float cellSize = 0.48f;
-        [SerializeField] private float gap = 0.04f;
+        [SerializeField] private float gap = 0.02f;
 [SerializeField] private float serveInterval = 0.025f;
         [SerializeField, Min(0.01f)] private float dropDuration = 0.13f;
         [Header("Tile scanning")]
