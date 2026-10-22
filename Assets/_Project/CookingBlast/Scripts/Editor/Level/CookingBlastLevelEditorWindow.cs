@@ -182,6 +182,32 @@ private void DrawBoardEditor()
         boardPanel.Draw(level, ref paintColor, ref boardColumns, ref boardRows, ref paletteMask, ref randomSeed, position.width, laneCount, minDemand, maxDemand);
     }
 
+internal static void RefreshBoardSizeFromImport(CookingBlastLevel modifiedLevel)
+    {
+        if (modifiedLevel == null) return;
+        foreach (var window in Resources.FindObjectsOfTypeAll<CookingBlastLevelEditorWindow>())
+        {
+            if (window.level != modifiedLevel) continue;
+            window.boardColumns = Mathf.Max(1, modifiedLevel.BoardColumns.Count);
+            window.boardRows = Mathf.Max(1, CookingBlastLevelEditing.MaxRows(modifiedLevel));
+            window.Repaint();
+        }
+    }
+
+internal static void RefreshCustomersFromImageImport(CookingBlastLevel changedLevel)
+    {
+        if (changedLevel == null) return;
+        foreach (var window in Resources.FindObjectsOfTypeAll<CookingBlastLevelEditorWindow>())
+        {
+            if (window.level != changedLevel) continue;
+            window.laneCount = Mathf.Max(1, changedLevel.CustomerLanes.Count);
+            window.boardPanel.ResetPriority(changedLevel);
+            window.Repaint();
+        }
+    }
+
+
+
 private void DrawCustomerEditor()
     {
         using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
