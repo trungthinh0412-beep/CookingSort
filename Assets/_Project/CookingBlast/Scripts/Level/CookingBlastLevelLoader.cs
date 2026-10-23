@@ -9,8 +9,6 @@ namespace CookingSort2D
     [DisallowMultipleComponent]
     public sealed class CookingBlastLevelLoader : MonoBehaviour
     {
-        private const string ProgressKey = "CookingBlast.CurrentLevel";
-
         [Header("References")]
         [SerializeField] private CookingBlastLevelConfig config;
         [SerializeField] private CookingSortGameController game;
@@ -43,8 +41,8 @@ namespace CookingSort2D
                 if (found != null) levelRoot = found;
             }
 
-            CurrentPlayerLevel = persistProgress
-                ? Mathf.Max(1, PlayerPrefs.GetInt(ProgressKey, defaultPlayerLevel))
+            CurrentPlayerLevel = persistProgress && Data.PlayerData != null
+                ? Data.PlayerData.CurrentLevelIndex
                 : Mathf.Max(1, defaultPlayerLevel);
         }
 
@@ -138,8 +136,8 @@ namespace CookingSort2D
 
                 if (persistProgress)
                 {
-                    PlayerPrefs.SetInt(ProgressKey, CurrentPlayerLevel);
-                    PlayerPrefs.Save();
+                    Data.PlayerData.CurrentLevelIndex = CurrentPlayerLevel;
+                    Data.SaveData();
                 }
 
                 game.SetLevelDefinition(loaded);
@@ -190,9 +188,9 @@ namespace CookingSort2D
         public void ResetProgress(int level = 1)
         {
             CurrentPlayerLevel = Mathf.Max(1, level);
-            if (!persistProgress) return;
-            PlayerPrefs.SetInt(ProgressKey, CurrentPlayerLevel);
-            PlayerPrefs.Save();
+            if (!persistProgress || Data.PlayerData == null) return;
+            Data.PlayerData.CurrentLevelIndex = CurrentPlayerLevel;
+            Data.SaveData();
         }
 
         private void ReleaseCurrentLevel()

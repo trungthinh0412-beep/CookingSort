@@ -31,7 +31,7 @@ private bool painting;
     private int lastRow = -1;
 
     private Vector2 gridScroll;
-    private static readonly FoodColor[] Colors = (FoodColor[])Enum.GetValues(typeof(FoodColor));
+    private static FoodColor[] Colors => CookingBlastTileFromImageWindow.GetAvailableTilePalette().ToArray();
 
 internal void Draw(CookingBlastLevel level, ref FoodColor brush, ref int columns, ref int rows,
         ref int mask, ref int seed, float width, int laneCount, int minDemand, int maxDemand)
@@ -88,6 +88,19 @@ internal void Draw(CookingBlastLevel level, ref FoodColor brush, ref int columns
                     EditorGUILayout.LabelField("TILES  /  NEEDED", EditorStyles.miniBoldLabel);
                     var counts = CookingBlastLevelEditing.TileCounts(level);
                     var demands = CookingBlastLevelEditing.DemandCounts(level);
+                    string missingSpriteNames = "";
+                    foreach (FoodColor type in Enum.GetValues(typeof(FoodColor)))
+                    {
+                        if (!counts.TryGetValue(type, out int number) || number == 0 ||
+                            CookingBlastTileSpriteEditorPreview.GetSprite(type) != null)
+                            continue;
+                        if (missingSpriteNames.Length > 0) missingSpriteNames += ", ";
+                        missingSpriteNames += type.ToString();
+                    }
+                    if (missingSpriteNames.Length > 0)
+                        EditorGUILayout.HelpBox("Missing custom Tile prefab for: " +
+                            missingSpriteNames + ". Gameplay uses TileBase for those types.",
+                            MessageType.Warning);
                     foreach (FoodColor color in Colors)
                     {
                         int count = counts.TryGetValue(color, out int n) ? n : 0;
@@ -96,8 +109,9 @@ internal void Draw(CookingBlastLevel level, ref FoodColor brush, ref int columns
                         EditorGUI.DrawRect(rect, color == brush
                             ? new Color(.24f, .36f, .48f)
                             : new Color(.16f, .18f, .22f));
-                        EditorGUI.DrawRect(new Rect(rect.x + 5, rect.y + 5, 19, 19),
-                            CookingSortPalette.Get(color));
+                        Rect tileSwatch = new Rect(rect.x + 5, rect.y + 5, 19, 19);
+                        if (!CookingBlastTileSpriteEditorPreview.Draw(tileSwatch, color))
+                            EditorGUI.DrawRect(tileSwatch, CookingSortPalette.Get(color));
                         GUI.Label(new Rect(rect.x + 30, rect.y + 4, 88, 22),
                             (color == brush ? "• " : "") + color);
                         var valueStyle = new GUIStyle(EditorStyles.miniBoldLabel);
@@ -160,14 +174,16 @@ internal void Draw(CookingBlastLevel level, ref FoodColor brush, ref int columns
                 continue;
             Color color = CookingSortPalette.Get(data.bottomToTop[r]);
             if (r == 0) EditorGUI.DrawRect(new Rect(cell.x-1,cell.y-1,cell.width+2,cell.height+2), new Color(.65f,.85f,1));
-            EditorGUI.DrawRect(cell, Color.Lerp(color, Color.black, .25f));
-            EditorGUI.DrawRect(new Rect(cell.x+2,cell.y+2,cell.width-4,cell.height-5), color);
-            EditorGUI.DrawRect(new Rect(cell.x+3,cell.y+2,cell.width-6,2), Color.Lerp(color, Color.white,.25f));
-            if (size >= 27)
+            EditorGUI.DrawRect(cell, new Color(.12f, .14f, .18f));
+            if (!CookingBlastTileSpriteEditorPreview.Draw(cell, data.bottomToTop[r]))
             {
-                var style = new GUIStyle(EditorStyles.centeredGreyMiniLabel);
-                style.normal.textColor = color.grayscale > .6f ? Color.black : Color.white;
-                GUI.Label(cell, CookingSortPalette.ShortName(data.bottomToTop[r]), style);
+                EditorGUI.DrawRect(new Rect(cell.x + 2, cell.y + 2, cell.width - 4, cell.height - 4), color);
+                if (size >= 27)
+                {
+                    var style = new GUIStyle(EditorStyles.centeredGreyMiniLabel);
+                    style.normal.textColor = color.grayscale > .6f ? Color.black : Color.white;
+                    GUI.Label(cell, CookingSortPalette.ShortName(data.bottomToTop[r]), style);
+                }
             }
             if (!GUI.enabled || !cell.Contains(ev.mousePosition)) continue;
             if (ev.type == EventType.MouseDown && ev.button == 1)
@@ -232,8 +248,13 @@ internal void Draw(CookingBlastLevel level, ref FoodColor brush, ref int columns
             {
                 GUILayout.Label(i == 0 ? "1 • BOTTOM" : (i+1).ToString(), GUILayout.Width(95));
                 Rect swatch = GUILayoutUtility.GetRect(20,20,GUILayout.Width(20));
-                EditorGUI.DrawRect(swatch, CookingSortPalette.Get((FoodColor)list.GetArrayElementAtIndex(i).enumValueIndex));
-                EditorGUILayout.PropertyField(list.GetArrayElementAtIndex(i),GUIContent.none);
+                FoodColor swatchColor = (FoodColor)list.GetArrayElementAtIndex(i).enumValueIndex;
+                if (!CookingBlastTileSpriteEditorPreview.Draw(swatch, swatchColor))
+                    EditorGUI.DrawRect(swatch, CookingSortPalette.Get(swatchColor));
+                FoodColor editedColor = CookingBlastTileSpriteEditorPreview.DrawAvailableColorPopup(
+                    swatchColor, GUILayout.Width(150));
+                if (swatchColor != editedColor)
+                    list.GetArrayElementAtIndex(i).enumValueIndex = (int)editedColor;
                 using(new EditorGUI.DisabledScope(i==0))
                     if(GUILayout.Button("↑",GUILayout.Width(25))) {moveIndex=i;move=-1;}
                 using(new EditorGUI.DisabledScope(i==list.arraySize-1))
@@ -446,7 +467,7 @@ private void DrawBoardFillButton(CookingBlastLevel level, int seed)
             {
                 GUILayout.Label("Pattern", GUILayout.Width(58));
                 organicPattern = EditorGUILayout.Popup(organicPattern,
-                    new[] { "Organic Clusters (recommended)", "Ordered Rows" },
+                    new[] { "Color Patches (recommended)", "Ordered Rows (legacy)" },
                     GUILayout.MaxWidth(270));
                 GUILayout.FlexibleSpace();
             }
@@ -454,7 +475,7 @@ private void DrawBoardFillButton(CookingBlastLevel level, int seed)
             if (organicPattern == 0)
             {
                 organicStrength = EditorGUILayout.IntSlider(
-                    new GUIContent("Organic Shape", "More refinement creates connected, rounded color patches while retaining exact counts."),
+                    new GUIContent("Patch Shape", "Grow irregular color patches from scattered seeds. Higher values add smaller, more varied patches."),
                     organicStrength, 25, 100);
             }
 

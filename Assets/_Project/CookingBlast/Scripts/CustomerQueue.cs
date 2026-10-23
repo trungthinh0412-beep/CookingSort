@@ -5,7 +5,11 @@ namespace CookingSort2D
 {
     public class CustomerQueue : MonoBehaviour
     {
-        [SerializeField] private CustomerView customerPrefab;
+        
+        [Header("Animal prefabs matched to Tile FoodColor")]
+        [Tooltip("Index = FoodColor enum value; missing entries fall back to AnimalBase.")]
+        [SerializeField] private CustomerView[] animalPrefabsByColor = new CustomerView[10];
+[SerializeField] private CustomerView customerPrefab;
         
         [SerializeField] private Transform slotsRoot;
         [SerializeField] private float slotSpacing = 1.05f;
@@ -34,13 +38,24 @@ private void Awake()
             CacheSlots();
         }
 
+public CustomerView GetAnimalPrefab(FoodColor type)
+        {
+            int index = (int)type;
+            if (animalPrefabsByColor != null && index >= 0 &&
+                index < animalPrefabsByColor.Length &&
+                animalPrefabsByColor[index] != null)
+                return animalPrefabsByColor[index];
+            return customerPrefab;
+        }
+
+
 public void Initialize(CookingSortGameController game, CookingBlastLevel data)
         {
             _game = game;
             AutoBindRoots();
             CacheSlots();
             ClearCustomers();
-            if (data == null || customerPrefab == null || customersRoot == null) return;
+            if (data == null || customersRoot == null) return;
 
             int laneCount = Mathf.Max(1, data.CustomerLanes.Count);
             EnsureSlotCount(laneCount);
@@ -58,8 +73,15 @@ public void Initialize(CookingSortGameController game, CookingBlastLevel data)
                 {
                     CustomerOrderData order = laneData.frontToBack[row];
                     if (order == null) continue;
-                    CustomerView view = Instantiate(customerPrefab, customersRoot);
-                    view.name = $"Customer_L{lane}_R{row}_{order.color}";
+                    CustomerView animalPrefab = GetAnimalPrefab(order.color);
+                    if (animalPrefab == null)
+                    {
+                        Debug.LogError("[CookingBlast] Missing Animal prefab for " +
+                            order.color + " on " + name);
+                        continue;
+                    }
+                    CustomerView view = Instantiate(animalPrefab, customersRoot);
+                    // Keep prefab instance names and scale: Animal 1(Clone), (1,1,1).
                     view.BindQueue(this, lane, order);
                     list.Add(view);
                 }

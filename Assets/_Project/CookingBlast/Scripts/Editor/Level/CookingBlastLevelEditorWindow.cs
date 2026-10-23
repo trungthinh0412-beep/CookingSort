@@ -212,7 +212,7 @@ private void DrawCustomerEditor()
     {
         using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
         {
-            EditorGUILayout.LabelField("CUSTOMER DESIGNER", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("ANIMAL / CUSTOMER DESIGNER", EditorStyles.boldLabel);
             EditorGUILayout.LabelField(customerPriorityPicking
                 ? "Click Customers to set priority #1, #2, #3... • Click again to unpin"
                 : deleteCustomerTool
@@ -556,8 +556,13 @@ private void DrawCustomerDetails()
                 GUILayout.Label(i == 0 ? "FRONT" : (i + 1).ToString(), GUILayout.Width(45));
                 var colorProp = order.FindPropertyRelative("color");
                 Rect swatch = GUILayoutUtility.GetRect(20, 20, GUILayout.Width(20));
-                EditorGUI.DrawRect(swatch, CookingSortPalette.Get((FoodColor)colorProp.enumValueIndex));
-                EditorGUILayout.PropertyField(colorProp, GUIContent.none, GUILayout.Width(100));
+                FoodColor animalColor = (FoodColor)colorProp.enumValueIndex;
+                if (!CookingBlastTileSpriteEditorPreview.DrawAnimal(swatch, animalColor))
+                    EditorGUI.DrawRect(swatch, CookingSortPalette.Get(animalColor));
+                FoodColor updatedColor = CookingBlastTileSpriteEditorPreview.DrawAvailableColorPopup(
+                    (FoodColor)colorProp.enumValueIndex, GUILayout.Width(140));
+                if ((FoodColor)colorProp.enumValueIndex != updatedColor)
+                    colorProp.enumValueIndex = (int)updatedColor;
                 EditorGUILayout.PropertyField(order.FindPropertyRelative("demand"), GUIContent.none, GUILayout.Width(70));
                 using (new EditorGUI.DisabledScope(i == 0))
                     if (GUILayout.Button("↑", GUILayout.Width(25))) { moveIndex = i; move = -1; }
@@ -627,8 +632,11 @@ private void DrawCustomerGrid(float available)
                     if (row == 0)
                         EditorGUI.DrawRect(new Rect(cell.x - 1, cell.y - 1, cell.width + 2, cell.height + 2),
                             new Color(.65f, .85f, 1f));
-                    EditorGUI.DrawRect(cell, Color.Lerp(color, Color.black, .23f));
-                    EditorGUI.DrawRect(new Rect(cell.x + 2, cell.y + 2, cell.width - 4, cell.height - 4), color);
+                    EditorGUI.DrawRect(cell, new Color(.14f, .16f, .20f));
+                    bool hasAnimalSprite = CookingBlastTileSpriteEditorPreview.DrawAnimal(cell, customer.color);
+                    if (!hasAnimalSprite)
+                        EditorGUI.DrawRect(new Rect(cell.x + 2, cell.y + 2,
+                            cell.width - 4, cell.height - 4), color);
                     var style = new GUIStyle(EditorStyles.centeredGreyMiniLabel);
                     style.normal.textColor = color.grayscale > .6f ? Color.black : Color.white;
                     int rank = boardPanel.GetPriorityRank(level, lane, row);
@@ -644,7 +652,15 @@ private void DrawCustomerGrid(float available)
                     Rect labelRect = rank > 0
                         ? new Rect(cell.x + 1, cell.y + 18, cell.width - 2, cell.height - 19)
                         : cell;
-                    GUI.Label(labelRect, CookingSortPalette.ShortName(customer.color) + " " + customer.demand, style);
+                    if (hasAnimalSprite)
+                    {
+                        Rect demandRect = new Rect(cell.x + 7, cell.yMax - 19, cell.width - 14, 17);
+                        EditorGUI.DrawRect(demandRect, new Color(0f, 0f, 0f, .70f));
+                        style.normal.textColor = Color.white;
+                        GUI.Label(demandRect, customer.demand.ToString(), style);
+                    }
+                    else
+                        GUI.Label(labelRect, CookingSortPalette.ShortName(customer.color) + " " + customer.demand, style);
                 }
 
                 if (!GUI.enabled || !cell.Contains(ev.mousePosition)) continue;
@@ -707,11 +723,11 @@ private void DrawCustomerGrid(float available)
 
 private void DrawCustomerPalette()
     {
-        EditorGUILayout.LabelField("COLOR LIST", EditorStyles.miniBoldLabel);
+        EditorGUILayout.LabelField("ANIMAL LIST", EditorStyles.miniBoldLabel);
         var demandCounts = CookingBlastLevelEditing.DemandCounts(level);
         var tileCounts = CookingBlastLevelEditing.TileCounts(level);
 
-        foreach (FoodColor color in Enum.GetValues(typeof(FoodColor)))
+        foreach (FoodColor color in CookingBlastTileFromImageWindow.GetAvailableTilePalette())
         {
             int demand = demandCounts.TryGetValue(color, out int d) ? d : 0;
             int tiles = tileCounts.TryGetValue(color, out int t) ? t : 0;
@@ -721,8 +737,9 @@ private void DrawCustomerPalette()
                 !deleteCustomerTool && color == paintColor
                     ? new Color(.24f, .36f, .48f)
                     : new Color(.16f, .18f, .22f));
-            EditorGUI.DrawRect(new Rect(rect.x + 5, rect.y + 5, 19, 19),
-                CookingSortPalette.Get(color));
+            Rect animalIcon = new Rect(rect.x + 5, rect.y + 5, 19, 19);
+            if (!CookingBlastTileSpriteEditorPreview.DrawAnimal(animalIcon, color))
+                EditorGUI.DrawRect(animalIcon, CookingSortPalette.Get(color));
             GUI.Label(new Rect(rect.x + 30, rect.y + 4, 94, 22),
                 (!deleteCustomerTool && color == paintColor ? "• " : "") + color);
             GUI.Label(new Rect(rect.xMax - 38, rect.y + 4, 35, 22),

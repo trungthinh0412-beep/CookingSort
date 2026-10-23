@@ -54,9 +54,6 @@ public static class Data
     public static void ClearData()
     {
         int previousStar = PlayerData?.Star ?? 0;
-        
-
-
 
         if (File.Exists(SavePath))
         {
@@ -75,6 +72,7 @@ public static class Data
         if (previousStar > 0)
             Observer.StarChanged?.Invoke(-previousStar);
 
+        Observer.LevelChanged?.Invoke(PlayerData.CurrentLevelIndex);
         Observer.StarChangedDone?.Invoke();
         Observer.CollectionChanged?.Invoke();
     }

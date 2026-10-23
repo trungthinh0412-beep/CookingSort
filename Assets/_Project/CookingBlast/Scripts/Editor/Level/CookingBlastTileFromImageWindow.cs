@@ -97,7 +97,7 @@ private void OnGUI()
             "Pixel Image", sourceImage, typeof(Texture2D), false);
         if (EditorGUI.EndChangeCheck()) ClearPreview();
 
-        EditorGUILayout.LabelField("Tile Palette: nearest available game FoodColor",
+        EditorGUILayout.LabelField("Tile Palette: nearest configured Tile prefab sprite",
             EditorStyles.miniLabel);
         if (sourceImage != null)
             EditorGUILayout.LabelField("Image: " + sourceImage.width + " x " +
@@ -267,11 +267,14 @@ private void BuildPreview()
 
 internal static List<FoodColor> GetAvailableTilePalette()
     {
-        // CookingSortPalette defines the actual colors shown by game Tiles.
-        // Use all FoodColor values instead of reading the current Board.
+        // Image import only uses tile types that have actual artwork prefabs.
+        // Red/Cyan have no prefab yet, so do not generate those from an image.
         var colors = new List<FoodColor>();
         foreach (FoodColor color in Enum.GetValues(typeof(FoodColor)))
-            colors.Add(color);
+        {
+            if (CookingBlastTileSpriteEditorPreview.GetSprite(color) != null)
+                colors.Add(color);
+        }
         return colors;
     }
 
@@ -307,8 +310,9 @@ private void DrawEditablePalette()
                     Rect rect = GUILayoutUtility.GetRect(96, 27, GUILayout.Width(96));
                     EditorGUI.DrawRect(rect, color == tileBrush ?
                         new Color(.27f, .42f, .57f) : new Color(.16f, .18f, .21f));
-                    EditorGUI.DrawRect(new Rect(rect.x + 4, rect.y + 4, 18, 18),
-                        CookingSortPalette.Get(color));
+                    Rect swatch = new Rect(rect.x + 4, rect.y + 4, 18, 18);
+                    if (!CookingBlastTileSpriteEditorPreview.Draw(swatch, color))
+                        EditorGUI.DrawRect(swatch, CookingSortPalette.Get(color));
                     GUI.Label(new Rect(rect.x + 26, rect.y + 5, 65, 20),
                         color.ToString(), EditorStyles.miniBoldLabel);
                     if (GUI.Button(rect, new GUIContent("",
@@ -382,7 +386,9 @@ private void DrawPreviewGrid()
             Rect cell = new Rect(area.x + col * size + 1,
                 area.y + (previewRows - row - 1) * size + 1,
                 size - 2, size - 2);
-            EditorGUI.DrawRect(cell, CookingSortPalette.Get(preview[col, row]));
+            EditorGUI.DrawRect(cell, new Color(.13f, .15f, .19f));
+            if (!CookingBlastTileSpriteEditorPreview.Draw(cell, preview[col, row]))
+                EditorGUI.DrawRect(cell, CookingSortPalette.Get(preview[col, row]));
 
             if (!cell.Contains(ev.mousePosition)) continue;
 
@@ -494,7 +500,7 @@ private void DrawCustomerSection()
                 }
 
             EditorGUILayout.LabelField(
-                "CUSTOMER DESIGNER  |  " + currentCount + " Customers  •  " +
+                "ANIMAL / CUSTOMER DESIGNER  |  " + currentCount + " Animals  •  " +
                 totalDemand + "/" + level.TotalTileCount + " Demand",
                 EditorStyles.boldLabel);
 
@@ -536,14 +542,14 @@ private void DrawCustomerSection()
 
             GUILayout.Space(6);
             showCustomerList = EditorGUILayout.Foldout(showCustomerList,
-                "CUSTOMER GRID  •  FRONT / FIRST TO SELECT", true);
+                "ANIMAL GRID  •  FRONT / FIRST TO SELECT", true);
             if (showCustomerList)
             {
                 using (new EditorGUILayout.HorizontalScope())
                 {
-                    customerBrush = (FoodColor)EditorGUILayout.EnumPopup(
-                        "Add Customer Color", customerBrush,
-                        GUILayout.MaxWidth(280));
+                    GUILayout.Label("Add Customer Color", GUILayout.Width(125));
+                    customerBrush = CookingBlastTileSpriteEditorPreview.DrawAvailableColorPopup(
+                        customerBrush, GUILayout.Width(150));
                     GUILayout.FlexibleSpace();
                     GUILayout.Label("Select / Shift+Click Delete / + Add",
                         EditorStyles.miniLabel);
@@ -616,15 +622,28 @@ private void DrawCustomerGrid()
                             cell.width + 4, cell.height + 4),
                             selected ? new Color(1f, .86f, .34f) :
                                 new Color(.65f, .85f, 1f));
-                    EditorGUI.DrawRect(cell, Color.Lerp(tint, Color.black, .28f));
-                    EditorGUI.DrawRect(new Rect(cell.x + 3, cell.y + 3,
-                        cell.width - 6, cell.height - 6), tint);
+                    EditorGUI.DrawRect(cell, new Color(.13f, .15f, .19f));
+                    bool hasAnimal = CookingBlastTileSpriteEditorPreview.DrawAnimal(cell, order.color);
+                    if (!hasAnimal)
+                        EditorGUI.DrawRect(new Rect(cell.x + 3, cell.y + 3,
+                            cell.width - 6, cell.height - 6), tint);
                     var label = new GUIStyle(EditorStyles.centeredGreyMiniLabel);
-                    label.normal.textColor = tint.grayscale > .55f ?
-                        Color.black : Color.white;
                     label.fontStyle = FontStyle.Bold;
-                    GUI.Label(cell, CookingSortPalette.ShortName(order.color) +
-                        "\n" + order.demand, label);
+                    label.normal.textColor = Color.white;
+                    if (hasAnimal)
+                    {
+                        Rect demandBadge = new Rect(cell.x + 10, cell.yMax - 20,
+                            cell.width - 20, 17);
+                        EditorGUI.DrawRect(demandBadge, new Color(0f, 0f, 0f, .75f));
+                        GUI.Label(demandBadge, order.demand.ToString(), label);
+                    }
+                    else
+                    {
+                        label.normal.textColor = tint.grayscale > .55f ?
+                            Color.black : Color.white;
+                        GUI.Label(cell, CookingSortPalette.ShortName(order.color) +
+                            "\n" + order.demand, label);
+                    }
                 }
 
                 if (!cell.Contains(ev.mousePosition) ||
@@ -703,8 +722,9 @@ private void DrawSelectedCustomerDetails()
             using (new EditorGUILayout.HorizontalScope())
             {
                 EditorGUI.BeginChangeCheck();
-                FoodColor color = (FoodColor)EditorGUILayout.EnumPopup(
-                    "Color", selected.color, GUILayout.MaxWidth(230));
+                GUILayout.Label("Color", GUILayout.Width(45));
+                FoodColor color = CookingBlastTileSpriteEditorPreview.DrawAvailableColorPopup(
+                    selected.color, GUILayout.Width(145));
                 int demand = Mathf.Max(1, EditorGUILayout.IntField(
                     "Demand", selected.demand, GUILayout.MaxWidth(190)));
                 if (EditorGUI.EndChangeCheck())
@@ -777,7 +797,8 @@ private void DrawColorSummary()
                 using (new EditorGUILayout.HorizontalScope())
                 {
                     Rect rect = GUILayoutUtility.GetRect(13, 13, GUILayout.Width(13));
-                    EditorGUI.DrawRect(rect, CookingSortPalette.Get(color));
+                    if (!CookingBlastTileSpriteEditorPreview.Draw(rect, color))
+                        EditorGUI.DrawRect(rect, CookingSortPalette.Get(color));
                     GUILayout.Label(color + ": " + count);
                 }
             }

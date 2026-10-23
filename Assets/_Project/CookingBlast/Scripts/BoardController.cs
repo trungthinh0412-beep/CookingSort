@@ -1,15 +1,22 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace CookingSort2D
 {
     public class BoardController : MonoBehaviour
     {
-        [SerializeField] private FoodTileView tilePrefab;
+        
+        [Header("Prefab for each FoodColor (matches Customer logic)")]
+        [Tooltip("Index = FoodColor enum value. Empty entries use TileBase fallback.")]
+        [SerializeField] private FoodTileView[] tilePrefabsByColor = new FoodTileView[10];
+[SerializeField] private FoodTileView tilePrefab;
         [SerializeField] private Transform tileRoot;
         [SerializeField] private float cellSize = 0.48f;
-        [SerializeField] private float gap = 0.02f;
+        [FormerlySerializedAs("gap")]
+        [SerializeField] private float gapX;
+        [SerializeField] private float gapY;
 [SerializeField] private float serveInterval = 0.025f;
         [SerializeField, Min(0.01f)] private float dropDuration = 0.13f;
         [Header("Tile scanning")]
@@ -54,6 +61,17 @@ private readonly List<bool> _columnBusy = new List<bool>();
             }
         }
 
+public FoodTileView GetTilePrefab(FoodColor color)
+        {
+            int index = (int)color;
+            if (tilePrefabsByColor != null && index >= 0 &&
+                index < tilePrefabsByColor.Length && tilePrefabsByColor[index] != null)
+                return tilePrefabsByColor[index];
+            // Backwards compatibility for colors without custom sprites.
+            return tilePrefab;
+        }
+
+
 public void Initialize(CookingSortGameController game, CookingBlastLevel data)
         {
             _game = game;
@@ -63,7 +81,7 @@ public void Initialize(CookingSortGameController game, CookingBlastLevel data)
                 if (t != null) tileRoot = t;
             }
             ClearBoard();
-            if (data == null || tilePrefab == null || tileRoot == null) return;
+            if (data == null || tileRoot == null) return;
 
             _maxRows = 0;
             for (int col = 0; col < data.BoardColumns.Count; col++)
@@ -78,9 +96,17 @@ public void Initialize(CookingSortGameController game, CookingBlastLevel data)
 _columnBusy.Add(false);
                 for (int row = 0; row < count; row++)
                 {
-                    FoodTileView tile = Instantiate(tilePrefab, tileRoot);
-                    tile.name = $"Tile_C{col}_R{row}_{columnData.bottomToTop[row]}";
-                    tile.Setup(columnData.bottomToTop[row]);
+                    FoodColor kind = columnData.bottomToTop[row];
+                    FoodTileView prefab = GetTilePrefab(kind);
+                    if (prefab == null)
+                    {
+                        Debug.LogError("[CookingBlast] Missing Tile prefab for " + kind + " on " + name);
+                        continue;
+                    }
+                    FoodTileView tile = Instantiate(prefab, tileRoot);
+                    // Keep the prefab's authored scale so every tile uses the
+                    // same visual size as its source prefab (Tile 8 included).
+                    tile.Setup(kind);
                     column.Add(tile);
                 }
             }
@@ -206,10 +232,11 @@ private void LayoutColumn(int col, bool animate, List<Coroutine> activeFalls = n
         {
             if (col < 0 || col >= _columns.Count || tileRoot == null) return;
             int columnCount = Mathf.Max(1, _columns.Count);
-            float step = cellSize + gap;
-            float totalWidth = columnCount * cellSize + (columnCount - 1) * gap;
+            float stepX = cellSize + gapX;
+            float stepY = cellSize + gapY;
+            float totalWidth = columnCount * cellSize + (columnCount - 1) * gapX;
             float startX = -totalWidth * 0.5f + cellSize * 0.5f;
-            float totalHeight = Mathf.Max(1, _maxRows) * cellSize + Mathf.Max(0, _maxRows - 1) * gap;
+            float totalHeight = Mathf.Max(1, _maxRows) * cellSize + Mathf.Max(0, _maxRows - 1) * gapY;
             float bottomY = -totalHeight * 0.5f + cellSize * 0.5f;
 
             List<FoodTileView> column = _columns[col];
@@ -217,8 +244,9 @@ private void LayoutColumn(int col, bool animate, List<Coroutine> activeFalls = n
             {
                 FoodTileView tile = column[row];
                 if (tile == null) continue;
-                Vector3 target = new Vector3(startX + col * step, bottomY + row * step, 0f);
-                tile.SetSortingOrder(10 + row);
+                Vector3 target = new Vector3(startX + col * stepX, bottomY + row * stepY, 0f);
+                // Bottom tiles render in front of the rows above them.
+                tile.SetSortingOrder(10 + _maxRows - row);
                 if (animate)
                 {
                     // Start every tile's fall together; the caller may wait for all of them.

@@ -6,7 +6,9 @@ namespace CookingSort2D
 {
     public class FoodTileView : MonoBehaviour
     {
-        [SerializeField] private SpriteRenderer body;
+        
+        [SerializeField] private bool usePrefabSprite = false;
+[SerializeField] private SpriteRenderer body;
         [SerializeField] private TextMesh symbol;
 
         public FoodColor ColorType { get; private set; }
@@ -20,7 +22,7 @@ namespace CookingSort2D
         {
             ColorType = color;
             AutoBind();
-            if (body != null) body.color = CookingSortPalette.Get(color);
+            if (body != null) body.color = usePrefabSprite ? Color.white : CookingSortPalette.Get(color);
             if (symbol != null)
             {
                 symbol.text = CookingSortPalette.ShortName(color);
@@ -28,8 +30,19 @@ namespace CookingSort2D
                     ? new Color32(90, 98, 108, 210)
                     : new Color32(255, 255, 255, 210);
             }
-            transform.localScale = Vector3.one;
         }
+
+public void FitToCell(float targetSize)
+        {
+            AutoBind();
+            if (body == null || body.sprite == null || targetSize <= 0f) return;
+            Vector3 dimensions = body.sprite.bounds.size;
+            float longest = Mathf.Max(dimensions.x, dimensions.y);
+            if (longest <= 0.0001f) return;
+            // Keep the artwork's proportions, including shadows/highlights.
+            transform.localScale = Vector3.one * (targetSize / longest);
+        }
+
 
         public void SetSortingOrder(int order)
         {
@@ -76,12 +89,12 @@ private IEnumerator ConsumeRoutine(Transform target, Action onComplete)
                 float eased = 1f - Mathf.Pow(1f - t, 3f);
                 Vector3 curve = side * sideSign * Mathf.Sin(t * Mathf.PI) * 0.12f;
                 transform.position = Vector3.LerpUnclamped(start, end, eased) + curve;
-                transform.localScale = Vector3.Lerp(startScale, Vector3.one * 0.5f, eased);
+                transform.localScale = Vector3.Lerp(startScale, startScale * 0.5f, eased);
                 yield return null;
             }
 
             transform.position = end;
-            transform.localScale = Vector3.one * 0.5f;
+            transform.localScale = startScale * 0.5f;
             SetSortingOrder(oldOrder);
             onComplete?.Invoke();
         }

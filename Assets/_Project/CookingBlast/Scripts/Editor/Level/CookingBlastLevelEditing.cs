@@ -390,8 +390,8 @@ internal static bool TryAutoFillOrganicByPriority(
         CookingBlastLevel level, IReadOnlyList<Vector2Int> priority, int tilesPerTurn,
         bool interleave, int seed, int organicStrength, out string message)
     {
-        // Reuse strict Customer/Board validation. Any invalid order or mismatched
-        // demand returns BEFORE we attempt to generate organic patterns.
+        // Use the existing exact-count / Customer order validation. Organic
+        // generation below overrides its temporary row-wise layout.
         if (!TryAutoFillByPriority(level, priority, tilesPerTurn, interleave, out message))
             return false;
 
@@ -399,145 +399,279 @@ internal static bool TryAutoFillOrganicByPriority(
         var lookup = new Dictionary<Vector2Int, int>();
         int maxRows = MaxRows(level);
         for (int row = 0; row < maxRows; row++)
+        for (int col = 0; col < level.BoardColumns.Count; col++)
         {
-            for (int col = 0; col < level.BoardColumns.Count; col++)
-            {
-                BoardColumnData column = level.BoardColumns[col];
-                if (column == null || column.bottomToTop == null ||
-                    row >= column.bottomToTop.Count) continue;
-                var pos = new Vector2Int(col, row);
-                lookup[pos] = cells.Count;
-                cells.Add(pos);
-            }
-        }
-        if (cells.Count == 0) return true;
-
-        var orders = new List<CustomerOrderData>();
-        foreach (Vector2Int id in priority)
-            orders.Add(level.CustomerLanes[id.x].frontToBack[id.y]);
-
-        var remaining = new int[orders.Count];
-        for (int i = 0; i < orders.Count; i++)
-            remaining[i] = orders[i].demand;
-
-        var taken = new bool[cells.Count];
-        var result = new FoodColor[cells.Count];
-        var random = new System.Random(seed);
-        organicStrength = Mathf.Clamp(organicStrength, 0, 100);
-        int count = 0;
-        tilesPerTurn = Mathf.Clamp(tilesPerTurn, 1, 32);
-        int safety = 0;
-
-        // Grow each Customer's patches from already-placed tiles of the same
-        // color. A seeded jitter in frontier selection makes irregular shapes,
-        // while neighbor scoring keeps large areas visually coherent.
-        while (count < cells.Count && safety++ < cells.Count + orders.Count + 2)
-        {
-            bool progress = false;
-            for (int customer = 0; customer < orders.Count; customer++)
-            {
-                int batch = Mathf.Min(remaining[customer],
-                    interleave ? tilesPerTurn : remaining[customer]);
-                FoodColor color = orders[customer].color;
-
-                for (int step = 0; step < batch; step++)
-                {
-                    int best = -1;
-                    float bestScore = float.NegativeInfinity;
-                    bool hasFrontier = false;
-
-                    if (count == 0)
-                    {
-                        best = 0; // Ensure first priority color begins bottom-left.
-                    }
-                    else
-                    {
-                        for (int candidate = 0; candidate < cells.Count; candidate++)
-                        {
-                            if (taken[candidate]) continue;
-                            Vector2Int pos = cells[candidate];
-                            int matched = 0;
-                            int touched = 0;
-                            for (int n = 0; n < CardinalDirections.Length; n++)
-                            {
-                                if (!lookup.TryGetValue(pos + CardinalDirections[n], out int neighbor) ||
-                                    !taken[neighbor]) continue;
-                                touched++;
-                                if (result[neighbor] == color) matched++;
-                            }
-
-                            if (matched == 0) continue;
-                            hasFrontier = true;
-                            // A connected frontier with several matching
-                            // neighbors is preferable. Organic Shape controls
-                            // how wavy vs compact its edge becomes.
-                            float jitter = (float)random.NextDouble() *
-                                           (1.8f + organicStrength * 0.12f);
-                            float score = matched * 5.5f + jitter -
-                                          touched * 0.1f;
-                            if (score > bestScore)
-                            {
-                                bestScore = score;
-                                best = candidate;
-                            }
-                        }
-
-                        // A color appearing for the first time has no existing
-                        // frontier. Seed it near the next available bottom cell,
-                        // then future tiles grow out into their own patch.
-                        if (!hasFrontier)
-                        {
-                            for (int candidate = 0; candidate < cells.Count; candidate++)
-                            {
-                                if (taken[candidate]) continue;
-                                Vector2Int pos = cells[candidate];
-                                float jitter = (float)random.NextDouble() *
-                                               (0.2f + organicStrength * 0.01f);
-                                float score = -(pos.y * level.BoardColumns.Count + pos.x) +
-                                              jitter;
-                                if (score > bestScore)
-                                {
-                                    bestScore = score;
-                                    best = candidate;
-                                }
-                            }
-                        }
-                    }
-
-                    if (best < 0)
-                    {
-                        message = "Organic Fill could not locate an empty Board cell.";
-                        return false;
-                    }
-                    taken[best] = true;
-                    result[best] = color;
-                    remaining[customer]--;
-                    count++;
-                    progress = true;
-                }
-            }
-            if (!progress) break;
+            BoardColumnData boardColumn = level.BoardColumns[col];
+            if (boardColumn == null || boardColumn.bottomToTop == null ||
+                row >= boardColumn.bottomToTop.Count) continue;
+            Vector2Int position = new Vector2Int(col, row);
+            lookup[position] = cells.Count;
+            cells.Add(position);
         }
 
-        if (count != cells.Count)
+        if (cells.Count == 0)
         {
-            message = "Organic Fill could not satisfy every Customer demand.";
+            message = "No Tiles available for Organic Fill.";
             return false;
         }
 
-        int exposedFrontColors = ExposeFrontCustomerColors(level, cells, result);
-        Undo.RecordObject(level, "Shape Cooking Blast Organic Tile Regions");
+        // Group the exact Customer demands by color. Customer order determines
+        // seed priority only; it must NOT force placement in horizontal rows.
+        var colors = new List<FoodColor>();
+        var quantities = new List<int>();
+        var colorIndices = new Dictionary<FoodColor, int>();
+        foreach (Vector2Int id in priority)
+        {
+            CustomerOrderData order = level.CustomerLanes[id.x].frontToBack[id.y];
+            if (!colorIndices.TryGetValue(order.color, out int colorIndex))
+            {
+                colorIndex = colors.Count;
+                colorIndices.Add(order.color, colorIndex);
+                colors.Add(order.color);
+                quantities.Add(0);
+            }
+            quantities[colorIndex] += order.demand;
+        }
+
+        var random = new System.Random(seed);
+        organicStrength = Mathf.Clamp(organicStrength, 0, 100);
+
+        var owners = new int[cells.Count];
+        for (int i = 0; i < owners.Length; i++) owners[i] = -1;
+
+        var neighbors = new int[cells.Count, CardinalDirections.Length];
+        for (int i = 0; i < cells.Count; i++)
+        for (int d = 0; d < CardinalDirections.Length; d++)
+            neighbors[i, d] = lookup.TryGetValue(
+                cells[i] + CardinalDirections[d], out int neighbor) ? neighbor : -1;
+
+        var remaining = quantities.ToArray();
+        var frontiers = new HashSet<int>[colors.Count];
+        var seedCounts = new int[colors.Count];
+        var seedsByColor = new List<int>[colors.Count];
+        for (int i = 0; i < colors.Count; i++)
+        {
+            frontiers[i] = new HashSet<int>();
+            seedsByColor[i] = new List<int>();
+        }
+        var placedSeeds = new List<int>();
+
+        // First selected Customer should have a playable Tile at bottom-left.
+        PlaceOrganicCell(0, 0, owners, remaining, frontiers, neighbors);
+        placedSeeds.Add(0);
+        seedsByColor[0].Add(0);
+        seedCounts[0]++;
+
+        // Expose the other FRONT Customers along the bottom edge if space
+        // permits, before allowing the clusters to grow independently.
+        var frontColors = new HashSet<FoodColor>();
+        foreach (CustomerLaneData lane in level.CustomerLanes)
+        {
+            if (lane == null || lane.frontToBack == null ||
+                lane.frontToBack.Count == 0 || lane.frontToBack[0] == null)
+                continue;
+            frontColors.Add(lane.frontToBack[0].color);
+        }
+        foreach (FoodColor frontColor in frontColors)
+        {
+            if (!colorIndices.TryGetValue(frontColor, out int index) ||
+                seedCounts[index] > 0 || remaining[index] == 0) continue;
+            int candidate = SelectOrganicSeed(cells, owners, placedSeeds, random, true);
+            if (candidate < 0) continue;
+            PlaceOrganicCell(candidate, index, owners, remaining, frontiers, neighbors);
+            placedSeeds.Add(candidate);
+            seedsByColor[index].Add(candidate);
+            seedCounts[index]++;
+        }
+
+        // Seed ALL other colors across the full board, not on the first
+        // available row. Farthest-point sampling keeps patches dispersed.
+        for (int color = 0; color < colors.Count; color++)
+        {
+            if (seedCounts[color] != 0 || remaining[color] == 0) continue;
+            int candidate = SelectOrganicSeed(cells, owners, placedSeeds, random, false);
+            if (candidate < 0) continue;
+            PlaceOrganicCell(candidate, color, owners, remaining, frontiers, neighbors);
+            placedSeeds.Add(candidate);
+            seedCounts[color]++;
+        }
+
+        // A larger color population needs several independent island seeds.
+        // This creates recognizable, irregular regions rather than stripes.
+        int patchTarget = Mathf.Max(
+            Mathf.RoundToInt(Mathf.Lerp(35f, 17f, organicStrength / 100f)),
+            Mathf.CeilToInt(cells.Count / 70f)); // Cap islands for large Boards.
+        var seedTargets = new int[colors.Count];
+        for (int color = 0; color < colors.Count; color++)
+            seedTargets[color] = Mathf.Min(quantities[color],
+                Mathf.Max(1, Mathf.CeilToInt(quantities[color] / (float)patchTarget)));
+
+        bool anyMore = true;
+        while (anyMore)
+        {
+            anyMore = false;
+            for (int color = 0; color < colors.Count; color++)
+            {
+                if (seedCounts[color] >= seedTargets[color] || remaining[color] == 0)
+                    continue;
+                int candidate = SelectOrganicSeed(cells, owners, placedSeeds, random, false);
+                if (candidate < 0) continue;
+                PlaceOrganicCell(candidate, color, owners, remaining, frontiers, neighbors);
+                placedSeeds.Add(candidate);
+            seedsByColor[color].Add(candidate);
+            seedCounts[color]++;
+                anyMore = true;
+            }
+        }
+
+        int filled = 0;
+        for (int i = 0; i < owners.Length; i++)
+            if (owners[i] != -1) filled++;
+
+        // Grow every color by one Tile per round. Frontiers favor adjacent
+        // same-color Tiles, while seeded jitter creates non-rectangular edges.
+        // If an island gets boxed in, create another seed in unused space.
+        while (filled < cells.Count)
+        {
+            bool progress = false;
+            int startColor = random.Next(colors.Count);
+            for (int offset = 0; offset < colors.Count; offset++)
+            {
+                int color = (startColor + offset) % colors.Count;
+                if (remaining[color] == 0) continue;
+                int next = SelectOrganicFrontier(
+                    color, owners, frontiers[color], neighbors, random, organicStrength,
+                    cells, seedsByColor[color]);
+
+                if (next < 0)
+                {
+                    next = SelectOrganicSeed(cells, owners, placedSeeds, random, false);
+                    if (next < 0) continue;
+                    placedSeeds.Add(next);
+                    seedsByColor[color].Add(next);
+                    seedCounts[color]++;
+                }
+                PlaceOrganicCell(next, color, owners, remaining, frontiers, neighbors);
+                filled++;
+                progress = true;
+            }
+            if (!progress)
+            {
+                message = "Could not grow all Organic Tile regions.";
+                return false;
+            }
+        }
+
+        var assigned = new FoodColor[cells.Count];
+        for (int i = 0; i < cells.Count; i++)
+            assigned[i] = colors[owners[i]];
+
+        // Normally all Front colors are already seeded in the bottom row.
+        // For a narrow Board, this best-effort fallback keeps them accessible.
+        int exposed = ExposeFrontCustomerColors(level, cells, assigned);
+        Undo.RecordObject(level, "Generate Cooking Blast Color Patches");
         for (int i = 0; i < cells.Count; i++)
         {
-            Vector2Int pos = cells[i];
-            level.BoardColumns[pos.x].bottomToTop[pos.y] = result[i];
+            Vector2Int cell = cells[i];
+            level.BoardColumns[cell.x].bottomToTop[cell.y] = assigned[i];
         }
         Dirty(level);
-        message = "Organic Clusters: " + count + " tiles, Seed " + seed +
-                  ". Customer demand preserved; first priority stays at the bottom. " +
-                  exposedFrontColors + " missing Front color(s) exposed.";
+        message = "Generated " + cells.Count + " Tiles as " +
+                  placedSeeds.Count + " irregular color patches (Seed " + seed +
+                  "). Exact Customer Demand preserved; " + exposed +
+                  " additional Front colors exposed.";
         return true;
     }
+
+private static void PlaceOrganicCell(int cell, int color,
+        int[] owners, int[] remaining, HashSet<int>[] frontiers, int[,] neighbors)
+    {
+        owners[cell] = color;
+        remaining[color]--;
+        for (int c = 0; c < frontiers.Length; c++)
+            frontiers[c].Remove(cell);
+
+        for (int d = 0; d < neighbors.GetLength(1); d++)
+        {
+            int adjacent = neighbors[cell, d];
+            if (adjacent >= 0 && owners[adjacent] == -1)
+                frontiers[color].Add(adjacent);
+        }
+    }
+
+private static int SelectOrganicSeed(List<Vector2Int> cells, int[] owners,
+        List<int> seeds, System.Random random, bool bottomOnly)
+    {
+        int best = -1;
+        double bestScore = double.NegativeInfinity;
+        for (int cell = 0; cell < cells.Count; cell++)
+        {
+            if (owners[cell] >= 0 || (bottomOnly && cells[cell].y != 0))
+                continue;
+
+            float distance = float.PositiveInfinity;
+            for (int s = 0; s < seeds.Count; s++)
+            {
+                Vector2Int difference = cells[cell] - cells[seeds[s]];
+                distance = Mathf.Min(distance, difference.sqrMagnitude);
+            }
+            if (float.IsPositiveInfinity(distance)) distance = 0f;
+            // The random tie-breaker makes layouts reproducible from the Seed
+            // without sacrificing the spatial distribution of patch centers.
+            double jitter = random.NextDouble() *
+                (4.0 + Mathf.Sqrt(distance) * 0.40);
+            double score = distance + jitter;
+            if (score <= bestScore) continue;
+            bestScore = score;
+            best = cell;
+        }
+        return best;
+    }
+
+private static int SelectOrganicFrontier(int color, int[] owners,
+        HashSet<int> frontier, int[,] neighbors, System.Random random,
+        int organicStrength, List<Vector2Int> cells, List<int> seedsOfColor)
+    {
+        int best = -1;
+        double bestScore = double.NegativeInfinity;
+        foreach (int candidate in frontier)
+        {
+            if (owners[candidate] >= 0) continue;
+            int same = 0;
+            int different = 0;
+            for (int d = 0; d < neighbors.GetLength(1); d++)
+            {
+                int adjacent = neighbors[candidate, d];
+                if (adjacent < 0) continue;
+                if (owners[adjacent] == color) same++;
+                else if (owners[adjacent] >= 0) different++;
+            }
+            if (same == 0) continue;
+
+            int nearestSeedDistance = int.MaxValue;
+            for (int s = 0; s < seedsOfColor.Count; s++)
+            {
+                Vector2Int delta = cells[candidate] - cells[seedsOfColor[s]];
+                nearestSeedDistance = Mathf.Min(nearestSeedDistance,
+                    delta.sqrMagnitude);
+            }
+            if (nearestSeedDistance == int.MaxValue) nearestSeedDistance = 0;
+
+            // Compact islands, not tall columns: prefer growing around each
+            // seed rather than stretching a long branch of the same color.
+            // Noise on the contour makes the island edges irregular.
+            double score = same * 2.4 - different * 1.0 -
+                           nearestSeedDistance * .22 +
+                           random.NextDouble() * (1.3 + organicStrength * .055);
+            if (score <= bestScore) continue;
+            bestScore = score;
+            best = candidate;
+        }
+        return best;
+    }
+
+
+
 
 private static int ExposeFrontCustomerColors(
         CookingBlastLevel level, List<Vector2Int> positions,
