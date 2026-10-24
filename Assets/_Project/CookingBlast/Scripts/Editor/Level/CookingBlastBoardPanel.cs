@@ -17,8 +17,8 @@ internal sealed class CookingBlastBoardPanel
     [SerializeField] private int manualPriorityCount;
     [SerializeField] private bool showAdvancedFillOptions;
     [SerializeField] private int priorityGroupSize = 3;
+    [SerializeField] private int animalOrderLayout;
     
-    [SerializeField] private int organicPattern = 0;
     [SerializeField] private int organicStrength = 72;
 [SerializeField] private bool priorityInterleave = true;
     private string fillStatus;
@@ -39,7 +39,7 @@ internal void Draw(CookingBlastLevel level, ref FoodColor brush, ref int columns
         using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
         {
             EditorGUILayout.LabelField("BOARD DESIGNER", EditorStyles.boldLabel);
-            EditorGUILayout.LabelField("Choose Customer priorities in Customer Designer below, then Fill Tile here.", EditorStyles.miniLabel);
+            EditorGUILayout.LabelField("Fill Tile follows Animal order automatically.", EditorStyles.miniLabel);
             GUILayout.Space(4);
             using (new EditorGUILayout.HorizontalScope())
             {
@@ -47,8 +47,7 @@ internal void Draw(CookingBlastLevel level, ref FoodColor brush, ref int columns
                 if (GUILayout.Button("New Seed", GUILayout.Width(90)))
                     seed = UnityEngine.Random.Range(1, int.MaxValue);
             }
-            DrawGridPriorityTools(level, seed);
-            DrawBoardFillButton(level, seed);
+            DrawBoardFillButton(level, ref seed);
             if (GUILayout.Button(new GUIContent("Import From Image...",
                 "Open pixel-art-to-Tile preview. Apply only after reviewing the sampled colors."),
                 GUILayout.Height(31)))
@@ -451,7 +450,7 @@ internal void TogglePriority(CookingBlastLevel level, int lane, int row)
     }
 
 
-private void DrawBoardFillButton(CookingBlastLevel level, int seed)
+private void DrawBoardFillButton(CookingBlastLevel level, ref int seed)
     {
         EnsurePriority(level);
         int demand = 0;
@@ -461,43 +460,37 @@ private void DrawBoardFillButton(CookingBlastLevel level, int seed)
 
         using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
         {
-            EditorGUILayout.LabelField("AUTO FILL  |  TILE PATTERN", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("AUTO FILL  |  ANIMAL ORDER", EditorStyles.boldLabel);
+            animalOrderLayout = EditorGUILayout.Popup("Layout", animalOrderLayout,
+                new[] { "Color Patches", "Vertical", "Horizontal" });
+            organicStrength = EditorGUILayout.IntSlider(
+                new GUIContent("Patch Shape",
+                    animalOrderLayout == 0
+                        ? "Controls the size and dispersion of randomized color regions."
+                        : "Controls variation in each vertical/horizontal color group around Tiles Per Turn."),
+                organicStrength, 0, 100);
 
-            using (new EditorGUILayout.HorizontalScope())
-            {
-                GUILayout.Label("Pattern", GUILayout.Width(58));
-                organicPattern = EditorGUILayout.Popup(organicPattern,
-                    new[] { "Color Patches (recommended)", "Ordered Rows (legacy)" },
-                    GUILayout.MaxWidth(270));
-                GUILayout.FlexibleSpace();
-            }
-
-            if (organicPattern == 0)
-            {
-                organicStrength = EditorGUILayout.IntSlider(
-                    new GUIContent("Patch Shape", "Grow irregular color patches from scattered seeds. Higher values add smaller, more varied patches."),
-                    organicStrength, 25, 100);
-            }
-
-            using (new EditorGUI.DisabledScope(!ready || chosenPriority.Count == 0))
+            using (new EditorGUI.DisabledScope(!ready))
             {
                 if (GUILayout.Button(new GUIContent("Fill Tile",
                     "Fill the board using the Customer priority above; Ctrl+Z can undo."),
                     GUILayout.Height(38)))
                 {
                     EndStroke();
+                    seed = UnityEngine.Random.Range(1, int.MaxValue);
                     Undo.IncrementCurrentGroup();
                     int group = Undo.GetCurrentGroup();
                     Undo.SetCurrentGroupName("Auto Fill Cooking Blast Tiles");
-                    bool success;
                     string message;
-                    if (organicPattern == 0)
-                        success = CookingBlastLevelEditing.TryAutoFillOrganicByPriority(
-                            level, chosenPriority, priorityGroupSize, priorityInterleave,
-                            seed, organicStrength, out message);
+                    bool success;
+                    if (animalOrderLayout == 0)
+                        success = CookingBlastLevelEditing.TryAutoFillOrganicByCustomerOrder(
+                            level, priorityGroupSize, seed, organicStrength,
+                            out message);
                     else
-                        success = CookingBlastLevelEditing.TryAutoFillByPriority(
-                            level, chosenPriority, priorityGroupSize, priorityInterleave,
+                        success = CookingBlastLevelEditing.TryAutoFillByAnimalOrder(
+                            level, priorityGroupSize, animalOrderLayout == 1,
+                            seed, organicStrength,
                             out message);
                     Undo.CollapseUndoOperations(group);
                     fillStatus = message;

@@ -1,15 +1,19 @@
 using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 namespace CookingSort2D
 {
     public class CustomerView : MonoBehaviour, IPointerClickHandler
     {
         [SerializeField] private SpriteRenderer body;
-        [SerializeField] private TextMesh count;
-        [SerializeField] private SpriteRenderer countBadge;
+        [SerializeField] private TextMeshProUGUI count;
+        [SerializeField] private Image countBadge;
         [SerializeField] private Collider2D hitbox;
+        [SerializeField] private Image demandFill;
+        [SerializeField, Min(1)] private int demand = 20;
 
         private CustomerQueue _queue;
         private int _laneIndex = -1;
@@ -24,6 +28,7 @@ namespace CookingSort2D
         public int Remaining { get; private set; }
         public bool IsSeated => _seated;
         public bool IsFront => _front;
+        public int Demand => Mathf.Max(1, demand);
 
         public void BindQueue(CustomerQueue queue, int laneIndex, CustomerOrderData order)
         {
@@ -31,7 +36,7 @@ namespace CookingSort2D
             _laneIndex = laneIndex;
             _seated = false;
             ColorType = order.color;
-            Remaining = Mathf.Max(1, order.demand);
+            Remaining = Demand;
             RefreshVisual();
             SetFront(false);
             transform.localScale = Vector3.one;
@@ -73,6 +78,7 @@ namespace CookingSort2D
             StopServePulse();
             Remaining--;
             RefreshCount();
+            RefreshDemandFill();
             _pulseRoutine = StartCoroutine(PulseRoutine());
             return Remaining <= 0;
         }
@@ -106,11 +112,14 @@ namespace CookingSort2D
         public void SetSortingOrder(int baseOrder)
         {
             if (body != null) body.sortingOrder = baseOrder;
-            if (countBadge != null) countBadge.sortingOrder = baseOrder + 2;
-            if (count != null)
+
+            Canvas uiCanvas = countBadge != null
+                ? countBadge.canvas
+                : demandFill != null ? demandFill.canvas : null;
+            if (uiCanvas != null)
             {
-                MeshRenderer r = count.GetComponent<MeshRenderer>();
-                if (r != null) r.sortingOrder = baseOrder + 3;
+                uiCanvas.overrideSorting = true;
+                uiCanvas.sortingOrder = baseOrder + 1;
             }
         }
 
@@ -124,11 +133,18 @@ namespace CookingSort2D
         {
             if (countBadge != null) countBadge.gameObject.SetActive(_seated);
             RefreshCount();
+            RefreshDemandFill();
         }
 
         private void RefreshCount()
         {
             if (count != null) count.text = Remaining.ToString();
+        }
+
+        private void RefreshDemandFill()
+        {
+            if (demandFill != null)
+                demandFill.fillAmount = Mathf.Clamp01(Remaining / (float)Demand);
         }
 
         private IEnumerator MoveRoutine(Vector3 target, float duration)
@@ -168,6 +184,7 @@ namespace CookingSort2D
         {
             Remaining = Mathf.Max(0, remaining);
             RefreshCount();
+            RefreshDemandFill();
         }
     }
 }

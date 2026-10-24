@@ -157,7 +157,7 @@ internal static bool TryAutoFillFromCustomers(CookingBlastLevel level, int seed,
     }
 
 internal static bool TryAutoFillByCustomerOrder(CookingBlastLevel level, int clusterSize,
-        out string message)
+        bool vertical, out string message)
     {
         message = "Open a level prefab first.";
         if (level == null || level.BoardColumns == null || level.CustomerLanes == null)
@@ -185,12 +185,12 @@ internal static bool TryAutoFillByCustomerOrder(CookingBlastLevel level, int clu
             var laneOrders = data.frontToBack;
             foreach (CustomerOrderData customer in laneOrders)
             {
-                if (customer == null || customer.demand <= 0)
+                if (customer == null)
                 {
                     message = "Lane " + (lane + 1) + " has an invalid Customer.";
                     return false;
                 }
-                required += customer.demand;
+                required += level.GetCustomerDemand(customer.color);
             }
             orders.Add(laneOrders);
         }
@@ -208,7 +208,7 @@ internal static bool TryAutoFillByCustomerOrder(CookingBlastLevel level, int clu
         var orderIndex = new int[lanes];
         var remaining = new int[lanes];
         for (int lane = 0; lane < lanes; lane++)
-            remaining[lane] = orders[lane][0].demand;
+            remaining[lane] = level.GetCustomerDemand(orders[lane][0].color);
 
         var result = new List<FoodColor>(slots);
         int cursor = 0;
@@ -228,7 +228,8 @@ internal static bool TryAutoFillByCustomerOrder(CookingBlastLevel level, int clu
             {
                 orderIndex[lane]++;
                 if (orderIndex[lane] < orders[lane].Count)
-                    remaining[lane] = orders[lane][orderIndex[lane]].demand;
+                    remaining[lane] = level.GetCustomerDemand(
+                        orders[lane][orderIndex[lane]].color);
             }
         }
 
@@ -249,7 +250,8 @@ internal static bool TryAutoFillByCustomerOrder(CookingBlastLevel level, int clu
                 {
                     orderIndex[lane]++;
                     if (orderIndex[lane] < orders[lane].Count)
-                        remaining[lane] = orders[lane][orderIndex[lane]].demand;
+                        remaining[lane] = level.GetCustomerDemand(
+                            orders[lane][orderIndex[lane]].color);
                 }
                 cursor = (lane + 1) % lanes;
                 found = true;
@@ -262,12 +264,24 @@ internal static bool TryAutoFillByCustomerOrder(CookingBlastLevel level, int clu
             }
         }
 
-        // The first list items become the lowest visible Tile row, left to right.
+        // Place the Animal-order color array either by columns (vertical) or
+        // by rows (horizontal). In both modes, index 0 starts at the bottom.
         Undo.RecordObject(level, "Fill Tile Colors in Customer Queue Order");
         int tileIndex = 0;
         int maxRows = MaxRows(level);
-        for (int row = 0; row < maxRows; row++)
+        if (vertical)
         {
+            for (int col = 0; col < level.BoardColumns.Count; col++)
+            {
+                BoardColumnData column = level.BoardColumns[col];
+                if (column == null || column.bottomToTop == null) continue;
+                for (int row = 0; row < column.bottomToTop.Count; row++)
+                    column.bottomToTop[row] = result[tileIndex++];
+            }
+        }
+        else
+        {
+            for (int row = 0; row < maxRows; row++)
             for (int col = 0; col < level.BoardColumns.Count; col++)
             {
                 BoardColumnData column = level.BoardColumns[col];
@@ -278,14 +292,16 @@ internal static bool TryAutoFillByCustomerOrder(CookingBlastLevel level, int clu
         }
         Dirty(level);
         message = "Filled " + tileIndex +
-                  " Tiles following Customer Front-to-Back order, with chunks of " +
+                  " Tiles " + (vertical ? "vertically" : "horizontally") +
+                  " following Animal Front-to-Back order, with chunks of " +
                   clusterSize + " (balanced by color).";
         return true;
     }
 
 internal static bool TryAutoFillByPriority(CookingBlastLevel level,
         IReadOnlyList<Vector2Int> priority, int tilesPerTurn, bool interleave,
-        out string message)
+        out string message, bool vertical = false, int seed = 0,
+        int patchShape = 0)
     {
         message = "Open a valid Cooking Blast level.";
         if (level == null || priority == null ||
@@ -311,13 +327,13 @@ internal static bool TryAutoFillByPriority(CookingBlastLevel level,
                 return false;
             }
             CustomerOrderData customer = lane.frontToBack[id.y];
-            if (customer == null || customer.demand < 1)
+            if (customer == null)
             {
                 message = "A Customer has invalid Demand.";
                 return false;
             }
             all.Add(customer);
-            totalDemand += customer.demand;
+            totalDemand += level.GetCustomerDemand(customer.color);
         }
 
         int customerTotal = 0;
@@ -340,7 +356,7 @@ internal static bool TryAutoFillByPriority(CookingBlastLevel level,
         var result = new List<FoodColor>(totalDemand);
         int[] remaining = new int[all.Count];
         for (int i = 0; i < all.Count; i++)
-            remaining[i] = all[i].demand;
+            remaining[i] = level.GetCustomerDemand(all[i].color);
 
         tilesPerTurn = Mathf.Clamp(tilesPerTurn, 1, 32);
         if (!interleave)
@@ -351,12 +367,19 @@ internal static bool TryAutoFillByPriority(CookingBlastLevel level,
         }
         else
         {
+            var random = new System.Random(seed);
+            int variation = Mathf.RoundToInt(
+                tilesPerTurn * Mathf.Clamp01(patchShape / 100f));
             int pending = totalDemand;
             while (pending > 0)
             {
                 for (int i = 0; i < all.Count; i++)
                 {
-                    int chunk = Mathf.Min(tilesPerTurn, remaining[i]);
+                    int desiredChunk = variation > 0
+                        ? tilesPerTurn + random.Next(-variation, variation + 1)
+                        : tilesPerTurn;
+                    int chunk = Mathf.Min(
+                        Mathf.Max(1, desiredChunk), remaining[i]);
                     for (int j = 0; j < chunk; j++)
                         result.Add(all[i].color);
                     remaining[i] -= chunk;
@@ -365,13 +388,24 @@ internal static bool TryAutoFillByPriority(CookingBlastLevel level,
             }
         }
 
-        // Assign in the exact order the Board scans: bottom row, left to right,
-        // followed by higher rows. No Customer Queue data is modified.
+        // Assign the same legacy priority array either across rows or up columns.
+        // No Customer Queue data is modified.
         Undo.RecordObject(level, "Auto Fill Tiles in Custom Customer Priority");
         int index = 0;
         int maxRows = MaxRows(level);
-        for (int row = 0; row < maxRows; row++)
+        if (vertical)
         {
+            for (int col = 0; col < level.BoardColumns.Count; col++)
+            {
+                BoardColumnData column = level.BoardColumns[col];
+                if (column == null || column.bottomToTop == null) continue;
+                for (int row = 0; row < column.bottomToTop.Count; row++)
+                    column.bottomToTop[row] = result[index++];
+            }
+        }
+        else
+        {
+            for (int row = 0; row < maxRows; row++)
             for (int col = 0; col < level.BoardColumns.Count; col++)
             {
                 BoardColumnData column = level.BoardColumns[col];
@@ -381,9 +415,60 @@ internal static bool TryAutoFillByPriority(CookingBlastLevel level,
             }
         }
         Dirty(level);
-        message = "Filled " + index + " Tiles in your chosen Customer order. " +
+        message = "Filled " + index + " Tiles " +
+                  (vertical ? "vertically" : "horizontally") +
+                  " in Animal order. " +
                   (interleave ? "Grouped in batches of " + tilesPerTurn + "." : "Entire Customer demands filled in sequence.");
         return true;
+    }
+
+internal static bool TryAutoFillByAnimalOrder(
+        CookingBlastLevel level, int tilesPerTurn, bool vertical, int seed,
+        int patchShape,
+        out string message)
+    {
+        List<Vector2Int> priority = BuildAnimalOrderPriority(level);
+        return TryAutoFillByPriority(
+            level, priority, tilesPerTurn, true, out message, vertical,
+            seed, patchShape);
+    }
+
+private static List<Vector2Int> BuildAnimalOrderPriority(CookingBlastLevel level)
+    {
+        var priority = new List<Vector2Int>();
+        if (level == null || level.CustomerLanes == null) return priority;
+
+        int maxDepth = 0;
+        foreach (CustomerLaneData lane in level.CustomerLanes)
+            if (lane != null && lane.frontToBack != null)
+                maxDepth = Mathf.Max(maxDepth, lane.frontToBack.Count);
+
+        for (int row = 0; row < maxDepth; row++)
+        for (int lane = 0; lane < level.CustomerLanes.Count; lane++)
+        {
+            CustomerLaneData laneData = level.CustomerLanes[lane];
+            if (laneData == null || laneData.frontToBack == null ||
+                row >= laneData.frontToBack.Count) continue;
+            priority.Add(new Vector2Int(lane, row));
+        }
+        return priority;
+    }
+
+internal static bool TryAutoFillOrganicByCustomerOrder(
+        CookingBlastLevel level, int tilesPerTurn, int seed,
+        int organicStrength, out string message)
+    {
+        if (level == null || level.CustomerLanes == null)
+        {
+            message = "Open a valid Cooking Blast level.";
+            return false;
+        }
+
+        List<Vector2Int> priority = BuildAnimalOrderPriority(level);
+
+        return TryAutoFillOrganicByPriority(
+            level, priority, tilesPerTurn, true, seed,
+            organicStrength, out message);
     }
 
 internal static bool TryAutoFillOrganicByPriority(
@@ -430,7 +515,7 @@ internal static bool TryAutoFillOrganicByPriority(
                 colors.Add(order.color);
                 quantities.Add(0);
             }
-            quantities[colorIndex] += order.demand;
+            quantities[colorIndex] += level.GetCustomerDemand(order.color);
         }
 
         var random = new System.Random(seed);
@@ -812,8 +897,6 @@ private static int ColorPlacementWeight(CookingBlastLevel level, Dictionary<Food
     {
         if (level == null) return;
         laneCount = Mathf.Clamp(laneCount, 1, 8);
-        minDemand = Mathf.Max(1, minDemand);
-        maxDemand = Mathf.Max(minDemand, maxDemand);
 
         var counts = new Dictionary<FoodColor, int>();
         foreach (var column in level.BoardColumns)
@@ -836,22 +919,16 @@ private static int ColorPlacementWeight(CookingBlastLevel level, Dictionary<Food
         foreach (var pair in counts)
         {
             int remaining = pair.Value;
-            bool toggle = false;
+            int animalDemand = level.GetCustomerDemand(pair.Key);
             while (remaining > 0)
             {
-                int desired = toggle ? minDemand : maxDemand;
-                int demand = Mathf.Min(desired, remaining);
-                if (remaining - demand > 0 && remaining - demand < minDemand)
-                    demand = Mathf.Max(1, remaining - minDemand);
-
                 var list = lanes.GetArrayElementAtIndex(lane % laneCount).FindPropertyRelative("frontToBack");
                 int index = list.arraySize++;
                 var order = list.GetArrayElementAtIndex(index);
                 order.FindPropertyRelative("color").enumValueIndex = (int)pair.Key;
-                order.FindPropertyRelative("demand").intValue = demand;
-                remaining -= demand;
+                order.FindPropertyRelative("demand").intValue = animalDemand;
+                remaining -= animalDemand;
                 lane++;
-                toggle = !toggle;
             }
         }
         so.ApplyModifiedProperties();
@@ -996,10 +1073,29 @@ internal static bool TryGenerateExactCustomerCount(
             {
                 if (order == null) continue;
                 if (!result.ContainsKey(order.color)) result[order.color] = 0;
-                result[order.color] += Mathf.Max(0, order.demand);
+                result[order.color] += level.GetCustomerDemand(order.color);
             }
         }
         return result;
+    }
+
+    internal static void SyncCustomerDemandsFromAnimals(CookingBlastLevel level)
+    {
+        if (level == null || level.CustomerLanes == null) return;
+        bool changed = false;
+        foreach (CustomerLaneData lane in level.CustomerLanes)
+        {
+            if (lane == null || lane.frontToBack == null) continue;
+            foreach (CustomerOrderData order in lane.frontToBack)
+            {
+                if (order == null) continue;
+                int animalDemand = level.GetCustomerDemand(order.color);
+                if (order.demand == animalDemand) continue;
+                order.demand = animalDemand;
+                changed = true;
+            }
+        }
+        if (changed) Dirty(level);
     }
 
     internal static void Dirty(Component component)

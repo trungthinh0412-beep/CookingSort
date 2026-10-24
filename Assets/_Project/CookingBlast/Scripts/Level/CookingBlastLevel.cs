@@ -33,6 +33,14 @@ public int LevelNumber => levelNumber;
         public List<BoardColumnData> BoardColumns => boardColumns;
         public List<CustomerLaneData> CustomerLanes => customerLanes;
 
+        public int GetCustomerDemand(FoodColor color)
+        {
+            CustomerView prefab = customerQueue != null
+                ? customerQueue.GetAnimalPrefab(color)
+                : null;
+            return prefab != null ? prefab.Demand : 20;
+        }
+
         public int TotalTileCount
         {
             get
@@ -113,14 +121,14 @@ if (levelNumber < 1)
                 for (int i = 0; i < laneData.frontToBack.Count; i++)
                 {
                     CustomerOrderData order = laneData.frontToBack[i];
-                    if (order == null || order.demand <= 0)
+                    if (order == null)
                     {
-                        error = $"Lane {lane + 1}, customer {i + 1} has invalid demand.";
+                        error = $"Lane {lane + 1}, customer {i + 1} is missing.";
                         return false;
                     }
                     customerCount++;
                     if (!demandCounts.ContainsKey(order.color)) demandCounts[order.color] = 0;
-                    demandCounts[order.color] += order.demand;
+                    demandCounts[order.color] += GetCustomerDemand(order.color);
                 }
             }
 

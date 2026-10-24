@@ -236,8 +236,8 @@ private void LayoutColumn(int col, bool animate, List<Coroutine> activeFalls = n
             float stepY = cellSize + gapY;
             float totalWidth = columnCount * cellSize + (columnCount - 1) * gapX;
             float startX = -totalWidth * 0.5f + cellSize * 0.5f;
-            float totalHeight = Mathf.Max(1, _maxRows) * cellSize + Mathf.Max(0, _maxRows - 1) * gapY;
-            float bottomY = -totalHeight * 0.5f + cellSize * 0.5f;
+            // Tiles is the origin of the first (bottom) row.
+            float bottomY = 0f;
 
             List<FoodTileView> column = _columns[col];
             for (int row = 0; row < column.Count; row++)
