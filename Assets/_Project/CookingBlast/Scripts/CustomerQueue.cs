@@ -147,7 +147,7 @@ private void RefreshLane(int laneIndex, bool animate)
                 Vector3 target = slotPosition + new Vector3(0f, -row * rowSpacing, 0f);
                 if (animate) view.AnimateTo(target); else view.transform.localPosition = target;
                 view.SetFront(row == 0);
-                view.SetSortingOrder(24 - row * 2);
+                view.SetSortingOrder(224 - row * 2);
             }
         }
     

@@ -134,6 +134,12 @@ namespace CookingSort2D
                 instance.transform.localRotation = Quaternion.identity;
                 instance.transform.localScale = Vector3.one;
 
+                CameraEdgeAnchors edgeAnchors =
+                    instance.GetComponentInChildren<CameraEdgeAnchors>(true);
+                if (edgeAnchors == null)
+                    edgeAnchors = instance.AddComponent<CameraEdgeAnchors>();
+                edgeAnchors.ApplyAnchors();
+
                 if (persistProgress)
                 {
                     Data.PlayerData.CurrentLevelIndex = CurrentPlayerLevel;

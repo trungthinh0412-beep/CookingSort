@@ -176,6 +176,8 @@ internal static void EnsureAllLevelStructures()
         try
         {
             root = PrefabUtility.LoadPrefabContents(path);
+            if (root.GetComponentInChildren<CameraEdgeAnchors>(true) == null)
+                root.AddComponent<CameraEdgeAnchors>();
             EnsureScenePieces(root);
             PrefabUtility.SaveAsPrefabAsset(root, path);
         }

@@ -23,7 +23,7 @@ namespace CookingSort2D
                 customer.transform.localPosition = Vector3.zero;
                 customer.transform.localRotation = Quaternion.identity;
                 customer.transform.localScale = Vector3.one * 0.9f;
-                customer.SetSortingOrder(30);
+                customer.SetSortingOrder(230);
                 customer.SetSeated();
             }
             Refresh();

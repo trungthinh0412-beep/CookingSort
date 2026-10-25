@@ -155,7 +155,7 @@ private IEnumerator LeaveRoutine(CustomerView customer)
             _departingCustomers.Add(customer);
             customer.StopServePulse();
             customer.transform.SetParent(transform, true);
-            customer.SetSortingOrder(70);
+            customer.SetSortingOrder(270);
 
             Transform sprite = customer.transform;
             Vector3 start = sprite.position;
@@ -244,9 +244,9 @@ private IEnumerator MergeThreeRoutine(SeatSlotView keepSlot, SeatSlotView second
             Vector3 thirdScale = third.transform.localScale;
             float lift = Mathf.Max(0f, mergeLift);
             Vector3 mergeCenter = keepSeatPosition + Vector3.up * lift;
-            keep.SetSortingOrder(42);
-            second.SetSortingOrder(40);
-            third.SetSortingOrder(40);
+            keep.SetSortingOrder(242);
+            second.SetSortingOrder(240);
+            third.SetSortingOrder(240);
 
             // 1. All three squash, stretch, and pop up like elastic jelly.
             float elapsed = 0f;
@@ -355,7 +355,7 @@ private IEnumerator MergeThreeRoutine(SeatSlotView keepSlot, SeatSlotView second
             {
                 keep.transform.position = keepSeatPosition;
                 keep.transform.localScale = keepScale;
-                keep.SetSortingOrder(30);
+                keep.SetSortingOrder(230);
             }
             secondSlot.Release();
             thirdSlot.Release();
