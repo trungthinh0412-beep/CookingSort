@@ -72,8 +72,7 @@ public bool TrySeat(CustomerView customer)
             {
                 SeatSlotView slot = _slots[i];
                 if (!slot.gameObject.activeSelf || !slot.IsEmpty) continue;
-                slot.Attach(customer);
-                TryBeginMerge();
+                slot.Attach(customer, TryBeginMerge);
                 return true;
             }
             return false;
@@ -153,6 +152,7 @@ private IEnumerator LeaveRoutine(CustomerView customer)
             // The slot is free immediately. Animate the departing customer in world
             // space so a newly seated customer cannot pull this one back into place.
             _departingCustomers.Add(customer);
+            customer.CancelSeatJump();
             customer.StopServePulse();
             customer.transform.SetParent(transform, true);
             customer.SetSortingOrder(270);
@@ -376,17 +376,20 @@ private void TryBeginMerge()
             for (int i = 0; i < _slots.Count; i++)
             {
                 SeatSlotView first = _slots[i];
-                if (first == null || !first.gameObject.activeSelf || first.IsEmpty) continue;
+                if (first == null || !first.gameObject.activeSelf || first.IsEmpty ||
+                    first.Occupant.IsSeatJumping) continue;
                 for (int j = i + 1; j < _slots.Count; j++)
                 {
                     SeatSlotView second = _slots[j];
                     if (second == null || !second.gameObject.activeSelf || second.IsEmpty ||
+                        second.Occupant.IsSeatJumping ||
                         second.Occupant.ColorType != first.Occupant.ColorType) continue;
                     for (int k = j + 1; k < _slots.Count; k++)
                     {
-                        SeatSlotView third = _slots[k];
-                        if (third == null || !third.gameObject.activeSelf || third.IsEmpty ||
-                            third.Occupant.ColorType != first.Occupant.ColorType) continue;
+                    SeatSlotView third = _slots[k];
+                    if (third == null || !third.gameObject.activeSelf || third.IsEmpty ||
+                        third.Occupant.IsSeatJumping ||
+                        third.Occupant.ColorType != first.Occupant.ColorType) continue;
 
                         _mergeInProgress = true;
                         _mergingCustomers.Add(first.Occupant);

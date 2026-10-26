@@ -81,7 +81,7 @@ public void Initialize(CookingSortGameController game, CookingBlastLevel data)
                         continue;
                     }
                     CustomerView view = Instantiate(animalPrefab, customersRoot);
-                    // Keep prefab instance names and scale: Animal 1(Clone), (1,1,1).
+                    // Keep the prefab-authored name and scale.
                     view.BindQueue(this, lane, order);
                     list.Add(view);
                 }

@@ -14,17 +14,16 @@ namespace CookingSort2D
             Refresh();
         }
 
-        public void Attach(CustomerView customer)
+        public void Attach(CustomerView customer, System.Action onLanded = null)
         {
             Occupant = customer;
             if (customer != null)
             {
-                customer.transform.SetParent(transform, false);
-                customer.transform.localPosition = Vector3.zero;
+                customer.transform.SetParent(transform, true);
                 customer.transform.localRotation = Quaternion.identity;
-                customer.transform.localScale = Vector3.one * 0.9f;
                 customer.SetSortingOrder(230);
                 customer.SetSeated();
+                customer.AnimateSeatJump(Vector3.zero, onLanded);
             }
             Refresh();
         }

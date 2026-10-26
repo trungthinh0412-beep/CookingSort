@@ -9,11 +9,17 @@ namespace CookingSort2D
     public class CustomerView : MonoBehaviour, IPointerClickHandler
     {
         [SerializeField] private SpriteRenderer body;
+        [SerializeField] private SpriteRenderer shadow;
         [SerializeField] private TextMeshProUGUI count;
         [SerializeField] private Image countBadge;
         [SerializeField] private Collider2D hitbox;
         [SerializeField] private Image demandFill;
         [SerializeField, Min(1)] private int demand = 20;
+
+        [Header("Seat Jump")]
+        [SerializeField, Min(0.01f)] private float seatJumpDuration = 0.34f;
+        [SerializeField, Min(0f)] private float seatJumpHeight = 0.55f;
+        [SerializeField, Range(0f, 1f)] private float shadowScaleAtJumpPeak = 0.45f;
 
         private CustomerQueue _queue;
         private int _laneIndex = -1;
@@ -21,14 +27,36 @@ namespace CookingSort2D
         private bool _seated;
 
         private Coroutine _pulseRoutine;
+        private Vector3 _authoredScale = Vector3.one;
         private Vector3 _seatedBaseScale = Vector3.one;
         private Coroutine _moveRoutine;
+        private Coroutine _seatJumpRoutine;
+        private Vector3 _shadowBaseLocalPosition;
+        private Vector3 _shadowBaseLocalScale = Vector3.one;
 
         public FoodColor ColorType { get; private set; }
         public int Remaining { get; private set; }
         public bool IsSeated => _seated;
         public bool IsFront => _front;
+        public bool IsSeatJumping => _seatJumpRoutine != null;
         public int Demand => Mathf.Max(1, demand);
+
+        private void Awake()
+        {
+            _authoredScale = transform.localScale;
+            _seatedBaseScale = _authoredScale;
+            if (shadow == null)
+            {
+                Transform shadowTransform = transform.Find("Shadow_Animal");
+                if (shadowTransform != null)
+                    shadow = shadowTransform.GetComponent<SpriteRenderer>();
+            }
+            if (shadow != null)
+            {
+                _shadowBaseLocalPosition = shadow.transform.localPosition;
+                _shadowBaseLocalScale = shadow.transform.localScale;
+            }
+        }
 
         public void BindQueue(CustomerQueue queue, int laneIndex, CustomerOrderData order)
         {
@@ -39,7 +67,7 @@ namespace CookingSort2D
             Remaining = Demand;
             RefreshVisual();
             SetFront(false);
-            transform.localScale = Vector3.one;
+            transform.localScale = _authoredScale;
         }
 
 
@@ -49,7 +77,6 @@ namespace CookingSort2D
         {
             _front = front && !_seated;
             if (hitbox != null) hitbox.enabled = _front;
-            transform.localScale = Vector3.one;
         }
 
         public void SetSeated()
@@ -65,7 +92,7 @@ namespace CookingSort2D
             if (hitbox != null) hitbox.enabled = false;
             if (countBadge != null) countBadge.gameObject.SetActive(true);
 
-            _seatedBaseScale = Vector3.one;
+            _seatedBaseScale = _authoredScale;
             transform.localScale = _seatedBaseScale;
             StopServePulse();
             RefreshCount();
@@ -86,7 +113,25 @@ namespace CookingSort2D
         public void PrepareForMerge()
         {
             // The jelly merge owns scale until its animation finishes.
+            CancelSeatJump();
             StopServePulse();
+        }
+
+        public void AnimateSeatJump(Vector3 targetLocalPosition, System.Action onLanded)
+        {
+            CancelSeatJump();
+            _seatJumpRoutine = StartCoroutine(
+                SeatJumpRoutine(targetLocalPosition, onLanded));
+        }
+
+        public void CancelSeatJump()
+        {
+            if (_seatJumpRoutine != null)
+            {
+                StopCoroutine(_seatJumpRoutine);
+                _seatJumpRoutine = null;
+            }
+            RestoreShadow();
         }
 
         public void StopServePulse()
@@ -112,6 +157,7 @@ namespace CookingSort2D
         public void SetSortingOrder(int baseOrder)
         {
             if (body != null) body.sortingOrder = baseOrder;
+            if (shadow != null) shadow.sortingOrder = baseOrder - 1;
 
             Canvas uiCanvas = countBadge != null
                 ? countBadge.canvas
@@ -161,6 +207,57 @@ namespace CookingSort2D
             }
             if (!_seated) transform.localPosition = target;
             _moveRoutine = null;
+        }
+
+        private IEnumerator SeatJumpRoutine(
+            Vector3 targetLocalPosition,
+            System.Action onLanded)
+        {
+            Vector3 startLocalPosition = transform.localPosition;
+            float duration = Mathf.Max(0.01f, seatJumpDuration);
+            float height = Mathf.Max(0f, seatJumpHeight);
+            float elapsed = 0f;
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                float t = Mathf.Clamp01(elapsed / duration);
+                float eased = t * t * (3f - 2f * t);
+                float height01 = Mathf.Sin(t * Mathf.PI);
+                float lift = height * height01;
+
+                transform.localPosition = Vector3.LerpUnclamped(
+                    startLocalPosition,
+                    targetLocalPosition,
+                    eased) + Vector3.up * lift;
+
+                if (shadow != null)
+                {
+                    float scaleY = Mathf.Max(0.001f, Mathf.Abs(transform.localScale.y));
+                    shadow.transform.localPosition =
+                        _shadowBaseLocalPosition + Vector3.down * (lift / scaleY);
+                    float shadowScale = Mathf.Lerp(
+                        1f,
+                        Mathf.Clamp01(shadowScaleAtJumpPeak),
+                        height01);
+                    shadow.transform.localScale =
+                        _shadowBaseLocalScale * shadowScale;
+                }
+
+                yield return null;
+            }
+
+            transform.localPosition = targetLocalPosition;
+            _seatJumpRoutine = null;
+            RestoreShadow();
+            onLanded?.Invoke();
+        }
+
+        private void RestoreShadow()
+        {
+            if (shadow == null) return;
+            shadow.transform.localPosition = _shadowBaseLocalPosition;
+            shadow.transform.localScale = _shadowBaseLocalScale;
         }
 
         private IEnumerator PulseRoutine()

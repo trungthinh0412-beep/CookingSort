@@ -992,14 +992,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 8981271963874292691, guid: 95f8175585ce18147bb023ffc7228d14, type: 3}
-      propertyPath: gapX
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8981271963874292691, guid: 95f8175585ce18147bb023ffc7228d14, type: 3}
-      propertyPath: gapY
-      value: -0.02
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
