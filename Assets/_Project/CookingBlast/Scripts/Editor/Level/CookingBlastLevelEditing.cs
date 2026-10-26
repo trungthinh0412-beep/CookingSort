@@ -11,6 +11,7 @@ internal static class CookingBlastLevelEditing
         Vector2Int.left, Vector2Int.right, Vector2Int.up, Vector2Int.down
     };
     internal static SerializedProperty BoardColumns(SerializedObject so) => so.FindProperty("boardColumns");
+    internal static SerializedProperty BoardClusters(SerializedObject so) => so.FindProperty("boardClusters");
     internal static SerializedProperty CustomerLanes(SerializedObject so) => so.FindProperty("customerLanes");
 
     internal static int MaxRows(CookingBlastLevel level)
@@ -39,12 +40,14 @@ internal static class CookingBlastLevelEditing
             for (int r = old; r < rows; r++) cells.GetArrayElementAtIndex(r).enumValueIndex = (int)fill;
         }
         so.ApplyModifiedProperties();
+        RemoveInvalidClusters(level);
         Dirty(level);
     }
 
     internal static void SetCell(CookingBlastLevel level, int column, int row, FoodColor color)
     {
         if (level == null) return;
+        if (level.IsClusterCell(column, row, out _)) return;
         var so = new SerializedObject(level);
         var cols = BoardColumns(so);
         if (column < 0 || column >= cols.arraySize) return;
@@ -54,6 +57,130 @@ internal static class CookingBlastLevelEditing
         cells.GetArrayElementAtIndex(row).enumValueIndex = (int)color;
         so.ApplyModifiedProperties();
         Dirty(level);
+    }
+
+    internal static bool NormalizeCluster40Sizes(CookingBlastLevel level)
+    {
+        if (level == null || level.BoardClusters == null) return false;
+        bool needsMigration = false;
+        for (int i = 0; i < level.BoardClusters.Count; i++)
+        {
+            BoardClusterData cluster = level.BoardClusters[i];
+            if (cluster != null &&
+                (cluster.value != BoardClusterData.DefaultValue ||
+                 cluster.width != BoardClusterData.DefaultWidth ||
+                 cluster.height != BoardClusterData.DefaultHeight))
+            {
+                needsMigration = true;
+                break;
+            }
+        }
+        if (!needsMigration) return false;
+
+        Undo.RecordObject(level, "Migrate Cooking Blast Cluster 40 to 2x2");
+        for (int i = 0; i < level.BoardClusters.Count; i++)
+        {
+            BoardClusterData cluster = level.BoardClusters[i];
+            if (cluster == null) continue;
+            cluster.value = BoardClusterData.DefaultValue;
+            cluster.width = BoardClusterData.DefaultWidth;
+            cluster.height = BoardClusterData.DefaultHeight;
+        }
+        Dirty(level);
+        return true;
+    }
+
+    internal static bool AddCluster40(CookingBlastLevel level, int anchorColumn,
+        int anchorRow, FoodColor color, out string message)
+    {
+        message = string.Empty;
+        if (level == null) return false;
+        const int width = BoardClusterData.DefaultWidth;
+        const int height = BoardClusterData.DefaultHeight;
+        if (anchorColumn < 0 || anchorColumn + width > level.BoardColumns.Count)
+        {
+            message = "Cluster 40 needs two columns and does not fit here.";
+            return false;
+        }
+        for (int column = anchorColumn; column < anchorColumn + width; column++)
+        {
+            BoardColumnData data = level.BoardColumns[column];
+            if (data == null || data.bottomToTop == null ||
+                anchorRow < 0 || anchorRow + height > data.bottomToTop.Count)
+            {
+                message = "Cluster 40 needs the clicked row and the row above it.";
+                return false;
+            }
+            for (int row = anchorRow; row < anchorRow + height; row++)
+                if (level.IsClusterCell(column, row, out _))
+                {
+                    message = "Cluster 40 overlaps an existing cluster.";
+                    return false;
+                }
+        }
+
+        Undo.RecordObject(level, "Place Cooking Blast Cluster 40");
+        level.BoardClusters.Add(new BoardClusterData
+        {
+            color = color,
+            value = BoardClusterData.DefaultValue,
+            anchorColumn = anchorColumn,
+            anchorRow = anchorRow,
+            width = width,
+            height = height
+        });
+        for (int column = anchorColumn; column < anchorColumn + width; column++)
+            for (int row = anchorRow; row < anchorRow + height; row++)
+                level.BoardColumns[column].bottomToTop[row] = color;
+        Dirty(level);
+        message = "Placed a 2 x 2 Cluster 40 using " + color + ".";
+        return true;
+    }
+
+    internal static bool RemoveClusterAt(CookingBlastLevel level, int column, int row)
+    {
+        if (level == null || level.BoardClusters == null) return false;
+        for (int i = level.BoardClusters.Count - 1; i >= 0; i--)
+        {
+            BoardClusterData cluster = level.BoardClusters[i];
+            if (cluster == null || !cluster.Contains(column, row)) continue;
+            Undo.RecordObject(level, "Remove Cooking Blast Cluster");
+            level.BoardClusters.RemoveAt(i);
+            Dirty(level);
+            return true;
+        }
+        return false;
+    }
+
+    private static void RemoveInvalidClusters(CookingBlastLevel level)
+    {
+        if (level == null || level.BoardClusters == null) return;
+        for (int i = level.BoardClusters.Count - 1; i >= 0; i--)
+        {
+            BoardClusterData cluster = level.BoardClusters[i];
+            bool valid = cluster != null && cluster.anchorRow >= 0 &&
+                         cluster.anchorColumn >= 0 &&
+                         cluster.anchorColumn + cluster.width <= level.BoardColumns.Count;
+            if (valid)
+                for (int column = cluster.anchorColumn;
+                     column < cluster.anchorColumn + cluster.width; column++)
+                    valid &= level.BoardColumns[column] != null &&
+                             level.BoardColumns[column].bottomToTop != null &&
+                             cluster.anchorRow + cluster.height <=
+                             level.BoardColumns[column].bottomToTop.Count;
+            if (!valid) level.BoardClusters.RemoveAt(i);
+        }
+    }
+
+    private static bool RejectAutoFillWithClusters(CookingBlastLevel level, out string message)
+    {
+        if (level != null && level.BoardClusters != null && level.BoardClusters.Count > 0)
+        {
+            message = "Remove Cluster 40 before Auto Fill, then place it again after filling the regular Tiles.";
+            return true;
+        }
+        message = string.Empty;
+        return false;
     }
 
     internal static FoodColor GetCell(CookingBlastLevel level, int column, int row)
@@ -140,6 +267,7 @@ internal static bool TryAutoFillFromCustomers(CookingBlastLevel level, int seed,
     {
         message = "Open a level prefab first.";
         if (level == null) return false;
+        if (RejectAutoFillWithClusters(level, out message)) return false;
         var demand = DemandCounts(level);
         int required = 0;
         foreach (var pair in demand) required += pair.Value;
@@ -162,6 +290,7 @@ internal static bool TryAutoFillByCustomerOrder(CookingBlastLevel level, int clu
         message = "Open a level prefab first.";
         if (level == null || level.BoardColumns == null || level.CustomerLanes == null)
             return false;
+        if (RejectAutoFillWithClusters(level, out message)) return false;
 
         int slots = level.TotalTileCount;
         int lanes = level.CustomerLanes.Count;
@@ -307,6 +436,7 @@ internal static bool TryAutoFillByPriority(CookingBlastLevel level,
         if (level == null || priority == null ||
             level.BoardColumns == null || level.CustomerLanes == null)
             return false;
+        if (RejectAutoFillWithClusters(level, out message)) return false;
 
         var all = new List<CustomerOrderData>();
         var visited = new HashSet<Vector2Int>();
@@ -898,16 +1028,10 @@ private static int ColorPlacementWeight(CookingBlastLevel level, Dictionary<Food
         if (level == null) return;
         laneCount = Mathf.Clamp(laneCount, 1, 8);
 
-        var counts = new Dictionary<FoodColor, int>();
-        foreach (var column in level.BoardColumns)
-        {
-            if (column == null || column.bottomToTop == null) continue;
-            foreach (FoodColor color in column.bottomToTop)
-            {
-                if (!counts.ContainsKey(color)) counts[color] = 0;
-                counts[color]++;
-            }
-        }
+        // Use the same logical totals shown by TILES / NEEDED. Covered cells
+        // do not count individually; each Cluster 40 contributes 40 units of
+        // its selected color.
+        var counts = TileCounts(level);
 
         Undo.RecordObject(level, "Generate Cooking Blast customers");
         var so = new SerializedObject(level);
@@ -1053,12 +1177,21 @@ internal static bool TryGenerateExactCustomerCount(
         foreach (var column in level.BoardColumns)
         {
             if (column == null || column.bottomToTop == null) continue;
-            foreach (FoodColor color in column.bottomToTop)
+            for (int row = 0; row < column.bottomToTop.Count; row++)
             {
+                if (level.IsClusterCell(level.BoardColumns.IndexOf(column), row, out _)) continue;
+                FoodColor color = column.bottomToTop[row];
                 if (!result.ContainsKey(color)) result[color] = 0;
                 result[color]++;
             }
         }
+        if (level.BoardClusters != null)
+            foreach (BoardClusterData cluster in level.BoardClusters)
+            {
+                if (cluster == null) continue;
+                if (!result.ContainsKey(cluster.color)) result[cluster.color] = 0;
+                result[cluster.color] += Mathf.Max(0, cluster.value);
+            }
         return result;
     }
 

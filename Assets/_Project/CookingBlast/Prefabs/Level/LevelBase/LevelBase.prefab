@@ -125,6 +125,7 @@ Transform:
   - {fileID: 3645062533833383122}
   - {fileID: 2337924391936930438}
   - {fileID: 8453892187877585116}
+  - {fileID: 1164615852980616502}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &4242704948146206076
@@ -141,7 +142,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CookingSort2D.CookingBlastLevel
   levelNumber: 1
   seatCount: 5
-  board: {fileID: 8981271963874292691}
+  board: {fileID: 992946337302588893}
   seatBar: {fileID: 6446821649508383590}
   customerQueue: {fileID: 420494745742649123}
   boardColumns: []
@@ -540,17 +541,6 @@ MonoBehaviour:
   referenceResolution: {x: 1080, y: 1920}
   scaleAtReference: {x: 1.07, y: 1.07, z: 1.07}
   scaleMode: 0
---- !u!114 &8981271963874292691 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 8849997689638928594, guid: 8147caf80ce89bc4e9d3242b87a7206c, type: 3}
-  m_PrefabInstance: {fileID: 464540665990230785}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8196168923619254116}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 606c5eb35598d1d48aa6e8a3c53334e3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CookingSort2D.BoardController
 --- !u!1001 &7700493205277882617
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -565,7 +555,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5380776936890600063, guid: f201b155fbb1e9c4188c61844a4cfb4c, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -2.3
+      value: -2.25
       objectReference: {fileID: 0}
     - target: {fileID: 5380776936890600063, guid: f201b155fbb1e9c4188c61844a4cfb4c, type: 3}
       propertyPath: m_LocalPosition.z
@@ -638,7 +628,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 106260037732843506, guid: 2e9dbd52803e0fa47aaac8a7821cca4a, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -4.62
+      value: -4.35
       objectReference: {fileID: 0}
     - target: {fileID: 106260037732843506, guid: 2e9dbd52803e0fa47aaac8a7821cca4a, type: 3}
       propertyPath: m_LocalPosition.z
@@ -696,4 +686,77 @@ MonoBehaviour:
 Transform:
   m_CorrespondingSourceObject: {fileID: 106260037732843506, guid: 2e9dbd52803e0fa47aaac8a7821cca4a, type: 3}
   m_PrefabInstance: {fileID: 8370996364213358382}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &8581087288908770575
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 7187586676207457956}
+    m_Modifications:
+    - target: {fileID: 7439857103381221433, guid: 8147caf80ce89bc4e9d3242b87a7206c, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7439857103381221433, guid: 8147caf80ce89bc4e9d3242b87a7206c, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.35
+      objectReference: {fileID: 0}
+    - target: {fileID: 7439857103381221433, guid: 8147caf80ce89bc4e9d3242b87a7206c, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7439857103381221433, guid: 8147caf80ce89bc4e9d3242b87a7206c, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7439857103381221433, guid: 8147caf80ce89bc4e9d3242b87a7206c, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7439857103381221433, guid: 8147caf80ce89bc4e9d3242b87a7206c, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7439857103381221433, guid: 8147caf80ce89bc4e9d3242b87a7206c, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7439857103381221433, guid: 8147caf80ce89bc4e9d3242b87a7206c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7439857103381221433, guid: 8147caf80ce89bc4e9d3242b87a7206c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7439857103381221433, guid: 8147caf80ce89bc4e9d3242b87a7206c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8632491686686747749, guid: 8147caf80ce89bc4e9d3242b87a7206c, type: 3}
+      propertyPath: m_Name
+      value: Board
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 8147caf80ce89bc4e9d3242b87a7206c, type: 3}
+--- !u!114 &992946337302588893 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8849997689638928594, guid: 8147caf80ce89bc4e9d3242b87a7206c, type: 3}
+  m_PrefabInstance: {fileID: 8581087288908770575}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 606c5eb35598d1d48aa6e8a3c53334e3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CookingSort2D.BoardController
+--- !u!4 &1164615852980616502 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7439857103381221433, guid: 8147caf80ce89bc4e9d3242b87a7206c, type: 3}
+  m_PrefabInstance: {fileID: 8581087288908770575}
   m_PrefabAsset: {fileID: 0}

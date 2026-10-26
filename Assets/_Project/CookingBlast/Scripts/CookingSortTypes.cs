@@ -40,6 +40,27 @@ namespace CookingSort2D
     }
 
     [Serializable]
+    public class BoardClusterData
+    {
+        public const int DefaultValue = 40;
+        public const int DefaultWidth = 2;
+        public const int DefaultHeight = 2;
+
+        public FoodColor color;
+        [Min(1)] public int value = DefaultValue;
+        [Min(0)] public int anchorColumn;
+        [Min(0)] public int anchorRow;
+        [Min(1)] public int width = DefaultWidth;
+        [Min(1)] public int height = DefaultHeight;
+
+        public bool Contains(int column, int row)
+        {
+            return column >= anchorColumn && column < anchorColumn + width &&
+                   row >= anchorRow && row < anchorRow + height;
+        }
+    }
+
+    [Serializable]
     public class CustomerLaneData
     {
         [Tooltip("Index 0 is the front customer. Last index is the back customer.")]

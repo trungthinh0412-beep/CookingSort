@@ -30,7 +30,14 @@ namespace CookingSort2D
         
         private readonly List<CustomerView> _customerBuffer = new List<CustomerView>();
         private readonly List<List<FoodTileView>> _columns = new List<List<FoodTileView>>();
-        
+        private sealed class RuntimeCluster
+        {
+            public BoardClusterData Data;
+            public FoodTileView View;
+            public int Remaining;
+            public bool Busy;
+        }
+        private readonly List<RuntimeCluster> _clusters = new List<RuntimeCluster>();
         private readonly List<int> _columnFrontRows = new List<int>();
 private readonly List<bool> _columnBusy = new List<bool>();
         private readonly Dictionary<CustomerView, int> _customerFlights = new Dictionary<CustomerView, int>();
@@ -47,6 +54,7 @@ private readonly List<bool> _columnBusy = new List<bool>();
             {
                 int total = 0;
                 for (int i = 0; i < _columns.Count; i++) total += _columns[i].Count;
+                for (int i = 0; i < _clusters.Count; i++) total += Mathf.Max(0, _clusters[i].Remaining);
                 return total;
             }
         }
@@ -96,6 +104,7 @@ public void Initialize(CookingSortGameController game, CookingBlastLevel data)
 _columnBusy.Add(false);
                 for (int row = 0; row < count; row++)
                 {
+                    if (data.IsClusterCell(col, row, out _)) continue;
                     FoodColor kind = columnData.bottomToTop[row];
                     FoodTileView prefab = GetTilePrefab(kind);
                     if (prefab == null)
@@ -110,7 +119,26 @@ _columnBusy.Add(false);
                     column.Add(tile);
                 }
             }
+            if (data.BoardClusters != null)
+            {
+                for (int i = 0; i < data.BoardClusters.Count; i++)
+                {
+                    BoardClusterData cluster = data.BoardClusters[i];
+                    if (cluster == null) continue;
+                    FoodTileView prefab = GetTilePrefab(cluster.color);
+                    if (prefab == null) continue;
+                    FoodTileView view = Instantiate(prefab, tileRoot);
+                    view.SetupCluster(cluster.color, cluster.value, cluster.width, cluster.height);
+                    _clusters.Add(new RuntimeCluster
+                    {
+                        Data = cluster,
+                        View = view,
+                        Remaining = cluster.value
+                    });
+                }
+            }
             LayoutAll(false);
+            LayoutClusters();
         }
 
         public void BeginServeLoop(SeatBar seats)
@@ -122,8 +150,16 @@ _columnBusy.Add(false);
         public bool HasServiceableTile(SeatBar seats)
         {
             if (seats == null) return false;
+            for (int i = 0; i < _clusters.Count; i++)
+            {
+                RuntimeCluster cluster = _clusters[i];
+                if (cluster.Remaining > 0 && IsClusterExposed(cluster) &&
+                    FindFreeCustomer(seats, cluster.Data.color) != null)
+                    return true;
+            }
             for (int col = 0; col < _columns.Count; col++)
             {
+                if (IsColumnBlockedByCluster(col)) continue;
                 if (_columns[col].Count == 0) continue;
                 FoodTileView bottom = _columns[col][0];
                 if (bottom != null && seats.HasCustomerForColor(bottom.ColorType)) return true;
@@ -136,7 +172,7 @@ public void ClearBoard()
             _serving = false;
             StopAllCoroutines();
             _columns.Clear();
-            
+            _clusters.Clear();
             _columnFrontRows.Clear();
 _columnBusy.Clear();
             _customerFlights.Clear();
@@ -156,9 +192,32 @@ private IEnumerator ServeRoutine(SeatBar seats)
                 bool anyColumnBusy = false;
                 bool startedAny = false;
 
+                for (int i = 0; i < _clusters.Count; i++)
+                {
+                    RuntimeCluster cluster = _clusters[i];
+                    if (cluster.Remaining <= 0 || !IsClusterExposed(cluster)) continue;
+                    if (cluster.Busy)
+                    {
+                        anyColumnBusy = true;
+                        continue;
+                    }
+                    CustomerView customer = FindFreeCustomer(seats, cluster.Data.color);
+                    if (customer == null) continue;
+                    _customerFlights.TryGetValue(customer, out int clusterFlights);
+                    _customerFlights[customer] = clusterFlights + 1;
+                    _customerNextScanAt[customer] = Time.unscaledTime + GetCustomerScanInterval(customer);
+                    cluster.Busy = true;
+                    cluster.Remaining--;
+                    if (cluster.View != null) cluster.View.SetClusterValue(cluster.Remaining);
+                    anyColumnBusy = true;
+                    startedAny = true;
+                    StartCoroutine(ServeClusterUnit(cluster, customer, seats));
+                }
+
                 // Repair missing tiles before selecting the next exposed layer.
                 for (int col = 0; col < _columns.Count; col++)
                 {
+                    if (IsColumnBlockedByCluster(col)) continue;
                     if (_columnBusy[col])
                     {
                         anyColumnBusy = true;
@@ -228,6 +287,80 @@ private IEnumerator ServeRoutine(SeatBar seats)
             for (int col = 0; col < _columns.Count; col++) LayoutColumn(col, animate);
         }
 
+        private int GetClusterBottomRow(RuntimeCluster cluster)
+        {
+            if (cluster == null || cluster.Data == null) return 0;
+            int bottom = 0;
+            int endColumn = Mathf.Min(_columnFrontRows.Count,
+                cluster.Data.anchorColumn + cluster.Data.width);
+            for (int col = Mathf.Max(0, cluster.Data.anchorColumn); col < endColumn; col++)
+                bottom = Mathf.Max(bottom,
+                    cluster.Data.anchorRow - _columnFrontRows[col]);
+            return Mathf.Max(0, bottom);
+        }
+
+        private bool IsClusterExposed(RuntimeCluster cluster)
+        {
+            return cluster != null && cluster.Remaining > 0 &&
+                   GetClusterBottomRow(cluster) == 0;
+        }
+
+        private bool IsColumnBlockedByCluster(int column)
+        {
+            if (column < 0 || column >= _columnFrontRows.Count) return false;
+            for (int i = 0; i < _clusters.Count; i++)
+            {
+                RuntimeCluster cluster = _clusters[i];
+                if (cluster == null || cluster.Remaining <= 0 || cluster.Data == null) continue;
+                BoardClusterData data = cluster.Data;
+                if (column < data.anchorColumn || column >= data.anchorColumn + data.width) continue;
+                if (_columnFrontRows[column] >= data.anchorRow) return true;
+            }
+            return false;
+        }
+
+        private int GetTileDisplayRow(int column, int compactRow)
+        {
+            if (column < 0 || column >= _columnFrontRows.Count) return compactRow;
+            int frontRow = _columnFrontRows[column];
+            RuntimeCluster nearest = null;
+            for (int i = 0; i < _clusters.Count; i++)
+            {
+                RuntimeCluster cluster = _clusters[i];
+                if (cluster == null || cluster.Remaining <= 0 || cluster.Data == null) continue;
+                BoardClusterData data = cluster.Data;
+                if (column < data.anchorColumn || column >= data.anchorColumn + data.width ||
+                    data.anchorRow < frontRow)
+                    continue;
+                if (nearest == null || data.anchorRow < nearest.Data.anchorRow)
+                    nearest = cluster;
+            }
+
+            if (nearest == null) return compactRow;
+            int belowCount = Mathf.Max(0, nearest.Data.anchorRow - frontRow);
+            if (compactRow < belowCount) return compactRow;
+            return GetClusterBottomRow(nearest) + nearest.Data.height + compactRow - belowCount;
+        }
+
+        private void LayoutClusters()
+        {
+            if (tileRoot == null || _columns.Count == 0) return;
+            float stepX = cellSize + gapX;
+            float stepY = cellSize + gapY;
+            float totalWidth = _columns.Count * cellSize + (_columns.Count - 1) * gapX;
+            float startX = -totalWidth * .5f + cellSize * .5f;
+            for (int i = 0; i < _clusters.Count; i++)
+            {
+                RuntimeCluster cluster = _clusters[i];
+                if (cluster.View == null) continue;
+                BoardClusterData data = cluster.Data;
+                cluster.View.transform.localPosition = new Vector3(
+                    startX + (data.anchorColumn + (data.width - 1) * .5f) * stepX,
+                    (GetClusterBottomRow(cluster) + (data.height - 1) * .5f) * stepY, 0f);
+                cluster.View.SetSortingOrder(20 + _maxRows);
+            }
+        }
+
 private void LayoutColumn(int col, bool animate, List<Coroutine> activeFalls = null)
         {
             if (col < 0 || col >= _columns.Count || tileRoot == null) return;
@@ -244,7 +377,9 @@ private void LayoutColumn(int col, bool animate, List<Coroutine> activeFalls = n
             {
                 FoodTileView tile = column[row];
                 if (tile == null) continue;
-                Vector3 target = new Vector3(startX + col * stepX, bottomY + row * stepY, 0f);
+                int displayRow = GetTileDisplayRow(col, row);
+                Vector3 target = new Vector3(startX + col * stepX,
+                    bottomY + displayRow * stepY, 0f);
                 // Bottom tiles render in front of the rows above them.
                 tile.SetSortingOrder(10 + _maxRows - row);
                 if (animate)
@@ -304,6 +439,7 @@ private IEnumerator ServeSingleTile(int col, FoodTileView tile, CustomerView cus
             // Falling and flying are independent; release the column after its fall.
             var fallingTiles = new List<Coroutine>();
             LayoutColumn(col, true, fallingTiles);
+            LayoutClusters();
 
             if (tile != null && customer != null)
                 tile.ConsumeTo(customer.transform, () => flightDone = true);
@@ -350,6 +486,67 @@ private IEnumerator ServeSingleTile(int col, FoodTileView tile, CustomerView cus
                     _customerDeliveredCount.Remove(customer);
                     _customerNextScanAt.Remove(customer);
                     seats.CompleteCustomer(customer);
+                }
+            }
+        }
+
+private IEnumerator ServeClusterUnit(RuntimeCluster cluster, CustomerView customer, SeatBar seats)
+        {
+            bool flightDone = false;
+            FoodColor servedColor = cluster.Data.color;
+            FoodTileView projectile = null;
+            FoodTileView prefab = GetTilePrefab(servedColor);
+            if (prefab != null && tileRoot != null)
+            {
+                projectile = Instantiate(prefab, tileRoot);
+                projectile.Setup(servedColor);
+                if (cluster.View != null)
+                    projectile.transform.position = cluster.View.transform.position;
+                projectile.SetSortingOrder(100);
+                projectile.ConsumeTo(customer != null ? customer.transform : null,
+                    () => flightDone = true);
+            }
+            else flightDone = true;
+
+            while (!flightDone) yield return null;
+
+            bool completed = customer != null && customer.ServeOne();
+            if (_game != null) _game.OnTileServed(servedColor);
+            if (projectile != null) Destroy(projectile.gameObject);
+
+            if (customer != null)
+            {
+                if (_customerFlights.TryGetValue(customer, out int inFlight))
+                {
+                    if (inFlight <= 1) _customerFlights.Remove(customer);
+                    else _customerFlights[customer] = inFlight - 1;
+                }
+
+                int delivered = 0;
+                _customerDeliveredCount.TryGetValue(customer, out delivered);
+                float oldInterval = GetCustomerScanInterval(customer);
+                _customerDeliveredCount[customer] = delivered + 1;
+                float newInterval = GetCustomerScanInterval(customer);
+                if (_customerNextScanAt.TryGetValue(customer, out float nextScan))
+                    _customerNextScanAt[customer] = Mathf.Min(nextScan,
+                        nextScan - oldInterval + newInterval);
+
+                if (completed)
+                {
+                    _customerDeliveredCount.Remove(customer);
+                    _customerNextScanAt.Remove(customer);
+                    seats.CompleteCustomer(customer);
+                }
+            }
+
+            cluster.Busy = false;
+            if (cluster.Remaining <= 0)
+            {
+                if (cluster.View != null) Destroy(cluster.View.gameObject);
+                for (int col = cluster.Data.anchorColumn;
+                     col < cluster.Data.anchorColumn + cluster.Data.width && col < _columns.Count; col++)
+                {
+                    StartCoroutine(WaitForColumnFall(col));
                 }
             }
         }

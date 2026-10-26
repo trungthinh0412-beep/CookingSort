@@ -26,6 +26,7 @@ internal sealed class CookingBlastBoardPanel
     private int strokeGroup = -1;
     
     private bool bucketMode;
+    [SerializeField] private bool cluster40Mode;
 private bool painting;
     private int lastColumn = -1;
     private int lastRow = -1;
@@ -36,6 +37,7 @@ private bool painting;
 internal void Draw(CookingBlastLevel level, ref FoodColor brush, ref int columns, ref int rows,
         ref int mask, ref int seed, float width, int laneCount, int minDemand, int maxDemand)
     {
+        CookingBlastLevelEditing.NormalizeCluster40Sizes(level);
         using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
         {
             EditorGUILayout.LabelField("BOARD DESIGNER", EditorStyles.boldLabel);
@@ -58,15 +60,20 @@ internal void Draw(CookingBlastLevel level, ref FoodColor brush, ref int columns
             }
             GUILayout.Space(8);
 
-            int tool = GUILayout.Toolbar(bucketMode ? 1 : 0,
-                new[] { "Brush  •  Paint Tiles", "Bucket  •  Fill Region" },
-                GUILayout.Height(28), GUILayout.Width(Mathf.Min(410f, Mathf.Max(230f, width - 38f))));
+            int currentTool = cluster40Mode ? 2 : bucketMode ? 1 : 0;
+            int tool = GUILayout.Toolbar(currentTool,
+                new[] { "Brush  •  Tiles", "Bucket  •  Region", "Cluster 40  •  2x2" },
+                GUILayout.Height(28), GUILayout.Width(Mathf.Min(610f, Mathf.Max(330f, width - 38f))));
             bool nextBucketMode = tool == 1;
-            if (nextBucketMode != bucketMode)
+            bool nextClusterMode = tool == 2;
+            if (nextBucketMode != bucketMode || nextClusterMode != cluster40Mode)
             {
                 EndStroke();
                 bucketMode = nextBucketMode;
+                cluster40Mode = nextClusterMode;
             }
+            if (cluster40Mode)
+                EditorGUILayout.HelpBox("Click any cell to use it as the bottom-left corner of a 2 x 2 Cluster with value 40. The cell to its right and the two cells above are included. Click an existing Cluster to remove it. The current Brush color is used.", MessageType.Info);
 
             using (new EditorGUILayout.HorizontalScope())
             {
@@ -171,6 +178,7 @@ internal void Draw(CookingBlastLevel level, ref FoodColor brush, ref int columns
             var data = level.BoardColumns[c];
             if (data == null || data.bottomToTop == null || r >= data.bottomToTop.Count)
                 continue;
+            if (level.IsClusterCell(c, r, out _)) continue;
             Color color = CookingSortPalette.Get(data.bottomToTop[r]);
             if (r == 0) EditorGUI.DrawRect(new Rect(cell.x-1,cell.y-1,cell.width+2,cell.height+2), new Color(.65f,.85f,1));
             EditorGUI.DrawRect(cell, new Color(.12f, .14f, .18f));
@@ -190,7 +198,14 @@ internal void Draw(CookingBlastLevel level, ref FoodColor brush, ref int columns
                 brush = data.bottomToTop[r];
                 ev.Use();
             }
-            else if (ev.type == EventType.MouseDown && ev.button == 0 &&
+            else if (cluster40Mode && ev.type == EventType.MouseDown && ev.button == 0)
+            {
+                EndStroke();
+                CookingBlastLevelEditing.AddCluster40(level, c, r, brush, out fillStatus);
+                fillStatusType = fillStatus.StartsWith("Placed") ? MessageType.Info : MessageType.Warning;
+                ev.Use();
+            }
+            else if (!cluster40Mode && ev.type == EventType.MouseDown && ev.button == 0 &&
                      (bucketMode || ev.shift))
             {
                 EndStroke();
@@ -201,7 +216,7 @@ internal void Draw(CookingBlastLevel level, ref FoodColor brush, ref int columns
                 fillStatusType = MessageType.Info;
                 ev.Use();
             }
-            else if (!bucketMode &&
+            else if (!cluster40Mode && !bucketMode &&
                      (ev.type == EventType.MouseDown || (ev.type == EventType.MouseDrag && painting)) &&
                      ev.button == 0)
             {
@@ -214,6 +229,45 @@ internal void Draw(CookingBlastLevel level, ref FoodColor brush, ref int columns
                 }
                 PaintLine(level, c, r, brush);
                 ev.Use();
+            }
+        }
+        if (level.BoardClusters != null)
+        {
+            foreach (BoardClusterData cluster in level.BoardClusters)
+            {
+                if (cluster == null) continue;
+                Rect clusterRect = new Rect(
+                    area.x + 26 + cluster.anchorColumn * size,
+                    area.y + 4 + (rows - cluster.anchorRow - cluster.height) * size,
+                    cluster.width * size - 2,
+                    cluster.height * size - 2);
+                EditorGUI.DrawRect(clusterRect, new Color(.10f, .11f, .15f));
+                Rect inset = new Rect(clusterRect.x + 2, clusterRect.y + 2,
+                    clusterRect.width - 4, clusterRect.height - 4);
+                EditorGUI.DrawRect(inset, CookingSortPalette.Get(cluster.color));
+                var clusterStyle = new GUIStyle(EditorStyles.boldLabel)
+                {
+                    alignment = TextAnchor.MiddleCenter,
+                    fontSize = Mathf.Clamp(Mathf.RoundToInt(size * .65f), 15, 26)
+                };
+                clusterStyle.normal.textColor = Color.white;
+                GUI.Label(inset, cluster.value.ToString(), clusterStyle);
+
+                if (!GUI.enabled || !clusterRect.Contains(ev.mousePosition)) continue;
+                if (ev.type == EventType.MouseDown && ev.button == 1)
+                {
+                    brush = cluster.color;
+                    ev.Use();
+                }
+                else if (cluster40Mode && ev.type == EventType.MouseDown && ev.button == 0)
+                {
+                    CookingBlastLevelEditing.RemoveClusterAt(level,
+                        cluster.anchorColumn, cluster.anchorRow);
+                    fillStatus = "Removed Cluster 40. Ctrl+Z to undo.";
+                    fillStatusType = MessageType.Info;
+                    ev.Use();
+                    break;
+                }
             }
         }
         for (int r=0; r<rows; r++)
