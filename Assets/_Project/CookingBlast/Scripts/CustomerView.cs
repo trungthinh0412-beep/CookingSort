@@ -19,6 +19,7 @@ namespace CookingSort2D
         private int _laneIndex = -1;
         private bool _front;
         private bool _seated;
+        private bool _seatReady;
 
         private Coroutine _pulseRoutine;
         private Vector3 _seatedBaseScale = Vector3.one;
@@ -27,6 +28,7 @@ namespace CookingSort2D
         public FoodColor ColorType { get; private set; }
         public int Remaining { get; private set; }
         public bool IsSeated => _seated;
+        public bool IsSeatReady => _seated && _seatReady;
         public bool IsFront => _front;
         public int Demand => Mathf.Max(1, demand);
 
@@ -35,6 +37,7 @@ namespace CookingSort2D
             _queue = queue;
             _laneIndex = laneIndex;
             _seated = false;
+            _seatReady = false;
             ColorType = order.color;
             Remaining = Demand;
             RefreshVisual();
@@ -59,6 +62,7 @@ namespace CookingSort2D
                 _moveRoutine = null;
             }
             _seated = true;
+            _seatReady = false;
             _front = false;
             _queue = null;
             if (hitbox != null) hitbox.enabled = false;
@@ -242,6 +246,7 @@ namespace CookingSort2D
 
             transform.localPosition = target;
             transform.localScale = targetScale;
+            _seatReady = true;
             _moveRoutine = null;
         }
 

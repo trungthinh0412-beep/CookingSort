@@ -111,7 +111,8 @@ public bool TrySeat(CustomerView customer)
                 SeatSlotView slot = _slots[i];
                 if (!slot.gameObject.activeSelf || slot.IsEmpty) continue;
                 CustomerView customer = slot.Occupant;
-                if (customer != null && customer.ColorType == color && customer.Remaining > 0)
+                if (customer != null && customer.IsSeatReady &&
+                    customer.ColorType == color && customer.Remaining > 0)
                     return customer;
             }
             return null;
@@ -126,7 +127,8 @@ public void GetCustomersForColor(FoodColor color, List<CustomerView> results)
                 SeatSlotView slot = _slots[i];
                 if (!slot.gameObject.activeSelf || slot.IsEmpty) continue;
                 CustomerView customer = slot.Occupant;
-                if (customer != null && customer.ColorType == color && customer.Remaining > 0)
+                if (customer != null && customer.IsSeatReady &&
+                    customer.ColorType == color && customer.Remaining > 0)
                     results.Add(customer);
             }
         }

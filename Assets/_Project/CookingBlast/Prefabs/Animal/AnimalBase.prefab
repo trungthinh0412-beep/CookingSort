@@ -231,15 +231,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CookingSort2D.CustomerView
   body: {fileID: 935351445869505619}
-  shadow: {fileID: 7458103924671201153}
   count: {fileID: 2282990251111241162}
   countBadge: {fileID: 4759627572592004962}
   hitbox: {fileID: 5542376764456775770}
   demandFill: {fileID: 4759627572592004962}
   demand: 20
-  seatJumpDuration: 0.34
-  seatJumpHeight: 0.55
-  shadowScaleAtJumpPeak: 0.45
 --- !u!1 &3890670980010363173
 GameObject:
   m_ObjectHideFlags: 0
