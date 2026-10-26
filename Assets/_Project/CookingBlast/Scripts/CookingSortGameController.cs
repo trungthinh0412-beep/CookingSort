@@ -64,6 +64,8 @@ public void StartLevel(int displayLevelNumber = -1)
             customerQueue.Initialize(this, levelDefinition);
             int shownLevel = displayLevelNumber > 0 ? displayLevelNumber : levelDefinition.LevelNumber;
             if (hud != null) hud.Initialize(this, shownLevel, levelDefinition.TotalTileCount);
+            if (PopupController.Instance != null)
+                PopupController.Instance.Show<PopupInGame>(PopupAnimation.None);
         }
 
 public void SetLevelDefinition(CookingBlastLevel level)
@@ -77,9 +79,16 @@ public void SetLevelDefinition(CookingBlastLevel level)
             if (_gameEnded || customer == null || seatBar == null || board == null) return false;
             if (!seatBar.TrySeat(customer)) return false;
 
-            board.BeginServeLoop(seatBar);
             EvaluateState();
             return true;
+        }
+
+        public void OnCustomerSeatFlightFinished()
+        {
+            if (_gameEnded || board == null || seatBar == null) return;
+            if (!seatBar.IsMerging)
+                board.BeginServeLoop(seatBar);
+            EvaluateState();
         }
 
         public void OnTileServed(FoodColor color)
@@ -144,7 +153,8 @@ public void ContinueAfterWin()
 
             // Airborne tiles have left the board but are not served yet.
             // Wait for the scan pipeline and any merge before deciding win/fail.
-            if (board.IsServing || seatBar.IsMerging || seatBar.HasDepartingCustomers) return;
+            if (board.IsServing || seatBar.IsMerging || seatBar.IsSeating ||
+                seatBar.HasDepartingCustomers) return;
 
             if (board.IsEmpty)
             {

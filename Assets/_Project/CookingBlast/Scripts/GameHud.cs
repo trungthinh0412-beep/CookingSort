@@ -57,6 +57,21 @@ namespace CookingSort2D
 public void ShowWin()
         {
             AutoBind();
+            if (PopupController.Instance != null)
+            {
+                PopupController.Instance.Hide<PopupInGame>(PopupAnimation.None);
+                Popup popup = PopupController.Instance.Get<PopupWin>();
+                if (popup is PopupWin winPopup)
+                {
+                    winPopup.Configure(() =>
+                    {
+                        if (_game != null) _game.ContinueAfterWin();
+                    });
+                    PopupController.Instance.Show<PopupWin>(PopupAnimation.ScaleFade);
+                    return;
+                }
+            }
+
             if (overlay != null) overlay.SetActive(true);
             if (resultText != null) resultText.text = "★  ★  ★\n<size=135%>Excellent!</size>\n<size=75%>Level Complete</size>";
             if (retryButton != null)
@@ -72,6 +87,21 @@ public void ShowWin()
 public void ShowFail()
         {
             AutoBind();
+            if (PopupController.Instance != null)
+            {
+                PopupController.Instance.Hide<PopupInGame>(PopupAnimation.None);
+                Popup popup = PopupController.Instance.Get<PopupLose>();
+                if (popup is PopupLose losePopup)
+                {
+                    losePopup.Configure(() =>
+                    {
+                        if (_game != null) _game.RestartLevel();
+                    });
+                    PopupController.Instance.Show<PopupLose>(PopupAnimation.ScaleFade);
+                    return;
+                }
+            }
+
             if (overlay != null) overlay.SetActive(true);
             if (resultText != null) resultText.text = "Level Failed!\n<size=70%>The table is full and no food can be served.</size>";
             if (retryButton != null)

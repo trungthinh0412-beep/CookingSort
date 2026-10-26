@@ -49,10 +49,9 @@ namespace CookingSort2D
         {
             _front = front && !_seated;
             if (hitbox != null) hitbox.enabled = _front;
-            transform.localScale = Vector3.one;
         }
 
-        public void SetSeated()
+        public void SetSeated(float seatedScale = 1f)
         {
             if (_moveRoutine != null)
             {
@@ -65,7 +64,7 @@ namespace CookingSort2D
             if (hitbox != null) hitbox.enabled = false;
             if (countBadge != null) countBadge.gameObject.SetActive(true);
 
-            _seatedBaseScale = Vector3.one;
+            _seatedBaseScale = Vector3.one * Mathf.Max(0.01f, seatedScale);
             transform.localScale = _seatedBaseScale;
             StopServePulse();
             RefreshCount();
@@ -101,12 +100,32 @@ namespace CookingSort2D
 
 
 
-        public void AnimateTo(Vector3 localPosition, float duration = 0.16f)
+        public void AnimateTo(
+            Vector3 localPosition,
+            Vector3 localScale,
+            float duration = 0.16f,
+            float scalePunch = 0f)
         {
             // A customer already moved into a seat must never receive queue movement again.
             if (_seated) return;
             if (_moveRoutine != null) StopCoroutine(_moveRoutine);
-            _moveRoutine = StartCoroutine(MoveRoutine(localPosition, duration));
+            _moveRoutine = StartCoroutine(
+                MoveRoutine(localPosition, localScale, duration, scalePunch));
+        }
+
+        public void AnimateToSeat(
+            Vector3 localPosition,
+            float duration,
+            float arcHeight,
+            float scalePunch)
+        {
+            if (_moveRoutine != null) StopCoroutine(_moveRoutine);
+            _moveRoutine = StartCoroutine(SeatMoveRoutine(
+                localPosition,
+                _seatedBaseScale,
+                duration,
+                arcHeight,
+                scalePunch));
         }
 
         public void SetSortingOrder(int baseOrder)
@@ -147,19 +166,31 @@ namespace CookingSort2D
                 demandFill.fillAmount = Mathf.Clamp01(Remaining / (float)Demand);
         }
 
-        private IEnumerator MoveRoutine(Vector3 target, float duration)
+        private IEnumerator MoveRoutine(
+            Vector3 target,
+            Vector3 targetScale,
+            float duration,
+            float scalePunch)
         {
             Vector3 start = transform.localPosition;
+            Vector3 startScale = transform.localScale;
             float elapsed = 0f;
             while (elapsed < duration && !_seated)
             {
                 elapsed += Time.unscaledDeltaTime;
-                float t = Mathf.Clamp01(elapsed / duration);
-                t = 1f - Mathf.Pow(1f - t, 3f);
-                transform.localPosition = Vector3.LerpUnclamped(start, target, t);
+                float normalized = Mathf.Clamp01(elapsed / duration);
+                float eased = 1f - Mathf.Pow(1f - normalized, 3f);
+                float punch = 1f + Mathf.Sin(normalized * Mathf.PI) * scalePunch;
+                transform.localPosition = Vector3.LerpUnclamped(start, target, eased);
+                transform.localScale =
+                    Vector3.LerpUnclamped(startScale, targetScale, eased) * punch;
                 yield return null;
             }
-            if (!_seated) transform.localPosition = target;
+            if (!_seated)
+            {
+                transform.localPosition = target;
+                transform.localScale = targetScale;
+            }
             _moveRoutine = null;
         }
 
@@ -178,6 +209,40 @@ namespace CookingSort2D
             }
             transform.localScale = baseScale;
             _pulseRoutine = null;
+        }
+
+        private IEnumerator SeatMoveRoutine(
+            Vector3 target,
+            Vector3 targetScale,
+            float duration,
+            float arcHeight,
+            float scalePunch)
+        {
+            Vector3 start = transform.localPosition;
+            Vector3 startScale = transform.localScale;
+            float elapsed = 0f;
+            duration = Mathf.Max(0.01f, duration);
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                float normalized = Mathf.Clamp01(elapsed / duration);
+                float eased = 1f - Mathf.Pow(1f - normalized, 3f);
+                Vector3 arc = Vector3.up *
+                              (Mathf.Sin(normalized * Mathf.PI) * arcHeight);
+                float punch = 1f +
+                              Mathf.Sin(normalized * Mathf.PI) * scalePunch;
+
+                transform.localPosition =
+                    Vector3.LerpUnclamped(start, target, eased) + arc;
+                transform.localScale =
+                    Vector3.LerpUnclamped(startScale, targetScale, eased) * punch;
+                yield return null;
+            }
+
+            transform.localPosition = target;
+            transform.localScale = targetScale;
+            _moveRoutine = null;
         }
 
         public void SetRemaining(int remaining)

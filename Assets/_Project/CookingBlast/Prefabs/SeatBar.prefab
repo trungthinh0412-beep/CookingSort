@@ -109,6 +109,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff06a1611f9286b47aa901c18a4a52bc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CookingSort2D.SeatBar
+  seatedAnimalScale: 1.1
   mergeDuration: 0.22
   mergePopDuration: 0.16
   mergeFuseDuration: 0.14

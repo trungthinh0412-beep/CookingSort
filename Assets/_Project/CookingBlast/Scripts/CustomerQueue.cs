@@ -17,6 +17,12 @@ namespace CookingSort2D
         [SerializeField] private float laneSpacing = 1.16f;
         [SerializeField] private float rowSpacing = 0.82f;
 
+        [Header("Queue Game Feel")]
+        [SerializeField, Min(0.01f)] private float frontRowScale = 1.1f;
+        [SerializeField, Min(0.01f)] private float backRowsScale = 0.9f;
+        [SerializeField, Min(0.01f)] private float pushDuration = 0.2f;
+        [SerializeField, Range(0f, 0.3f)] private float pushScalePunch = 0.08f;
+
         
         private readonly List<CustomerQueueSlotView> _slots = new List<CustomerQueueSlotView>();
 private readonly List<List<CustomerView>> _lanes = new List<List<CustomerView>>();
@@ -145,7 +151,15 @@ private void RefreshLane(int laneIndex, bool animate)
                 CustomerView view = lane[row];
                 if (view == null) continue;
                 Vector3 target = slotPosition + new Vector3(0f, -row * rowSpacing, 0f);
-                if (animate) view.AnimateTo(target); else view.transform.localPosition = target;
+                float rowScale = row == 0 ? frontRowScale : backRowsScale;
+                Vector3 targetScale = Vector3.one * rowScale;
+                if (animate)
+                    view.AnimateTo(target, targetScale, pushDuration, pushScalePunch);
+                else
+                {
+                    view.transform.localPosition = target;
+                    view.transform.localScale = targetScale;
+                }
                 view.SetFront(row == 0);
                 view.SetSortingOrder(224 - row * 2);
             }

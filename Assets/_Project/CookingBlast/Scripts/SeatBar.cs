@@ -8,6 +8,12 @@ namespace CookingSort2D
     {
         private readonly List<SeatSlotView> _slots = new List<SeatSlotView>();
         private CookingSortGameController _game;
+        [Header("Animal on Seat")]
+        [SerializeField, Min(0.01f)] private float seatedAnimalScale = 1f;
+        [SerializeField, Min(0.01f)] private float seatFlyDuration = 0.32f;
+        [SerializeField, Min(0f)] private float seatFlyArcHeight = 0.55f;
+        [SerializeField, Range(0f, 0.3f)] private float seatFlyScalePunch = 0.12f;
+
         [Header("Jelly merge animation")]
         [SerializeField, Min(0.01f)] private float mergeDuration = 0.22f;
         [SerializeField, Min(0.01f)] private float mergePopDuration = 0.16f;
@@ -24,7 +30,9 @@ namespace CookingSort2D
         private readonly HashSet<CustomerView> _mergingCustomers = new HashSet<CustomerView>();
         private readonly HashSet<CustomerView> _departingCustomers = new HashSet<CustomerView>();
         private bool _mergeInProgress;
+        private int _seatingCustomers;
         public bool IsMerging => _mergeInProgress;
+        public bool IsSeating => _seatingCustomers > 0;
         public bool HasDepartingCustomers => _departingCustomers.Count > 0;
 
         public bool IsFull
@@ -59,6 +67,7 @@ public void Initialize(CookingSortGameController game, int seatCount)
             ClearDepartingCustomers();
             _mergingCustomers.Clear();
             _mergeInProgress = false;
+            _seatingCustomers = 0;
             _game = game;
             CacheSlots();
             for (int i = 0; i < _slots.Count; i++)
@@ -72,11 +81,27 @@ public bool TrySeat(CustomerView customer)
             {
                 SeatSlotView slot = _slots[i];
                 if (!slot.gameObject.activeSelf || !slot.IsEmpty) continue;
-                slot.Attach(customer);
-                TryBeginMerge();
+                slot.Attach(
+                    customer,
+                    seatedAnimalScale,
+                    seatFlyDuration,
+                    seatFlyArcHeight,
+                    seatFlyScalePunch);
+                _seatingCustomers++;
+                StartCoroutine(FinishSeatFlightRoutine());
                 return true;
             }
             return false;
+        }
+
+        private IEnumerator FinishSeatFlightRoutine()
+        {
+            yield return new WaitForSecondsRealtime(Mathf.Max(0.01f, seatFlyDuration));
+            _seatingCustomers = Mathf.Max(0, _seatingCustomers - 1);
+            if (_seatingCustomers > 0) yield break;
+
+            TryBeginMerge();
+            if (_game != null) _game.OnCustomerSeatFlightFinished();
         }
 
         public CustomerView FindCustomerForColor(FoodColor color)

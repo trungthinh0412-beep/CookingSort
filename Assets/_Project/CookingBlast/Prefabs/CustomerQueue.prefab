@@ -62,6 +62,10 @@ MonoBehaviour:
   customersRoot: {fileID: 8800161071531819008}
   laneSpacing: 1.6
   rowSpacing: 1.6
+  frontRowScale: 1
+  backRowsScale: 0.9
+  pushDuration: 0.2
+  pushScalePunch: 0.08
 --- !u!212 &1009386618176987760
 SpriteRenderer:
   serializedVersion: 2
