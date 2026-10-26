@@ -45,7 +45,10 @@ namespace CookingSort2D
         {
             ColorType = color;
             AutoBind();
-            if (body != null) body.color = usePrefabSprite ? Color.white : CookingSortPalette.Get(color);
+            if (body != null)
+                body.color = color == FoodColor.Neutral
+                    ? CookingSortPalette.Get(color)
+                    : usePrefabSprite ? Color.white : CookingSortPalette.Get(color);
             if (symbol != null)
             {
                 symbol.text = CookingSortPalette.ShortName(color);

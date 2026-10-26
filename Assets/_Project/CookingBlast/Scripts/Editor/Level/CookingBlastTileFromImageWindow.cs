@@ -272,6 +272,7 @@ internal static List<FoodColor> GetAvailableTilePalette()
         var colors = new List<FoodColor>();
         foreach (FoodColor color in Enum.GetValues(typeof(FoodColor)))
         {
+            if (color == FoodColor.Neutral) continue;
             if (CookingBlastTileSpriteEditorPreview.GetSprite(color) != null)
                 colors.Add(color);
         }

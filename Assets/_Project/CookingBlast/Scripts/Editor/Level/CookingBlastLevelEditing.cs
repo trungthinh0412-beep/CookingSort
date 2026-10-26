@@ -95,6 +95,11 @@ internal static class CookingBlastLevelEditing
     {
         message = string.Empty;
         if (level == null) return false;
+        if (color == FoodColor.Neutral)
+        {
+            message = "Cluster 40 cannot use Neutral because Neutral has no Customer.";
+            return false;
+        }
         const int width = BoardClusterData.DefaultWidth;
         const int height = BoardClusterData.DefaultHeight;
         if (anchorColumn < 0 || anchorColumn + width > level.BoardColumns.Count)
@@ -344,7 +349,9 @@ internal static bool TryAutoFillByCustomerOrder(CookingBlastLevel level, int clu
         int firstRowWidth = 0;
         foreach (BoardColumnData column in level.BoardColumns)
             if (column != null && column.bottomToTop != null &&
-                column.bottomToTop.Count > 0) firstRowWidth++;
+                column.bottomToTop.Count > 0 &&
+                column.bottomToTop[0] != FoodColor.Neutral)
+                firstRowWidth++;
 
         // Where space allows, reserve at least one exposed bottom tile for
         // every front lane before filling larger color clusters.
@@ -405,7 +412,10 @@ internal static bool TryAutoFillByCustomerOrder(CookingBlastLevel level, int clu
                 BoardColumnData column = level.BoardColumns[col];
                 if (column == null || column.bottomToTop == null) continue;
                 for (int row = 0; row < column.bottomToTop.Count; row++)
+                {
+                    if (column.bottomToTop[row] == FoodColor.Neutral) continue;
                     column.bottomToTop[row] = result[tileIndex++];
+                }
             }
         }
         else
@@ -416,6 +426,7 @@ internal static bool TryAutoFillByCustomerOrder(CookingBlastLevel level, int clu
                 BoardColumnData column = level.BoardColumns[col];
                 if (column == null || column.bottomToTop == null ||
                     row >= column.bottomToTop.Count) continue;
+                if (column.bottomToTop[row] == FoodColor.Neutral) continue;
                 column.bottomToTop[row] = result[tileIndex++];
             }
         }
@@ -530,7 +541,10 @@ internal static bool TryAutoFillByPriority(CookingBlastLevel level,
                 BoardColumnData column = level.BoardColumns[col];
                 if (column == null || column.bottomToTop == null) continue;
                 for (int row = 0; row < column.bottomToTop.Count; row++)
+                {
+                    if (column.bottomToTop[row] == FoodColor.Neutral) continue;
                     column.bottomToTop[row] = result[index++];
+                }
             }
         }
         else
@@ -541,6 +555,7 @@ internal static bool TryAutoFillByPriority(CookingBlastLevel level,
                 BoardColumnData column = level.BoardColumns[col];
                 if (column == null || column.bottomToTop == null ||
                     row >= column.bottomToTop.Count) continue;
+                if (column.bottomToTop[row] == FoodColor.Neutral) continue;
                 column.bottomToTop[row] = result[index++];
             }
         }
@@ -970,6 +985,7 @@ internal static bool ShuffleBoardKeepingCounts(CookingBlastLevel level, int seed
 private static void ApplyColorDistribution(CookingBlastLevel level, Dictionary<FoodColor, int> available, int seed, bool spreadColors)
     {
         var remaining = new Dictionary<FoodColor, int>(available);
+        remaining.Remove(FoodColor.Neutral);
         var random = new System.Random(seed);
         int maxRows = MaxRows(level);
         for (int row = 0; row < maxRows; row++)
@@ -978,6 +994,7 @@ private static void ApplyColorDistribution(CookingBlastLevel level, Dictionary<F
             {
                 var column = level.BoardColumns[col];
                 if (column == null || column.bottomToTop == null || row >= column.bottomToTop.Count) continue;
+                if (column.bottomToTop[row] == FoodColor.Neutral) continue;
                 int totalWeight = 0;
                 foreach (FoodColor color in Enum.GetValues(typeof(FoodColor)))
                     if (remaining.TryGetValue(color, out int count) && count > 0)
@@ -1042,6 +1059,7 @@ private static int ColorPlacementWeight(CookingBlastLevel level, Dictionary<Food
         int lane = 0;
         foreach (var pair in counts)
         {
+            if (pair.Key == FoodColor.Neutral) continue;
             int remaining = pair.Value;
             int animalDemand = level.GetCustomerDemand(pair.Key);
             while (remaining > 0)
@@ -1070,6 +1088,7 @@ internal static bool TryGenerateExactCustomerCount(
         int total = 0;
         foreach (FoodColor color in Enum.GetValues(typeof(FoodColor)))
         {
+            if (color == FoodColor.Neutral) continue;
             if (!counts.TryGetValue(color, out int amount) || amount <= 0) continue;
             colors.Add(color);
             total += amount;

@@ -32,7 +32,15 @@ private bool painting;
     private int lastRow = -1;
 
     private Vector2 gridScroll;
-    private static FoodColor[] Colors => CookingBlastTileFromImageWindow.GetAvailableTilePalette().ToArray();
+    private static FoodColor[] Colors
+    {
+        get
+        {
+            var colors = CookingBlastTileFromImageWindow.GetAvailableTilePalette();
+            if (!colors.Contains(FoodColor.Neutral)) colors.Add(FoodColor.Neutral);
+            return colors.ToArray();
+        }
+    }
 
 internal void Draw(CookingBlastLevel level, ref FoodColor brush, ref int columns, ref int rows,
         ref int mask, ref int seed, float width, int laneCount, int minDemand, int maxDemand)
@@ -97,7 +105,8 @@ internal void Draw(CookingBlastLevel level, ref FoodColor brush, ref int columns
                     string missingSpriteNames = "";
                     foreach (FoodColor type in Enum.GetValues(typeof(FoodColor)))
                     {
-                        if (!counts.TryGetValue(type, out int number) || number == 0 ||
+                        if (type == FoodColor.Neutral ||
+                            !counts.TryGetValue(type, out int number) || number == 0 ||
                             CookingBlastTileSpriteEditorPreview.GetSprite(type) != null)
                             continue;
                         if (missingSpriteNames.Length > 0) missingSpriteNames += ", ";
@@ -116,12 +125,13 @@ internal void Draw(CookingBlastLevel level, ref FoodColor brush, ref int columns
                             ? new Color(.24f, .36f, .48f)
                             : new Color(.16f, .18f, .22f));
                         Rect tileSwatch = new Rect(rect.x + 5, rect.y + 5, 19, 19);
-                        if (!CookingBlastTileSpriteEditorPreview.Draw(tileSwatch, color))
+                        if (color == FoodColor.Neutral ||
+                            !CookingBlastTileSpriteEditorPreview.Draw(tileSwatch, color))
                             EditorGUI.DrawRect(tileSwatch, CookingSortPalette.Get(color));
                         GUI.Label(new Rect(rect.x + 30, rect.y + 4, 88, 22),
                             (color == brush ? "• " : "") + color);
                         var valueStyle = new GUIStyle(EditorStyles.miniBoldLabel);
-                        if (count != demand)
+                        if (color != FoodColor.Neutral && count != demand)
                         {
                             valueStyle.normal.textColor = new Color(1f, .56f, .49f);
                             EditorGUI.DrawRect(new Rect(rect.xMax - 3, rect.y + 3, 3, rect.height - 6),
@@ -130,7 +140,8 @@ internal void Draw(CookingBlastLevel level, ref FoodColor brush, ref int columns
                         else if (count > 0)
                             valueStyle.normal.textColor = new Color(.60f, .86f, .64f);
                         GUI.Label(new Rect(rect.xMax - 58, rect.y + 4, 54, 22),
-                            count + "/" + demand, valueStyle);
+                            color == FoodColor.Neutral ? count + "/--" : count + "/" + demand,
+                            valueStyle);
                         if (GUI.Button(rect,
                             new GUIContent("", color + ": " + count + " tiles / " + demand + " demand"),
                             GUIStyle.none))
@@ -182,7 +193,8 @@ internal void Draw(CookingBlastLevel level, ref FoodColor brush, ref int columns
             Color color = CookingSortPalette.Get(data.bottomToTop[r]);
             if (r == 0) EditorGUI.DrawRect(new Rect(cell.x-1,cell.y-1,cell.width+2,cell.height+2), new Color(.65f,.85f,1));
             EditorGUI.DrawRect(cell, new Color(.12f, .14f, .18f));
-            if (!CookingBlastTileSpriteEditorPreview.Draw(cell, data.bottomToTop[r]))
+            if (data.bottomToTop[r] == FoodColor.Neutral ||
+                !CookingBlastTileSpriteEditorPreview.Draw(cell, data.bottomToTop[r]))
             {
                 EditorGUI.DrawRect(new Rect(cell.x + 2, cell.y + 2, cell.width - 4, cell.height - 4), color);
                 if (size >= 27)

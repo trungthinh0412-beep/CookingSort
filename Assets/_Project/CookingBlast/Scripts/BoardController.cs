@@ -39,6 +39,7 @@ namespace CookingSort2D
             public FoodTileView View;
             public int Remaining;
             public bool Busy;
+            public int[] TilesBelowByColumn;
         }
         private readonly List<RuntimeCluster> _clusters = new List<RuntimeCluster>();
         private readonly List<int> _columnFrontRows = new List<int>();
@@ -57,7 +58,11 @@ private readonly List<bool> _columnBusy = new List<bool>();
             get
             {
                 int total = 0;
-                for (int i = 0; i < _columns.Count; i++) total += _columns[i].Count;
+                for (int col = 0; col < _columns.Count; col++)
+                    for (int row = 0; row < _columns[col].Count; row++)
+                        if (_columns[col][row] != null &&
+                            _columns[col][row].ColorType != FoodColor.Neutral)
+                            total++;
                 for (int i = 0; i < _clusters.Count; i++) total += Mathf.Max(0, _clusters[i].Remaining);
                 return total;
             }
@@ -110,6 +115,9 @@ _columnBusy.Add(false);
                 {
                     if (data.IsClusterCell(col, row, out _)) continue;
                     FoodColor kind = columnData.bottomToTop[row];
+                    // Neutral is editor-only padding. It has no runtime view
+                    // and all playable Tiles compact around it.
+                    if (kind == FoodColor.Neutral) continue;
                     FoodTileView prefab = GetTilePrefab(kind);
                     if (prefab == null)
                     {
@@ -137,7 +145,8 @@ _columnBusy.Add(false);
                     {
                         Data = cluster,
                         View = view,
-                        Remaining = cluster.value
+                        Remaining = cluster.value,
+                        TilesBelowByColumn = CountPlayableTilesBelow(data, cluster)
                     });
                 }
             }
@@ -300,8 +309,38 @@ private IEnumerator ServeRoutine(SeatBar seats)
                 cluster.Data.anchorColumn + cluster.Data.width);
             for (int col = Mathf.Max(0, cluster.Data.anchorColumn); col < endColumn; col++)
                 bottom = Mathf.Max(bottom,
-                    cluster.Data.anchorRow - _columnFrontRows[col]);
+                    GetTilesBelow(cluster, col) - _columnFrontRows[col]);
             return Mathf.Max(0, bottom);
+        }
+
+        private static int[] CountPlayableTilesBelow(CookingBlastLevel level,
+            BoardClusterData cluster)
+        {
+            int[] result = new int[Mathf.Max(0, cluster.width)];
+            for (int offset = 0; offset < result.Length; offset++)
+            {
+                int column = cluster.anchorColumn + offset;
+                if (column < 0 || column >= level.BoardColumns.Count) continue;
+                BoardColumnData data = level.BoardColumns[column];
+                if (data == null || data.bottomToTop == null) continue;
+                int endRow = Mathf.Min(cluster.anchorRow, data.bottomToTop.Count);
+                for (int row = 0; row < endRow; row++)
+                    if (data.bottomToTop[row] != FoodColor.Neutral &&
+                        !level.IsClusterCell(column, row, out _))
+                        result[offset]++;
+            }
+            return result;
+        }
+
+        private static int GetTilesBelow(RuntimeCluster cluster, int column)
+        {
+            if (cluster == null || cluster.Data == null ||
+                cluster.TilesBelowByColumn == null)
+                return 0;
+            int offset = column - cluster.Data.anchorColumn;
+            return offset >= 0 && offset < cluster.TilesBelowByColumn.Length
+                ? cluster.TilesBelowByColumn[offset]
+                : 0;
         }
 
         private bool IsClusterExposed(RuntimeCluster cluster)
@@ -319,7 +358,7 @@ private IEnumerator ServeRoutine(SeatBar seats)
                 if (cluster == null || cluster.Remaining <= 0 || cluster.Data == null) continue;
                 BoardClusterData data = cluster.Data;
                 if (column < data.anchorColumn || column >= data.anchorColumn + data.width) continue;
-                if (_columnFrontRows[column] >= data.anchorRow) return true;
+                if (_columnFrontRows[column] >= GetTilesBelow(cluster, column)) return true;
             }
             return false;
         }
@@ -335,14 +374,15 @@ private IEnumerator ServeRoutine(SeatBar seats)
                 if (cluster == null || cluster.Remaining <= 0 || cluster.Data == null) continue;
                 BoardClusterData data = cluster.Data;
                 if (column < data.anchorColumn || column >= data.anchorColumn + data.width ||
-                    data.anchorRow < frontRow)
+                    GetTilesBelow(cluster, column) < frontRow)
                     continue;
-                if (nearest == null || data.anchorRow < nearest.Data.anchorRow)
+                if (nearest == null || GetTilesBelow(cluster, column) <
+                    GetTilesBelow(nearest, column))
                     nearest = cluster;
             }
 
             if (nearest == null) return compactRow;
-            int belowCount = Mathf.Max(0, nearest.Data.anchorRow - frontRow);
+            int belowCount = Mathf.Max(0, GetTilesBelow(nearest, column) - frontRow);
             if (compactRow < belowCount) return compactRow;
             return GetClusterBottomRow(nearest) + nearest.Data.height + compactRow - belowCount;
         }

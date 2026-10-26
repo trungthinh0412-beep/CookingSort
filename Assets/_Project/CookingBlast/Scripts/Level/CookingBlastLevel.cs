@@ -56,7 +56,9 @@ public int LevelNumber => levelNumber;
                     if (column != null && column.bottomToTop != null)
                     {
                         for (int row = 0; row < column.bottomToTop.Count; row++)
-                            if (!IsClusterCell(i, row, out _)) total++;
+                            if (!IsClusterCell(i, row, out _) &&
+                                column.bottomToTop[row] != FoodColor.Neutral)
+                                total++;
                     }
                 }
                 if (boardClusters != null)
@@ -130,6 +132,11 @@ if (levelNumber < 1)
                         error = $"Cluster {i + 1} starts outside the board rows.";
                         return false;
                     }
+                    if (cluster.color == FoodColor.Neutral)
+                    {
+                        error = $"Cluster {i + 1} cannot use Neutral because it requires Customers.";
+                        return false;
+                    }
                     if (cluster.anchorColumn < 0 || cluster.anchorColumn + cluster.width > boardColumns.Count)
                     {
                         error = $"Cluster {i + 1} is outside the board columns.";
@@ -169,6 +176,7 @@ if (levelNumber < 1)
                 {
                     if (occupiedClusterCells.Contains(new Vector2Int(c, r))) continue;
                     FoodColor color = column.bottomToTop[r];
+                    if (color == FoodColor.Neutral) continue;
                     if (!tileCounts.ContainsKey(color)) tileCounts[color] = 0;
                     tileCounts[color]++;
                 }
@@ -197,6 +205,11 @@ if (levelNumber < 1)
                     if (order == null)
                     {
                         error = $"Lane {lane + 1}, customer {i + 1} is missing.";
+                        return false;
+                    }
+                    if (order.color == FoodColor.Neutral)
+                    {
+                        error = $"Lane {lane + 1}, customer {i + 1} cannot use Neutral.";
                         return false;
                     }
                     customerCount++;
