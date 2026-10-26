@@ -15,7 +15,8 @@ namespace CookingSort2D
         Cyan,
         Orange,
         White,
-        Gray
+        Gray,
+        Neutral
     }
 
     [Serializable]
@@ -37,6 +38,27 @@ namespace CookingSort2D
     {
         [Tooltip("Index 0 is the exposed bottom tile. Last index is the top tile.")]
         public List<FoodColor> bottomToTop = new List<FoodColor>();
+    }
+
+    [Serializable]
+    public class BoardClusterData
+    {
+        public const int DefaultValue = 40;
+        public const int DefaultWidth = 2;
+        public const int DefaultHeight = 2;
+
+        public FoodColor color;
+        [Min(1)] public int value = DefaultValue;
+        [Min(0)] public int anchorColumn;
+        [Min(0)] public int anchorRow;
+        [Min(1)] public int width = DefaultWidth;
+        [Min(1)] public int height = DefaultHeight;
+
+        public bool Contains(int column, int row)
+        {
+            return column >= anchorColumn && column < anchorColumn + width &&
+                   row >= anchorRow && row < anchorRow + height;
+        }
     }
 
     [Serializable]
@@ -62,6 +84,7 @@ namespace CookingSort2D
                 case FoodColor.Orange: return new Color32(245, 147, 53, 255);
                 case FoodColor.White: return new Color32(241, 241, 235, 255);
                 case FoodColor.Gray: return new Color32(92, 101, 115, 255);
+                case FoodColor.Neutral: return new Color32(135, 142, 151, 255);
                 default: return Color.white;
             }
         }
@@ -80,6 +103,7 @@ namespace CookingSort2D
                 case FoodColor.Orange: return "O";
                 case FoodColor.White: return "W";
                 case FoodColor.Gray: return "D";
+                case FoodColor.Neutral: return "N";
                 default: return "?";
             }
         }

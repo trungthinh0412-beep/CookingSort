@@ -45,7 +45,10 @@ namespace CookingSort2D
         {
             ColorType = color;
             AutoBind();
-            if (body != null) body.color = usePrefabSprite ? Color.white : CookingSortPalette.Get(color);
+            if (body != null)
+                body.color = color == FoodColor.Neutral
+                    ? CookingSortPalette.Get(color)
+                    : usePrefabSprite ? Color.white : CookingSortPalette.Get(color);
             if (symbol != null)
             {
                 symbol.text = CookingSortPalette.ShortName(color);
@@ -53,6 +56,40 @@ namespace CookingSort2D
                     ? new Color32(90, 98, 108, 210)
                     : new Color32(255, 255, 255, 210);
             }
+        }
+
+        public void SetupCluster(FoodColor color, int value, int width, int height)
+        {
+            Setup(color);
+            transform.localScale = new Vector3(
+                transform.localScale.x * Mathf.Max(1, width),
+                transform.localScale.y * Mathf.Max(1, height),
+                transform.localScale.z);
+
+            if (symbol == null)
+            {
+                GameObject label = new GameObject("ClusterValue");
+                label.transform.SetParent(transform, false);
+                symbol = label.AddComponent<TextMesh>();
+                symbol.anchor = TextAnchor.MiddleCenter;
+                symbol.alignment = TextAlignment.Center;
+                symbol.fontSize = 72;
+                symbol.characterSize = 0.06f;
+                symbol.fontStyle = FontStyle.Bold;
+            }
+
+            symbol.transform.localPosition = new Vector3(0f, 0f, -0.05f);
+            symbol.transform.localScale = new Vector3(
+                1f / Mathf.Max(1, width),
+                1f / Mathf.Max(1, height), 1f);
+            SetClusterValue(value);
+        }
+
+        public void SetClusterValue(int value)
+        {
+            if (symbol == null) return;
+            symbol.text = Mathf.Max(0, value).ToString();
+            symbol.color = Color.white;
         }
 
 public void FitToCell(float targetSize)
