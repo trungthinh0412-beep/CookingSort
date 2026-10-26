@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 
@@ -408,6 +409,10 @@ public class PopupHome : Popup
         {
             return;
         }
+
+        if (PopupController.Instance != null)
+            PopupController.Instance.HideAll();
+        SceneManager.LoadScene("CookingBlastGameplay");
     }
 
     public void OnClickDebug()

@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class IngamePauseMenu : MonoBehaviour
 {
@@ -60,6 +61,13 @@ public class IngamePauseMenu : MonoBehaviour
     public void OnClickExit()
     {
         Close();
+        if (PopupController.Instance != null)
+        {
+            PopupController.Instance.HideAll();
+            PopupController.Instance.Show<PopupBackground>(PopupAnimation.None);
+            PopupController.Instance.Show<PopupHome>(PopupAnimation.None);
+        }
+        SceneManager.LoadScene("GameplayScene");
     }
 
     private void OnDisable()

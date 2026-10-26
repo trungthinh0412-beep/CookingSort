@@ -23,8 +23,8 @@ public class LoadingController : MonoBehaviour
     private int _dotCount = 1;
     private bool _isLoadingTextRunning;
 
-    private const string GameplaySceneStr =
-        "CookingBlastGameplay";
+    private const string HomeSceneStr = "GameplayScene";
+    private const string CookingBlastSceneStr = "CookingBlastGameplay";
 
     private void Start()
     {
@@ -117,11 +117,11 @@ public class LoadingController : MonoBehaviour
                 0
             ) > 0)
         {
-            return GameplaySceneStr;
+            return CookingBlastSceneStr;
         }
 #endif
 
-        return GameplaySceneStr;
+        return HomeSceneStr;
     }
 
     private void StartSceneTransition()
