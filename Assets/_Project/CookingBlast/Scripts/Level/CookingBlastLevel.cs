@@ -21,6 +21,9 @@ namespace CookingSort2D
 [Header("Board - each column is stored bottom to top")]
         [SerializeField] private List<BoardColumnData> boardColumns = new List<BoardColumnData>();
 
+        [Header("Board clusters - replace the covered cells with one valued piece")]
+        [SerializeField] private List<BoardClusterData> boardClusters = new List<BoardClusterData>();
+
         [Header("Customers - each lane is stored front to back")]
         [SerializeField] private List<CustomerLaneData> customerLanes = new List<CustomerLaneData>();
 
@@ -31,6 +34,7 @@ namespace CookingSort2D
 public int LevelNumber => levelNumber;
         public int SeatCount => seatCount;
         public List<BoardColumnData> BoardColumns => boardColumns;
+        public List<BoardClusterData> BoardClusters => boardClusters;
         public List<CustomerLaneData> CustomerLanes => customerLanes;
 
         public int GetCustomerDemand(FoodColor color)
@@ -50,10 +54,36 @@ public int LevelNumber => levelNumber;
                 {
                     BoardColumnData column = boardColumns[i];
                     if (column != null && column.bottomToTop != null)
-                        total += column.bottomToTop.Count;
+                    {
+                        for (int row = 0; row < column.bottomToTop.Count; row++)
+                            if (!IsClusterCell(i, row, out _) &&
+                                column.bottomToTop[row] != FoodColor.Neutral)
+                                total++;
+                    }
                 }
+                if (boardClusters != null)
+                    for (int i = 0; i < boardClusters.Count; i++)
+                        if (boardClusters[i] != null) total += Mathf.Max(0, boardClusters[i].value);
                 return total;
             }
+        }
+
+        public bool IsClusterCell(int column, int row, out BoardClusterData cluster)
+        {
+            if (boardClusters != null)
+            {
+                for (int i = 0; i < boardClusters.Count; i++)
+                {
+                    BoardClusterData candidate = boardClusters[i];
+                    if (candidate != null && candidate.Contains(column, row))
+                    {
+                        cluster = candidate;
+                        return true;
+                    }
+                }
+            }
+            cluster = null;
+            return false;
         }
 
         public bool TryValidate(out string error)
@@ -84,6 +114,55 @@ if (levelNumber < 1)
             }
 
             var tileCounts = new Dictionary<FoodColor, int>();
+            var occupiedClusterCells = new HashSet<Vector2Int>();
+            if (boardClusters != null)
+            {
+                for (int i = 0; i < boardClusters.Count; i++)
+                {
+                    BoardClusterData cluster = boardClusters[i];
+                    if (cluster == null || cluster.value != BoardClusterData.DefaultValue ||
+                        cluster.width != BoardClusterData.DefaultWidth ||
+                        cluster.height != BoardClusterData.DefaultHeight)
+                    {
+                        error = $"Cluster {i + 1} must be a 2 x 2 block with value 40.";
+                        return false;
+                    }
+                    if (cluster.anchorRow < 0)
+                    {
+                        error = $"Cluster {i + 1} starts outside the board rows.";
+                        return false;
+                    }
+                    if (cluster.color == FoodColor.Neutral)
+                    {
+                        error = $"Cluster {i + 1} cannot use Neutral because it requires Customers.";
+                        return false;
+                    }
+                    if (cluster.anchorColumn < 0 || cluster.anchorColumn + cluster.width > boardColumns.Count)
+                    {
+                        error = $"Cluster {i + 1} is outside the board columns.";
+                        return false;
+                    }
+                    for (int column = cluster.anchorColumn; column < cluster.anchorColumn + cluster.width; column++)
+                    {
+                        BoardColumnData boardColumn = boardColumns[column];
+                        if (boardColumn == null || boardColumn.bottomToTop == null ||
+                            cluster.anchorRow + cluster.height > boardColumn.bottomToTop.Count)
+                        {
+                            error = $"Cluster {i + 1} does not fit inside the board rows.";
+                            return false;
+                        }
+                        for (int row = cluster.anchorRow;
+                             row < cluster.anchorRow + cluster.height; row++)
+                            if (!occupiedClusterCells.Add(new Vector2Int(column, row)))
+                            {
+                                error = $"Cluster {i + 1} overlaps another cluster.";
+                                return false;
+                            }
+                    }
+                    if (!tileCounts.ContainsKey(cluster.color)) tileCounts[cluster.color] = 0;
+                    tileCounts[cluster.color] += cluster.value;
+                }
+            }
             for (int c = 0; c < boardColumns.Count; c++)
             {
                 BoardColumnData column = boardColumns[c];
@@ -95,7 +174,9 @@ if (levelNumber < 1)
 
                 for (int r = 0; r < column.bottomToTop.Count; r++)
                 {
+                    if (occupiedClusterCells.Contains(new Vector2Int(c, r))) continue;
                     FoodColor color = column.bottomToTop[r];
+                    if (color == FoodColor.Neutral) continue;
                     if (!tileCounts.ContainsKey(color)) tileCounts[color] = 0;
                     tileCounts[color]++;
                 }
@@ -124,6 +205,11 @@ if (levelNumber < 1)
                     if (order == null)
                     {
                         error = $"Lane {lane + 1}, customer {i + 1} is missing.";
+                        return false;
+                    }
+                    if (order.color == FoodColor.Neutral)
+                    {
+                        error = $"Lane {lane + 1}, customer {i + 1} cannot use Neutral.";
                         return false;
                     }
                     customerCount++;

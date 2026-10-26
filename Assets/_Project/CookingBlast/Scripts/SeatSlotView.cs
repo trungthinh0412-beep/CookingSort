@@ -14,27 +14,16 @@ namespace CookingSort2D
             Refresh();
         }
 
-        public void Attach(
-            CustomerView customer,
-            float seatedScale,
-            float flyDuration,
-            float arcHeight,
-            float scalePunch)
+        public void Attach(CustomerView customer, System.Action onLanded = null)
         {
             Occupant = customer;
             if (customer != null)
             {
-                Vector3 startScale = customer.transform.localScale;
                 customer.transform.SetParent(transform, true);
                 customer.transform.localRotation = Quaternion.identity;
                 customer.SetSortingOrder(230);
-                customer.SetSeated(seatedScale);
-                customer.transform.localScale = startScale;
-                customer.AnimateToSeat(
-                    Vector3.zero,
-                    flyDuration,
-                    arcHeight,
-                    scalePunch);
+                customer.SetSeated();
+                customer.AnimateSeatJump(Vector3.zero, onLanded);
             }
             Refresh();
         }

@@ -8,6 +8,11 @@ public sealed class WorldSpriteAnimation
 {
     [SerializeField] private string animationName = "New Animation";
 
+    [Tooltip("Keo texture da Sprite Mode = Multiple va Slice san vao day de tu dong lay tat ca frame.")]
+    [SerializeField] private Texture2D spriteSheet;
+    [SerializeField, Min(0)] private int spriteSheetStartFrame;
+    [SerializeField] private int spriteSheetEndFrame = -1;
+
     [Tooltip("Keo cac Sprite vao theo dung thu tu frame 0, 1, 2, ...")]
     [SerializeField] private Sprite[] frames = new Sprite[0];
 
@@ -17,6 +22,16 @@ public sealed class WorldSpriteAnimation
     [Tooltip("Bat de chay tu dau den cuoi roi chay nguoc ve dau.")]
     [SerializeField] private bool pingPong;
 
+    [Tooltip("After the first pass, ping-pong only inside this frame range.")]
+    [SerializeField] private bool useLoopFrameRange;
+    [SerializeField, Min(0)] private int loopStartFrame;
+    [SerializeField] private int loopEndFrame = -1;
+
+    [Tooltip("When a new animation is queued, exit through this range before switching.")]
+    [SerializeField] private bool usePendingExitRange;
+    [SerializeField, Min(0)] private int pendingExitStartFrame;
+    [SerializeField] private int pendingExitEndFrame = -1;
+
     [Tooltip("Only enable for clips authored with redundant first and last frames.")]
     [SerializeField] private bool skipBoundaryFrames = true;
 
@@ -25,12 +40,26 @@ public sealed class WorldSpriteAnimation
 
     public string Name => animationName;
     public Sprite[] Frames => frames;
+    public Texture2D SpriteSheet => spriteSheet;
+    public int SpriteSheetStartFrame => spriteSheetStartFrame;
+    public int SpriteSheetEndFrame => spriteSheetEndFrame;
     public float Fps => fps;
     public bool Loop => loop;
     public bool PingPong => pingPong;
+    public bool UseLoopFrameRange => useLoopFrameRange;
+    public int LoopStartFrame => loopStartFrame;
+    public int LoopEndFrame => loopEndFrame;
+    public bool UsePendingExitRange => usePendingExitRange;
+    public int PendingExitStartFrame => pendingExitStartFrame;
+    public int PendingExitEndFrame => pendingExitEndFrame;
     public bool SkipBoundaryFrames => skipBoundaryFrames;
     public float LoopDelay => loopDelay;
     public bool HasFrames => frames != null && frames.Length > 0;
+
+    public void SetFrames(Sprite[] newFrames)
+    {
+        frames = newFrames ?? new Sprite[0];
+    }
 
     public WorldSpriteAnimation(string name)
     {
@@ -61,6 +90,8 @@ public sealed class WorldSpriteAnimation
 
         fps = Mathf.Max(0.01f, fps);
         loopDelay = Mathf.Max(0f, loopDelay);
+        loopStartFrame = Mathf.Max(0, loopStartFrame);
+        pendingExitStartFrame = Mathf.Max(0, pendingExitStartFrame);
 
         if (frames == null)
         {

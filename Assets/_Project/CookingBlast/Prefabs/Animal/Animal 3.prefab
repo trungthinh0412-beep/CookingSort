@@ -83,5 +83,83 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 881334079911708789, guid: 0d5fef164a3bcaf4e9b560e3a662ab4e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3509641449356004060}
   m_SourcePrefab: {fileID: 100100000, guid: 0d5fef164a3bcaf4e9b560e3a662ab4e, type: 3}
+--- !u!1 &1387615419954166547 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 881334079911708789, guid: 0d5fef164a3bcaf4e9b560e3a662ab4e, type: 3}
+  m_PrefabInstance: {fileID: 2268385337890681702}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3509641449356004060
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1387615419954166547}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f0b0c72a81e4c74a4ce4961b6d752b9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpriteAnimator
+  targetType: 1
+  targetImage: {fileID: 0}
+  targetRenderer: {fileID: 1405656748083027765}
+  frameSource: 1
+  spriteSheet: {fileID: 0}
+  frames: []
+  generateGridFrames: 0
+  gridColumns: 1
+  gridRows: 1
+  gridPixelsPerUnit: 100
+  useFrameFx: 0
+  frameFx: {fileID: 0}
+  playFxAtFrame: 1
+  animations:
+  - animationName: Default
+    spriteSheet: {fileID: 2800000, guid: f913b7ffee259054a96978deb401274a, type: 3}
+    spriteSheetStartFrame: 0
+    spriteSheetEndFrame: 239
+    frames:
+    - {fileID: 21300000, guid: f913b7ffee259054a96978deb401274a, type: 3}
+    fps: 45
+    loop: 1
+    pingPong: 1
+    useLoopFrameRange: 0
+    loopStartFrame: 0
+    loopEndFrame: -1
+    usePendingExitRange: 0
+    pendingExitStartFrame: 0
+    pendingExitEndFrame: -1
+    skipBoundaryFrames: 0
+    loopDelay: 0
+  playOnEnableAnimation: Default
+  enableIdleVariation: 0
+  primaryIdleAnimation: Idle_1
+  alternateIdleAnimation: Idle_2
+  idleVariationChance: 0.2
+  finishCurrentAnimationBeforeSwitching: 1
+  useLinkedIdleChain: 0
+  linkedIdle1: Idle_1
+  linkedIdle2: Idle_2
+  linkedIdle3: Idle_3
+  idle1Chance: 0.75
+  idle2Chance: 0.2
+  idle3Chance: 0.05
+  fps: 12
+  loop: 1
+  pingPong: 0
+  playOnEnable: 1
+  ignoreTimeScale: 0
+  useStartDelay: 0
+  startDelay: 0
+  useLoopDelay: 0
+  loopDelay: 0
+--- !u!212 &1405656748083027765 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 935351445869505619, guid: 0d5fef164a3bcaf4e9b560e3a662ab4e, type: 3}
+  m_PrefabInstance: {fileID: 2268385337890681702}
+  m_PrefabAsset: {fileID: 0}

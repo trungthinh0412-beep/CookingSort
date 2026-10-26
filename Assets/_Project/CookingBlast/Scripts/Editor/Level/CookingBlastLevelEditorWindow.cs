@@ -726,6 +726,7 @@ private void DrawCustomerPalette()
 
         foreach (FoodColor color in CookingBlastTileFromImageWindow.GetAvailableTilePalette())
         {
+            if (color == FoodColor.Neutral) continue;
             int demand = demandCounts.TryGetValue(color, out int d) ? d : 0;
             int tiles = tileCounts.TryGetValue(color, out int t) ? t : 0;
 
