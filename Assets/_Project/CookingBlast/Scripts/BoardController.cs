@@ -16,10 +16,10 @@ namespace CookingSort2D
         [Tooltip("Fallback size used only when a Tile has no SpriteRenderer sprite.")]
         [SerializeField, Min(0.01f)] private float cellSize = 0.8f;
         [FormerlySerializedAs("gap")]
-        [SerializeField, Min(0f)] private float gapX = 0.06f;
-        [SerializeField, Min(0f)] private float gapY = 0.04f;
-        [Tooltip("Smallest visible gap kept between sprite bounds in every level.")]
-        [SerializeField, Min(0f)] private float minimumVisualGap = 0.04f;
+        [Tooltip("Horizontal space added to the measured sprite width. Use a negative value to overlap Tiles.")]
+        [SerializeField, Range(-0.5f, 0.5f)] private float gapX = 0f;
+        [Tooltip("Vertical space added to the measured sprite height. Use a negative value to overlap rows.")]
+        [SerializeField, Range(-1f, 0.5f)] private float gapY = -0.28f;
 [SerializeField] private float serveInterval = 0.025f;
         [SerializeField, Min(0.01f)] private float dropDuration = 0.13f;
         [Header("Tile scanning")]
@@ -261,8 +261,8 @@ private void LayoutColumn(int col, bool animate, List<Coroutine> activeFalls = n
             int columnCount = Mathf.Max(1, _columns.Count);
             float tileWidth = _layoutCellSize.x > 0.0001f ? _layoutCellSize.x : Mathf.Max(0.01f, cellSize);
             float tileHeight = _layoutCellSize.y > 0.0001f ? _layoutCellSize.y : Mathf.Max(0.01f, cellSize);
-            float safeGapX = Mathf.Max(minimumVisualGap, gapX);
-            float safeGapY = Mathf.Max(minimumVisualGap, gapY);
+            float safeGapX = Mathf.Max(-tileWidth + 0.01f, gapX);
+            float safeGapY = Mathf.Max(-tileHeight + 0.01f, gapY);
             float stepX = tileWidth + safeGapX;
             float stepY = tileHeight + safeGapY;
             float totalWidth = columnCount * tileWidth + (columnCount - 1) * safeGapX;
