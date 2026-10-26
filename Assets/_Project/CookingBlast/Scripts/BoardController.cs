@@ -13,10 +13,13 @@ namespace CookingSort2D
         [SerializeField] private FoodTileView[] tilePrefabsByColor = new FoodTileView[10];
 [SerializeField] private FoodTileView tilePrefab;
         [SerializeField] private Transform tileRoot;
-        [SerializeField] private float cellSize = 0.48f;
+        [Tooltip("Fallback size used only when a Tile has no SpriteRenderer sprite.")]
+        [SerializeField, Min(0.01f)] private float cellSize = 0.8f;
         [FormerlySerializedAs("gap")]
-        [SerializeField] private float gapX;
-        [SerializeField] private float gapY;
+        [SerializeField, Min(0f)] private float gapX = 0.06f;
+        [SerializeField, Min(0f)] private float gapY = 0.04f;
+        [Tooltip("Smallest visible gap kept between sprite bounds in every level.")]
+        [SerializeField, Min(0f)] private float minimumVisualGap = 0.04f;
 [SerializeField] private float serveInterval = 0.025f;
         [SerializeField, Min(0.01f)] private float dropDuration = 0.13f;
         [Header("Tile scanning")]
@@ -39,6 +42,7 @@ private readonly List<bool> _columnBusy = new List<bool>();
         private CookingSortGameController _game;
         private bool _serving;
         private int _maxRows;
+        private Vector2 _layoutCellSize;
 
         public bool IsServing => _serving;
         public int RemainingTileCount
@@ -110,6 +114,7 @@ _columnBusy.Add(false);
                     column.Add(tile);
                 }
             }
+            MeasureLayoutCellSize();
             LayoutAll(false);
         }
 
@@ -228,14 +233,40 @@ private IEnumerator ServeRoutine(SeatBar seats)
             for (int col = 0; col < _columns.Count; col++) LayoutColumn(col, animate);
         }
 
+        private void MeasureLayoutCellSize()
+        {
+            Vector2 measured = Vector2.zero;
+            for (int col = 0; col < _columns.Count; col++)
+            {
+                List<FoodTileView> column = _columns[col];
+                for (int row = 0; row < column.Count; row++)
+                {
+                    FoodTileView tile = column[row];
+                    if (tile == null) continue;
+                    Vector2 size = tile.GetVisualSize(tileRoot);
+                    measured.x = Mathf.Max(measured.x, size.x);
+                    measured.y = Mathf.Max(measured.y, size.y);
+                }
+            }
+
+            float fallback = Mathf.Max(0.01f, cellSize);
+            _layoutCellSize = new Vector2(
+                measured.x > 0.0001f ? measured.x : fallback,
+                measured.y > 0.0001f ? measured.y : fallback);
+        }
+
 private void LayoutColumn(int col, bool animate, List<Coroutine> activeFalls = null)
         {
             if (col < 0 || col >= _columns.Count || tileRoot == null) return;
             int columnCount = Mathf.Max(1, _columns.Count);
-            float stepX = cellSize + gapX;
-            float stepY = cellSize + gapY;
-            float totalWidth = columnCount * cellSize + (columnCount - 1) * gapX;
-            float startX = -totalWidth * 0.5f + cellSize * 0.5f;
+            float tileWidth = _layoutCellSize.x > 0.0001f ? _layoutCellSize.x : Mathf.Max(0.01f, cellSize);
+            float tileHeight = _layoutCellSize.y > 0.0001f ? _layoutCellSize.y : Mathf.Max(0.01f, cellSize);
+            float safeGapX = Mathf.Max(minimumVisualGap, gapX);
+            float safeGapY = Mathf.Max(minimumVisualGap, gapY);
+            float stepX = tileWidth + safeGapX;
+            float stepY = tileHeight + safeGapY;
+            float totalWidth = columnCount * tileWidth + (columnCount - 1) * safeGapX;
+            float startX = -totalWidth * 0.5f + tileWidth * 0.5f;
             // Tiles is the origin of the first (bottom) row.
             float bottomY = 0f;
 
@@ -244,7 +275,11 @@ private void LayoutColumn(int col, bool animate, List<Coroutine> activeFalls = n
             {
                 FoodTileView tile = column[row];
                 if (tile == null) continue;
-                Vector3 target = new Vector3(startX + col * stepX, bottomY + row * stepY, 0f);
+                Vector2 centerOffset = tile.GetVisualCenterOffset(tileRoot);
+                Vector3 target = new Vector3(
+                    startX + col * stepX - centerOffset.x,
+                    bottomY + row * stepY - centerOffset.y,
+                    0f);
                 // Bottom tiles render in front of the rows above them.
                 tile.SetSortingOrder(10 + _maxRows - row);
                 if (animate)

@@ -25,7 +25,7 @@ Transform:
   m_GameObject: {fileID: 5225402541332961189}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -5.01, z: 0}
+  m_LocalPosition: {x: 0, y: -5.17, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -59,8 +59,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 0.9, y: 0.9, z: 0.9}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 7174922274440986648}
   m_Father: {fileID: 0}
@@ -148,8 +148,9 @@ MonoBehaviour:
   tilePrefab: {fileID: 112428899413308147, guid: ea3e74737b6150a4ea6035a00534c5d8, type: 3}
   tileRoot: {fileID: 7174922274440986648}
   cellSize: 0.8
-  gapX: 0
-  gapY: 0
+  gapX: 0.06
+  gapY: 0.04
+  minimumVisualGap: 0.04
   serveInterval: 0.025
   dropDuration: 0.13
   scanInterval: 0.18
