@@ -236,6 +236,7 @@ MonoBehaviour:
   seatBar: {fileID: 6446821649508383590}
   customerQueue: {fileID: 420494745742649123}
   boardColumns: []
+  boardClusters: []
   customerLanes: []
 --- !u!1 &5340691042414495155
 GameObject:
@@ -613,6 +614,10 @@ PrefabInstance:
     - target: {fileID: 8632491686686747749, guid: 8147caf80ce89bc4e9d3242b87a7206c, type: 3}
       propertyPath: m_Name
       value: Board
+      objectReference: {fileID: 0}
+    - target: {fileID: 8849997689638928594, guid: 8147caf80ce89bc4e9d3242b87a7206c, type: 3}
+      propertyPath: dropDuration
+      value: 0.13
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
