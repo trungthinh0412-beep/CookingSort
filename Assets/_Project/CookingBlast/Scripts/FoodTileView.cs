@@ -36,6 +36,12 @@ namespace CookingSort2D
             return new Vector2(offset.x, offset.y);
         }
 
+        public Vector3 GetVisualCenterWorldPosition()
+        {
+            AutoBind();
+            return body != null ? body.bounds.center : transform.position;
+        }
+
         private void Awake()
         {
             AutoBind();
@@ -115,25 +121,29 @@ public void FitToCell(float targetSize)
             }
         }
 
-public void ConsumeTo(Transform target, Action onComplete)
+public void ConsumeTo(Transform target, Action onComplete, int flightSortingOrder = 100,
+            float arrivalScaleFactor = 0.5f)
         {
             if (!isActiveAndEnabled || target == null)
             {
                 onComplete?.Invoke();
                 return;
             }
-            StartCoroutine(ConsumeRoutine(target, onComplete));
+            StartCoroutine(ConsumeRoutine(target, onComplete, flightSortingOrder,
+                arrivalScaleFactor));
         }
 
-private IEnumerator ConsumeRoutine(Transform target, Action onComplete)
+private IEnumerator ConsumeRoutine(Transform target, Action onComplete, int flightSortingOrder,
+            float arrivalScaleFactor)
         {
             AutoBind();
             int oldOrder = body != null ? body.sortingOrder : 0;
-            SetSortingOrder(100);
+            SetSortingOrder(flightSortingOrder);
 
             Vector3 start = transform.position;
             Vector3 end = target.position;
             Vector3 startScale = transform.localScale;
+            Vector3 endScale = startScale * Mathf.Max(0.01f, arrivalScaleFactor);
             const float duration = 0.22f;
             float elapsed = 0f;
 
@@ -149,12 +159,12 @@ private IEnumerator ConsumeRoutine(Transform target, Action onComplete)
                 float eased = 1f - Mathf.Pow(1f - t, 3f);
                 Vector3 curve = side * sideSign * Mathf.Sin(t * Mathf.PI) * 0.12f;
                 transform.position = Vector3.LerpUnclamped(start, end, eased) + curve;
-                transform.localScale = Vector3.Lerp(startScale, startScale * 0.5f, eased);
+                transform.localScale = Vector3.Lerp(startScale, endScale, eased);
                 yield return null;
             }
 
             transform.position = end;
-            transform.localScale = startScale * 0.5f;
+            transform.localScale = endScale;
             SetSortingOrder(oldOrder);
             onComplete?.Invoke();
         }
