@@ -10,12 +10,14 @@ internal static class CookingBlastTileSpriteEditorPreview
     private static readonly Dictionary<FoodColor, string> EditorSpriteOverrides =
         new Dictionary<FoodColor, string>
         {
-            { FoodColor.Blue, "Assets/_Project/CookingBlast/Art/Element_block/Blue_.png" },
-            { FoodColor.Pink, "Assets/_Project/CookingBlast/Art/Element_block/Pink.png" },
-            { FoodColor.Yellow, "Assets/_Project/CookingBlast/Art/Element_block/Yellow_.png" },
-            { FoodColor.Green, "Assets/_Project/CookingBlast/Art/Element_block/Green_.png" },
-            { FoodColor.Purple, "Assets/_Project/CookingBlast/Art/Element_block/Purple_.png" },
-            { FoodColor.Orange, "Assets/_Project/CookingBlast/Art/Element_block/Orange_.png" }
+            { FoodColor.Blue, "Assets/_Project/CookingBlast/Art/Element_block_1x1/Blue_.png" },
+            { FoodColor.Pink, "Assets/_Project/CookingBlast/Art/Element_block_1x1/Pink.png" },
+            { FoodColor.Yellow, "Assets/_Project/CookingBlast/Art/Element_block_1x1/Yellow_.png" },
+            { FoodColor.Green, "Assets/_Project/CookingBlast/Art/Element_block_1x1/Green_.png" },
+            { FoodColor.Red, "Assets/_Project/CookingBlast/Art/Element_block_1x1/Red_.png" },
+            { FoodColor.Purple, "Assets/_Project/CookingBlast/Art/Element_block_1x1/Purple_.png" },
+            { FoodColor.Cyan, "Assets/_Project/CookingBlast/Art/Element_block_1x1/Cyan.png" },
+            { FoodColor.Orange, "Assets/_Project/CookingBlast/Art/Element_block_1x1/Orange_.png" }
         };
 
     private static readonly Dictionary<FoodColor, Sprite> Cache =
