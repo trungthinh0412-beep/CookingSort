@@ -3,10 +3,21 @@ using CookingSort2D;
 using UnityEditor;
 using UnityEngine;
 
-// Sprite previews use the SAME Tile prefabs configured on Board.prefab.
-// Red/Cyan without custom prefab continue using the legacy color swatch.
+// The level editor can override preview artwork without changing gameplay's
+// Board prefab mapping. Colors without an override still use Board.prefab.
 internal static class CookingBlastTileSpriteEditorPreview
 {
+    private static readonly Dictionary<FoodColor, string> EditorSpriteOverrides =
+        new Dictionary<FoodColor, string>
+        {
+            { FoodColor.Blue, "Assets/_Project/CookingBlast/Art/Element_block/Blue.png" },
+            { FoodColor.Pink, "Assets/_Project/CookingBlast/Art/Element_block/Pink.png" },
+            { FoodColor.Yellow, "Assets/_Project/CookingBlast/Art/Element_block/Yellow.png" },
+            { FoodColor.Green, "Assets/_Project/CookingBlast/Art/Element_block/Green.png" },
+            { FoodColor.Purple, "Assets/_Project/CookingBlast/Art/Element_block/Purple.png" },
+            { FoodColor.Orange, "Assets/_Project/CookingBlast/Art/Element_block/Orange.png" }
+        };
+
     private static readonly Dictionary<FoodColor, Sprite> Cache =
         new Dictionary<FoodColor, Sprite>();
 
@@ -29,6 +40,13 @@ private static bool loaded;
             {
                 foreach (FoodColor color in System.Enum.GetValues(typeof(FoodColor)))
                 {
+                    if (EditorSpriteOverrides.TryGetValue(color, out string spritePath))
+                    {
+                        Sprite editorSprite = AssetDatabase.LoadAssetAtPath<Sprite>(spritePath);
+                        if (editorSprite != null) Cache[color] = editorSprite;
+                        continue;
+                    }
+
                     FoodTileView tile = board.GetTilePrefab(color);
                     if (tile == null || tile.gameObject.name.Contains("TileBase"))
                         continue;
