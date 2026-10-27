@@ -15,6 +15,15 @@ internal static class CookingBlastTileSpriteEditorPreview
         new Dictionary<FoodColor, Sprite>();
 private static bool loaded;
 
+    /// <summary>
+    /// The editor now uses the serialized FoodColor directly. Keeping display
+    /// naming here gives every Level Editor panel one consistent source.
+    /// </summary>
+    internal static string GetDisplayName(FoodColor type)
+    {
+        return type.ToString();
+    }
+
     internal static Sprite GetSprite(FoodColor type)
     {
         if (!loaded)
@@ -105,7 +114,7 @@ internal static FoodColor DrawAvailableColorPopup(
         foreach (FoodColor color in supported)
         {
             values.Add(color);
-            names.Add(color.ToString());
+            names.Add(GetDisplayName(color));
         }
         int selected = Mathf.Max(0, values.IndexOf(current));
         int next = EditorGUILayout.Popup(selected, names.ToArray(), options);
