@@ -54,6 +54,17 @@ public CustomerView GetAnimalPrefab(FoodColor type)
             return customerPrefab;
         }
 
+        public int ConfiguredAnimalPrefabCount =>
+            animalPrefabsByColor != null ? animalPrefabsByColor.Length : 0;
+
+        /// <summary>Returns only the Animal explicitly stored in the list; never uses AnimalBase.</summary>
+        public CustomerView GetConfiguredAnimalPrefab(int index)
+        {
+            return animalPrefabsByColor != null && index >= 0 && index < animalPrefabsByColor.Length
+                ? animalPrefabsByColor[index]
+                : null;
+        }
+
 
 public void Initialize(CookingSortGameController game, CookingBlastLevel data)
         {

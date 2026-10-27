@@ -139,7 +139,7 @@ internal static class CookingBlastLevelEditing
                 level.BoardColumns[column].bottomToTop[row] = color;
         Dirty(level);
         message = "Placed a 2 x 2 Cluster 40 using " +
-                  CookingBlastTileSpriteEditorPreview.GetDisplayName(color) + ".";
+                  color + ".";
         return true;
     }
 

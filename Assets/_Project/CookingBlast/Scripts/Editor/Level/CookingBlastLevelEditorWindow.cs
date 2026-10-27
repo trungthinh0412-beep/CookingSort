@@ -94,11 +94,13 @@ private void OnLostFocus()
 
             if (level == null)
             {
+                CookingBlastTileSpriteEditorPreview.SetLevelContext(null);
                 EditorGUILayout.HelpBox("Choose a Cooking Blast level prefab and click Open. Like the Hidden Object editor, this edits the real prefab directly in Prefab Mode; there is no second level-data copy.", MessageType.Info);
                 DrawStatus();
                 return;
             }
 
+            CookingBlastTileSpriteEditorPreview.SetLevelContext(level);
             CookingBlastLevelEditing.SyncCustomerDemandsFromAnimals(level);
 
             EditorGUILayout.LabelField("Editing: " + stage.assetPath, EditorStyles.miniLabel);
@@ -319,7 +321,7 @@ private void DrawStats()
                     if (!CookingBlastTileSpriteEditorPreview.Draw(swatch, color))
                         EditorGUI.DrawRect(swatch, CookingSortPalette.Get(color));
                     GUILayout.Label(
-                        CookingBlastTileSpriteEditorPreview.GetDisplayName(color),
+                        color.ToString(),
                         GUILayout.Width(80));
                     GUILayout.Label("Tiles  " + t + "   /   Need  " + d, GUILayout.Width(185));
                     string delta = match ? "OK" : (t > d ? "+" : "") + (t - d);
@@ -760,12 +762,12 @@ private void DrawCustomerPalette()
                 EditorGUI.DrawRect(animalIcon, CookingSortPalette.Get(color));
             GUI.Label(new Rect(rect.x + 30, rect.y + 4, 94, 22),
                 (!deleteCustomerTool && color == paintColor ? "• " : "") +
-                CookingBlastTileSpriteEditorPreview.GetDisplayName(color));
+                color.ToString());
             GUI.Label(new Rect(rect.xMax - 38, rect.y + 4, 35, 22),
                 demand.ToString(), EditorStyles.boldLabel);
 
             if (GUI.Button(rect, new GUIContent("",
-                CookingBlastTileSpriteEditorPreview.GetDisplayName(color) + ": " +
+                color + ": " +
                 demand + " customer demand / " + tiles + " board tiles"),
                 GUIStyle.none))
             {
@@ -805,7 +807,7 @@ private void DrawCustomerPalette()
         GUILayout.Space(5);
         EditorGUILayout.LabelField(deleteCustomerTool
             ? "Tool: Delete Customer"
-            : "Brush: " + CookingBlastTileSpriteEditorPreview.GetDisplayName(paintColor),
+            : "Brush: " + paintColor,
             EditorStyles.boldLabel);
         EditorGUILayout.HelpBox(deleteCustomerTool
             ? "Click any Customer cell to remove that Customer. Click a color above to return to painting. Ctrl+Z to undo."

@@ -56,6 +56,17 @@ private readonly List<bool> _columnBusy = new List<bool>();
         private Vector2 _layoutCellSize;
 
         public bool IsServing => _serving;
+        public int ConfiguredTilePrefabCount =>
+            tilePrefabsByColor != null ? tilePrefabsByColor.Length : 0;
+
+        /// <summary>Returns only the prefab explicitly stored in the list; never uses TileBase.</summary>
+        public FoodTileView GetConfiguredTilePrefab(int index)
+        {
+            return tilePrefabsByColor != null && index >= 0 && index < tilePrefabsByColor.Length
+                ? tilePrefabsByColor[index]
+                : null;
+        }
+
         public int RemainingTileCount
         {
             get

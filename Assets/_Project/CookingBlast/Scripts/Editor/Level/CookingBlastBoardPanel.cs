@@ -124,7 +124,7 @@ internal void Draw(CookingBlastLevel level, ref FoodColor brush, ref int columns
                             CookingBlastTileSpriteEditorPreview.GetSprite(type) != null)
                             continue;
                         if (missingSpriteNames.Length > 0) missingSpriteNames += ", ";
-                        missingSpriteNames += CookingBlastTileSpriteEditorPreview.GetDisplayName(type);
+                        missingSpriteNames += type;
                     }
                     if (missingSpriteNames.Length > 0)
                         EditorGUILayout.HelpBox("Missing custom Tile prefab for: " +
@@ -144,7 +144,7 @@ internal void Draw(CookingBlastLevel level, ref FoodColor brush, ref int columns
                             EditorGUI.DrawRect(tileSwatch, CookingSortPalette.Get(color));
                         GUI.Label(new Rect(rect.x + 30, rect.y + 4, 88, 22),
                             (color == brush ? "• " : "") +
-                            CookingBlastTileSpriteEditorPreview.GetDisplayName(color));
+                            color.ToString());
                         var valueStyle = new GUIStyle(EditorStyles.miniBoldLabel);
                         if (color != FoodColor.Neutral && count != demand)
                         {
@@ -159,14 +159,14 @@ internal void Draw(CookingBlastLevel level, ref FoodColor brush, ref int columns
                             valueStyle);
                         if (GUI.Button(rect,
                             new GUIContent("",
-                                CookingBlastTileSpriteEditorPreview.GetDisplayName(color) +
+                                color +
                                 ": " + count + " tiles / " + demand + " demand"),
                             GUIStyle.none))
                             brush = color;
                     }
                     GUILayout.Space(6);
                     EditorGUILayout.LabelField("Brush: " +
-                        CookingBlastTileSpriteEditorPreview.GetDisplayName(brush),
+                        brush.ToString(),
                         EditorStyles.boldLabel);
                     EditorGUILayout.LabelField("Right click picks color. Shift+click bucket fills. Ctrl+Z undoes.", EditorStyles.wordWrappedMiniLabel);
                 }
@@ -243,10 +243,10 @@ internal void Draw(CookingBlastLevel level, ref FoodColor brush, ref int columns
                 int filled = CookingBlastLevelEditing.FloodFillBoard(level, c, r, brush);
                 fillStatus = filled > 0
                     ? "Bucket filled " + filled + " connected tile(s) with " +
-                      CookingBlastTileSpriteEditorPreview.GetDisplayName(brush) +
+                      brush +
                       ". Ctrl+Z to undo."
                     : "No tiles changed (this region already has " +
-                      CookingBlastTileSpriteEditorPreview.GetDisplayName(brush) + ").";
+                      brush + ").";
                 fillStatusType = MessageType.Info;
                 ev.Use();
             }

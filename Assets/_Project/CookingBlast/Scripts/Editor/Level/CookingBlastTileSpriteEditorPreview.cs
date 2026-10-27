@@ -11,17 +11,56 @@ internal static class CookingBlastTileSpriteEditorPreview
         new Dictionary<FoodColor, Sprite>();
 
     private static bool animalLoaded;
+    private static int configuredAnimalCount;
+    private static CustomerQueue levelQueue;
     private static readonly Dictionary<FoodColor, Sprite> AnimalCache =
         new Dictionary<FoodColor, Sprite>();
 private static bool loaded;
+    private static int configuredTileCount;
+    private static BoardController levelBoard;
+    private static int sourceHash;
 
-    /// <summary>
-    /// The editor now uses the serialized FoodColor directly. Keeping display
-    /// naming here gives every Level Editor panel one consistent source.
-    /// </summary>
-    internal static string GetDisplayName(FoodColor type)
+    internal static void SetLevelContext(CookingBlastLevel level)
     {
-        return type.ToString();
+        BoardController nextBoard = level != null ? level.Board : null;
+        CustomerQueue nextQueue = level != null ? level.CustomerQueue : null;
+        int nextHash = CalculateSourceHash(nextBoard, nextQueue);
+        if (levelBoard == nextBoard && levelQueue == nextQueue && sourceHash == nextHash)
+            return;
+
+        levelBoard = nextBoard;
+        levelQueue = nextQueue;
+        sourceHash = nextHash;
+        loaded = false;
+        animalLoaded = false;
+        configuredTileCount = 0;
+        configuredAnimalCount = 0;
+        Cache.Clear();
+        AnimalCache.Clear();
+    }
+
+    private static int CalculateSourceHash(BoardController board, CustomerQueue queue)
+    {
+        unchecked
+        {
+            int hash = 17;
+            int tileCount = board != null ? board.ConfiguredTilePrefabCount : 0;
+            hash = hash * 31 + tileCount;
+            for (int i = 0; i < tileCount; i++)
+            {
+                FoodTileView prefab = board.GetConfiguredTilePrefab(i);
+                hash = hash * 31 + (prefab != null ? prefab.GetInstanceID() : 0);
+            }
+
+            int animalCount = queue != null ? queue.ConfiguredAnimalPrefabCount : 0;
+            hash = hash * 31 + animalCount;
+            for (int i = 0; i < animalCount; i++)
+            {
+                CustomerView prefab = queue.GetConfiguredAnimalPrefab(i);
+                hash = hash * 31 + (prefab != null ? prefab.GetInstanceID() : 0);
+            }
+            return hash;
+        }
     }
 
     internal static Sprite GetSprite(FoodColor type)
@@ -29,20 +68,23 @@ private static bool loaded;
         if (!loaded)
         {
             loaded = true;
-            GameObject boardAsset = AssetDatabase.LoadAssetAtPath<GameObject>(
-                "Assets/_Project/CookingBlast/Prefabs/Board.prefab");
-            BoardController board = boardAsset != null ?
-                boardAsset.GetComponent<BoardController>() : null;
+            BoardController board = levelBoard;
+            if (board == null)
+            {
+                GameObject boardAsset = AssetDatabase.LoadAssetAtPath<GameObject>(
+                    "Assets/_Project/CookingBlast/Prefabs/Board.prefab");
+                board = boardAsset != null ? boardAsset.GetComponent<BoardController>() : null;
+            }
             if (board != null)
             {
-                foreach (FoodColor color in System.Enum.GetValues(typeof(FoodColor)))
+                configuredTileCount = board.ConfiguredTilePrefabCount;
+                for (int index = 0; index < board.ConfiguredTilePrefabCount; index++)
                 {
-                    FoodTileView tile = board.GetTilePrefab(color);
-                    if (tile == null || tile.gameObject.name.Contains("TileBase"))
-                        continue;
+                    FoodTileView tile = board.GetConfiguredTilePrefab(index);
+                    if (tile == null) continue;
                     SpriteRenderer renderer = tile.GetComponentInChildren<SpriteRenderer>(true);
                     if (renderer != null && renderer.sprite != null)
-                        Cache[color] = renderer.sprite;
+                        Cache[(FoodColor)index] = renderer.sprite;
                 }
             }
         }
@@ -56,23 +98,43 @@ internal static Sprite GetAnimalSprite(FoodColor type)
         if (!animalLoaded)
         {
             animalLoaded = true;
-            GameObject queueAsset = AssetDatabase.LoadAssetAtPath<GameObject>(
-                "Assets/_Project/CookingBlast/Prefabs/CustomerQueue.prefab");
-            CustomerQueue queue = queueAsset != null
-                ? queueAsset.GetComponent<CustomerQueue>() : null;
+            CustomerQueue queue = levelQueue;
+            if (queue == null)
+            {
+                GameObject queueAsset = AssetDatabase.LoadAssetAtPath<GameObject>(
+                    "Assets/_Project/CookingBlast/Prefabs/CustomerQueue.prefab");
+                queue = queueAsset != null ? queueAsset.GetComponent<CustomerQueue>() : null;
+            }
             if (queue != null)
             {
-                foreach (FoodColor color in System.Enum.GetValues(typeof(FoodColor)))
+                configuredAnimalCount = queue.ConfiguredAnimalPrefabCount;
+                for (int index = 0; index < queue.ConfiguredAnimalPrefabCount; index++)
                 {
-                    CustomerView animal = queue.GetAnimalPrefab(color);
-                    if (animal == null || animal.gameObject.name.Contains("AnimalBase"))
-                        continue;
+                    CustomerView animal = queue.GetConfiguredAnimalPrefab(index);
+                    if (animal == null) continue;
                     SpriteRenderer sr = animal.GetComponentInChildren<SpriteRenderer>(true);
-                    if (sr != null && sr.sprite != null) AnimalCache[color] = sr.sprite;
+                    if (sr != null && sr.sprite != null) AnimalCache[(FoodColor)index] = sr.sprite;
                 }
             }
         }
         AnimalCache.TryGetValue(type, out Sprite result);
+        return result;
+    }
+
+    internal static List<FoodColor> GetConfiguredColors()
+    {
+        // Trigger each cache once, then expose only indexes explicitly present
+        // in BOTH gameplay lists. Fallback prefabs and extra enum values are excluded.
+        GetSprite(default);
+        GetAnimalSprite(default);
+        int count = Mathf.Min(configuredTileCount, configuredAnimalCount);
+        var result = new List<FoodColor>(count);
+        for (int index = 0; index < count; index++)
+        {
+            FoodColor color = (FoodColor)index;
+            if (Cache.ContainsKey(color) && AnimalCache.ContainsKey(color))
+                result.Add(color);
+        }
         return result;
     }
 
@@ -114,7 +176,7 @@ internal static FoodColor DrawAvailableColorPopup(
         foreach (FoodColor color in supported)
         {
             values.Add(color);
-            names.Add(GetDisplayName(color));
+            names.Add(color.ToString());
         }
         int selected = Mathf.Max(0, values.IndexOf(current));
         int next = EditorGUILayout.Popup(selected, names.ToArray(), options);
