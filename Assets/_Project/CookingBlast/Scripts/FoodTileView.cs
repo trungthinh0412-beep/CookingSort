@@ -11,6 +11,10 @@ namespace CookingSort2D
 [SerializeField] private SpriteRenderer body;
         [SerializeField] private TextMesh symbol;
 
+        [Header("Fly To Animal")]
+        [Tooltip("Seconds for this Tile to fly into its Animal. Increase to fly slower; decrease to fly faster.")]
+        [SerializeField, Min(0.01f)] private float consumeDuration = 0.22f;
+
         public FoodColor ColorType { get; private set; }
 
         public Vector2 GetVisualSize(Transform relativeTo)
@@ -134,7 +138,7 @@ private IEnumerator ConsumeRoutine(Transform target, Action onComplete)
             Vector3 start = transform.position;
             Vector3 end = target.position;
             Vector3 startScale = transform.localScale;
-            const float duration = 0.22f;
+            float duration = Mathf.Max(0.01f, consumeDuration);
             float elapsed = 0f;
 
             Vector3 direction = end - start;
@@ -146,7 +150,9 @@ private IEnumerator ConsumeRoutine(Transform target, Action onComplete)
             {
                 elapsed += Time.unscaledDeltaTime;
                 float t = Mathf.Clamp01(elapsed / duration);
-                float eased = 1f - Mathf.Pow(1f - t, 3f);
+                // Zero velocity at both ends avoids a visible jerk when a Tile
+                // changes from the vertical drop into its curved flight.
+                float eased = t * t * (3f - 2f * t);
                 Vector3 curve = side * sideSign * Mathf.Sin(t * Mathf.PI) * 0.12f;
                 transform.position = Vector3.LerpUnclamped(start, end, eased) + curve;
                 transform.localScale = Vector3.Lerp(startScale, startScale * 0.5f, eased);

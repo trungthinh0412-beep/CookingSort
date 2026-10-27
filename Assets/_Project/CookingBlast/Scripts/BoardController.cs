@@ -20,15 +20,18 @@ namespace CookingSort2D
         [SerializeField, Range(-0.5f, 0.5f)] private float gapX = 0f;
         [Tooltip("Vertical space added to the measured sprite height. Use a negative value to overlap rows.")]
         [SerializeField, Range(-1f, 0.5f)] private float gapY = -0.28f;
-[SerializeField] private float serveInterval = 0.025f;
+
+        [Header("Tile flow")]
+        [Tooltip("Extra pause after a column finishes sliding down. Keep at 0 for an immediate drop-to-flight handoff.")]
+        [SerializeField, Min(0f)] private float serveInterval = 0f;
         [SerializeField, Min(0.01f)] private float dropDuration = 0.13f;
         [Header("Tile scanning")]
         [Tooltip("Starting delay between tile launches for each customer")]
-        [SerializeField, Min(0f)] private float scanInterval = 0.18f;
+        [SerializeField, Min(0f)] private float scanInterval = 0.14f;
         [Tooltip("Fastest interval for a customer after building combo")]
         [SerializeField, Min(0f)] private float minimumScanInterval = 0.06f;
-        [Tooltip("Seconds removed from a customer's scan interval per delivered tile")]
-        [SerializeField, Min(0f)] private float scanAccelerationPerTile = 0.0075f;
+        [Tooltip("Seconds removed from a customer's scan interval per delivered tile. Smaller values make the launch cadence accelerate more gradually.")]
+        [SerializeField, Min(0f)] private float scanAccelerationPerTile = 0.003f;
 
         
         private readonly List<CustomerView> _customerBuffer = new List<CustomerView>();

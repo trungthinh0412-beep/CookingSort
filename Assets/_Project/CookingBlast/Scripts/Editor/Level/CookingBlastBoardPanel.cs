@@ -37,7 +37,6 @@ private bool painting;
         get
         {
             var colors = CookingBlastTileFromImageWindow.GetAvailableTilePalette();
-            if (!colors.Contains(FoodColor.Neutral)) colors.Add(FoodColor.Neutral);
             return colors.ToArray();
         }
     }

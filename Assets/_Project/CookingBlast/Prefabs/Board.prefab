@@ -150,8 +150,8 @@ MonoBehaviour:
   cellSize: 0.8
   gapX: 0
   gapY: -0.28
-  serveInterval: 0.025
+  serveInterval: 0
   dropDuration: 0.13
-  scanInterval: 0.18
-  minimumScanInterval: 0.06
-  scanAccelerationPerTile: 0.0075
+  scanInterval: 0.14
+  minimumScanInterval: 0.1
+  scanAccelerationPerTile: 0.003
