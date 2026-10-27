@@ -247,6 +247,23 @@ private void DrawCustomerEditor()
                     CookingBlastLevelEditing.AutoGenerateCustomers(level, laneCount, minDemand, maxDemand);
                     GUIUtility.ExitGUI();
                 }
+                if (GUILayout.Button(new GUIContent("Shuffle Animal Positions",
+                        "Randomize existing Animals across all current lane slots without changing their count, color, or demand."),
+                    GUILayout.Width(185)))
+                {
+                    EndCustomerStroke();
+                    if (CookingBlastLevelEditing.ShuffleCustomerPositions(level))
+                    {
+                        boardPanel.ResetPriority(level);
+                        SetStatus("Shuffled Animal positions. Customer count and lane sizes are unchanged.",
+                            MessageType.Info);
+                    }
+                    else
+                    {
+                        SetStatus("Add at least two Animals before shuffling.", MessageType.Warning);
+                    }
+                    GUIUtility.ExitGUI();
+                }
             }
 
             GUILayout.Space(7);
