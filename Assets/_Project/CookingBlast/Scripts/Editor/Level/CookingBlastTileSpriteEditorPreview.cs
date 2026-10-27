@@ -10,12 +10,20 @@ internal static class CookingBlastTileSpriteEditorPreview
     private static readonly Dictionary<FoodColor, string> EditorSpriteOverrides =
         new Dictionary<FoodColor, string>
         {
-            { FoodColor.Blue, "Assets/_Project/CookingBlast/Art/Element_block/Blue.png" },
-            { FoodColor.Pink, "Assets/_Project/CookingBlast/Art/Element_block/Pink.png" },
-            { FoodColor.Yellow, "Assets/_Project/CookingBlast/Art/Element_block/Yellow.png" },
-            { FoodColor.Green, "Assets/_Project/CookingBlast/Art/Element_block/Green.png" },
-            { FoodColor.Purple, "Assets/_Project/CookingBlast/Art/Element_block/Purple.png" },
-            { FoodColor.Orange, "Assets/_Project/CookingBlast/Art/Element_block/Orange.png" }
+            { FoodColor.Blue, "Assets/_Project/CookingBlast/Art/Element_block/Blue_.png" },
+            { FoodColor.Pink, "Assets/_Project/CookingBlast/Art/Element_block/Green_.png" },
+            { FoodColor.Yellow, "Assets/_Project/CookingBlast/Art/Element_block/Orange_.png" },
+            { FoodColor.Green, "Assets/_Project/CookingBlast/Art/Element_block/Pink.png" },
+            // Runtime slot 4 uses Tile 5 / Animal 5, whose artwork is Purple.
+            // Keep serialized enum indexes stable and mirror that mapping here.
+            { FoodColor.Red, "Assets/_Project/CookingBlast/Art/Element_block/Purple_.png" },
+            { FoodColor.Purple, "Assets/_Project/CookingBlast/Art/Element_block/Red_.png" },
+            { FoodColor.Cyan, "Assets/_Project/CookingBlast/Art/Element_block/Cyan.png" },
+            // Runtime slots for Yellow and Orange use the opposite artwork.
+            { FoodColor.Orange, "Assets/_Project/CookingBlast/Art/Element_block/Yellow_.png" },
+            { FoodColor.White, "Assets/_Project/CookingBlast/Art/Element_block/White.png" },
+            { FoodColor.Gray, "Assets/_Project/CookingBlast/Art/Element_block/Black_.png" },
+            { FoodColor.SoftPink, "Assets/_Project/CookingBlast/Art/Element_block/SoftPink.png" }
         };
 
     private static readonly Dictionary<FoodColor, Sprite> Cache =
@@ -53,8 +61,11 @@ private static bool loaded;
                     if (EditorSpriteOverrides.TryGetValue(color, out string spritePath))
                     {
                         Sprite editorSprite = AssetDatabase.LoadAssetAtPath<Sprite>(spritePath);
-                        if (editorSprite != null) Cache[color] = editorSprite;
-                        continue;
+                        if (editorSprite != null)
+                        {
+                            Cache[color] = editorSprite;
+                            continue;
+                        }
                     }
 
                     FoodTileView tile = board.GetTilePrefab(color);

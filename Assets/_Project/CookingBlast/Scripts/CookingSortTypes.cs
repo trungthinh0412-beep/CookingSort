@@ -16,7 +16,8 @@ namespace CookingSort2D
         Orange,
         White,
         Gray,
-        Neutral
+        Neutral,
+        SoftPink
     }
 
     [Serializable]
@@ -85,6 +86,7 @@ namespace CookingSort2D
                 case FoodColor.White: return new Color32(241, 241, 235, 255);
                 case FoodColor.Gray: return new Color32(92, 101, 115, 255);
                 case FoodColor.Neutral: return new Color32(135, 142, 151, 255);
+                case FoodColor.SoftPink: return new Color32(255, 137, 186, 255);
                 default: return Color.white;
             }
         }
@@ -104,6 +106,7 @@ namespace CookingSort2D
                 case FoodColor.White: return "W";
                 case FoodColor.Gray: return "D";
                 case FoodColor.Neutral: return "N";
+                case FoodColor.SoftPink: return "SP";
                 default: return "?";
             }
         }

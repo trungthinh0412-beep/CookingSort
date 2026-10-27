@@ -267,8 +267,7 @@ private void BuildPreview()
 
 internal static List<FoodColor> GetAvailableTilePalette()
     {
-        // Image import only uses tile types that have actual artwork prefabs.
-        // Red/Cyan have no prefab yet, so do not generate those from an image.
+        // Only expose colors that have actual tile artwork available.
         var colors = new List<FoodColor>();
         foreach (FoodColor color in Enum.GetValues(typeof(FoodColor)))
         {

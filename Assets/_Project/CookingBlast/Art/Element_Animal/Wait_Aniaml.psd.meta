@@ -309,6 +309,72 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: Wait_Aniaml_8
+      rect:
+        serializedVersion: 2
+        x: 1750
+        y: 0
+        width: 175
+        height: 175
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: caf0db4932bf8e8469a71a6bd2baf93e
+      internalID: 161109740
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wait_Aniaml_9
+      rect:
+        serializedVersion: 2
+        x: 1575
+        y: 0
+        width: 175
+        height: 175
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5e0b6a21f92403f4a94925e6541e467f
+      internalID: 1062070601
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Wait_Aniaml_10
+      rect:
+        serializedVersion: 2
+        x: 1400
+        y: 0
+        width: 175
+        height: 175
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bf633cfc7d3473445969ccc27d78c90c
+      internalID: 1690225390
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []
@@ -327,12 +393,15 @@ TextureImporter:
     nameFileIdTable:
       Wait_Aniaml_0: 1218389506053861408
       Wait_Aniaml_1: 3072202770239149422
+      Wait_Aniaml_10: 1690225390
       Wait_Aniaml_2: -6483270519606096915
       Wait_Aniaml_3: 6003623903977701362
       Wait_Aniaml_4: -1215026718968505287
       Wait_Aniaml_5: 417464901538600093
       Wait_Aniaml_6: -1024570802493984600
       Wait_Aniaml_7: 8241762711887907341
+      Wait_Aniaml_8: 161109740
+      Wait_Aniaml_9: 1062070601
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
