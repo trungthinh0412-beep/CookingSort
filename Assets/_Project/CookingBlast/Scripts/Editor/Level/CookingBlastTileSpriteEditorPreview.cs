@@ -7,6 +7,24 @@ using UnityEngine;
 // Board prefab mapping. Colors without an override still use Board.prefab.
 internal static class CookingBlastTileSpriteEditorPreview
 {
+    // FoodColor values are serialized in existing levels, so their numeric
+    // order must stay unchanged. Show names that match the current Tile art.
+    internal static string GetDisplayName(FoodColor color)
+    {
+        switch (color)
+        {
+            case FoodColor.Pink: return "Green";
+            case FoodColor.Yellow: return "Orange";
+            case FoodColor.Green: return "Pink";
+            case FoodColor.Red: return "Purple";
+            case FoodColor.Purple: return "Red";
+            case FoodColor.Orange: return "Yellow";
+            case FoodColor.Gray: return "Black";
+            case FoodColor.SoftPink: return "SoftPink";
+            default: return color.ToString();
+        }
+    }
+
     private static readonly Dictionary<FoodColor, string> EditorSpriteOverrides =
         new Dictionary<FoodColor, string>
         {
@@ -33,11 +51,13 @@ internal static class CookingBlastTileSpriteEditorPreview
         new Dictionary<FoodColor, string>
         {
             { FoodColor.Blue, "Assets/_Project/CookingBlast/Prefabs/Animal/Animal 1.prefab" },
-            { FoodColor.Pink, "Assets/_Project/CookingBlast/Prefabs/Animal/Animal 4.prefab" },
-            { FoodColor.Yellow, "Assets/_Project/CookingBlast/Prefabs/Animal/Animal 6.prefab" },
-            { FoodColor.Green, "Assets/_Project/CookingBlast/Prefabs/Animal/Animal 2.prefab" },
-            { FoodColor.Purple, "Assets/_Project/CookingBlast/Prefabs/Animal/Animal 5.prefab" },
-            { FoodColor.Orange, "Assets/_Project/CookingBlast/Prefabs/Animal/Animal 3.prefab" }
+            { FoodColor.Pink, "Assets/_Project/CookingBlast/Prefabs/Animal/Animal 2.prefab" },
+            { FoodColor.Yellow, "Assets/_Project/CookingBlast/Prefabs/Animal/Animal 3.prefab" },
+            { FoodColor.Green, "Assets/_Project/CookingBlast/Prefabs/Animal/Animal 4.prefab" },
+            { FoodColor.Red, "Assets/_Project/CookingBlast/Prefabs/Animal/Animal 5.prefab" },
+            { FoodColor.Orange, "Assets/_Project/CookingBlast/Prefabs/Animal/Animal 6.prefab" },
+            { FoodColor.White, "Assets/_Project/CookingBlast/Prefabs/Animal/Animal 7.prefab" },
+            { FoodColor.Gray, "Assets/_Project/CookingBlast/Prefabs/Animal/Animal 8.prefab" }
         };
 
     private static bool animalLoaded;
@@ -107,6 +127,10 @@ internal static Sprite GetAnimalSprite(FoodColor type)
                         continue;
                     }
 
+                    // A custom Tile color without matching Animal artwork must
+                    // not silently preview a differently colored runtime slot.
+                    if (EditorSpriteOverrides.ContainsKey(color)) continue;
+
                     CustomerView animal = queue.GetAnimalPrefab(color);
                     if (animal == null || animal.gameObject.name.Contains("AnimalBase"))
                         continue;
@@ -152,12 +176,12 @@ internal static FoodColor DrawAvailableColorPopup(
         if (!supported.Contains(current))
         {
             values.Add(current);
-            names.Add(current + " (legacy - no Tile prefab)");
+            names.Add(GetDisplayName(current) + " (legacy - no Tile prefab)");
         }
         foreach (FoodColor color in supported)
         {
             values.Add(color);
-            names.Add(color.ToString());
+            names.Add(GetDisplayName(color));
         }
         int selected = Mathf.Max(0, values.IndexOf(current));
         int next = EditorGUILayout.Popup(selected, names.ToArray(), options);

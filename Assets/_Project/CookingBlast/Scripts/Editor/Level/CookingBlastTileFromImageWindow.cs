@@ -289,8 +289,11 @@ private void DrawCurrentBoardPalette()
                 {
                     FoodColor color = colors[i];
                     Rect swatch = GUILayoutUtility.GetRect(12, 14, GUILayout.Width(12));
-                    EditorGUI.DrawRect(swatch, CookingSortPalette.Get(color));
-                    GUILayout.Label(color.ToString(), EditorStyles.miniLabel, GUILayout.Width(62));
+                    if (!CookingBlastTileSpriteEditorPreview.Draw(swatch, color))
+                        EditorGUI.DrawRect(swatch, CookingSortPalette.Get(color));
+                    GUILayout.Label(
+                        CookingBlastTileSpriteEditorPreview.GetDisplayName(color),
+                        EditorStyles.miniLabel, GUILayout.Width(62));
                 }
                 GUILayout.FlexibleSpace();
             }
@@ -314,9 +317,12 @@ private void DrawEditablePalette()
                     if (!CookingBlastTileSpriteEditorPreview.Draw(swatch, color))
                         EditorGUI.DrawRect(swatch, CookingSortPalette.Get(color));
                     GUI.Label(new Rect(rect.x + 26, rect.y + 5, 65, 20),
-                        color.ToString(), EditorStyles.miniBoldLabel);
+                        CookingBlastTileSpriteEditorPreview.GetDisplayName(color),
+                        EditorStyles.miniBoldLabel);
                     if (GUI.Button(rect, new GUIContent("",
-                            "Select " + color + " for painting Tiles"), GUIStyle.none))
+                            "Select " +
+                            CookingBlastTileSpriteEditorPreview.GetDisplayName(color) +
+                            " for painting Tiles"), GUIStyle.none))
                         tileBrush = color;
                 }
                 GUILayout.FlexibleSpace();
@@ -799,7 +805,9 @@ private void DrawColorSummary()
                     Rect rect = GUILayoutUtility.GetRect(13, 13, GUILayout.Width(13));
                     if (!CookingBlastTileSpriteEditorPreview.Draw(rect, color))
                         EditorGUI.DrawRect(rect, CookingSortPalette.Get(color));
-                    GUILayout.Label(color + ": " + count);
+                    GUILayout.Label(
+                        CookingBlastTileSpriteEditorPreview.GetDisplayName(color) +
+                        ": " + count);
                 }
             }
         }
