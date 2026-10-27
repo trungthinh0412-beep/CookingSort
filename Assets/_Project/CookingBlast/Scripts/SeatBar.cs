@@ -91,15 +91,22 @@ public bool TrySeat(CustomerView customer)
                     seatFlyArcHeight,
                     seatFlyScalePunch);
                 _seatingCustomers++;
-                StartCoroutine(FinishSeatFlightRoutine());
+                StartCoroutine(FinishSeatFlightRoutine(customer));
                 return true;
             }
             return false;
         }
 
-        private IEnumerator FinishSeatFlightRoutine()
+        private IEnumerator FinishSeatFlightRoutine(CustomerView customer)
         {
             yield return new WaitForSecondsRealtime(Mathf.Max(0.01f, seatFlyDuration));
+
+            // CustomerView owns the actual seat-flight animation. Its coroutine
+            // can finish one frame after this timer depending on update order.
+            // Do not wake the Board until the animal is truly selectable.
+            while (customer != null && customer.IsSeated && !customer.IsSeatReady)
+                yield return null;
+
             _seatingCustomers = Mathf.Max(0, _seatingCustomers - 1);
             if (_seatingCustomers > 0) yield break;
 
