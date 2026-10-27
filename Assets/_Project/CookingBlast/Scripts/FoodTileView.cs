@@ -6,16 +6,37 @@ namespace CookingSort2D
 {
     public class FoodTileView : MonoBehaviour
     {
-        
+        [Header("Matching")]
+        [Tooltip("This Tile can only be eaten by an Animal with the same Match Type.")]
+        [SerializeField] private FoodColor matchType = FoodColor.Blue;
+
         [SerializeField] private bool usePrefabSprite = false;
 [SerializeField] private SpriteRenderer body;
         [SerializeField] private TextMesh symbol;
+
+        [Header("Board Footprint")]
+        [Tooltip("Number of logical Board cells occupied horizontally when placed from the Level Editor.")]
+        [SerializeField, Min(1)] private int footprintWidth = 1;
+        [Tooltip("Number of logical Board cells occupied vertically when placed from the Level Editor.")]
+        [SerializeField, Min(1)] private int footprintHeight = 1;
+        [Tooltip("How many servings this Tile contains. A normal 1 x 1 Tile uses 1.")]
+        [SerializeField, Min(1)] private int footprintValue = 1;
+        [Tooltip("Enable when this prefab uses a 1 x 1 sprite that should be stretched to its footprint. Disable when the sprite is already authored as 1 x 2, 2 x 1, 2 x 2, etc.")]
+        [SerializeField] private bool stretchVisualToFootprint = true;
 
         [Header("Fly To Animal")]
         [Tooltip("Seconds for this Tile to fly into its Animal. Increase to fly slower; decrease to fly faster.")]
         [SerializeField, Min(0.01f)] private float consumeDuration = 0.22f;
 
-        public FoodColor ColorType { get; private set; }
+        // FoodColor is kept as the serialized level ID for backwards compatibility.
+        // In gameplay this value is a match type: a Tile can only be eaten by an
+        // Animal whose Type has the same value.
+        public FoodColor Type => matchType;
+        public FoodColor ColorType => Type;
+        public int FootprintWidth => Mathf.Max(1, footprintWidth);
+        public int FootprintHeight => Mathf.Max(1, footprintHeight);
+        public int FootprintValue => Mathf.Max(1, footprintValue);
+        public bool UsesFootprint => FootprintWidth > 1 || FootprintHeight > 1 || FootprintValue > 1;
 
         public Vector2 GetVisualSize(Transform relativeTo)
         {
@@ -45,30 +66,31 @@ namespace CookingSort2D
             AutoBind();
         }
 
-        public void Setup(FoodColor color)
+public void Setup(FoodColor color)
         {
-            ColorType = color;
             AutoBind();
             if (body != null)
                 body.color = color == FoodColor.Neutral
                     ? CookingSortPalette.Get(color)
                     : usePrefabSprite ? Color.white : CookingSortPalette.Get(color);
+            // Regular 1x1 tiles are artwork-only, without letters or numbers.
+            // Footprints bigger than 1x1 explicitly enable their value label.
             if (symbol != null)
             {
-                symbol.text = CookingSortPalette.ShortName(color);
-                symbol.color = color == FoodColor.White
-                    ? new Color32(90, 98, 108, 210)
-                    : new Color32(255, 255, 255, 210);
+                symbol.text = string.Empty;
             }
         }
 
-        public void SetupCluster(FoodColor color, int value, int width, int height)
+public void SetupCluster(FoodColor color, int value, int width, int height)
         {
             Setup(color);
-            transform.localScale = new Vector3(
-                transform.localScale.x * Mathf.Max(1, width),
-                transform.localScale.y * Mathf.Max(1, height),
-                transform.localScale.z);
+            // Keep prefab instance scale at (1,1,1); only stretch its visual.
+            if (stretchVisualToFootprint)
+                StretchFootprintVisual(width, height);
+
+            // An explicitly placed 1x1 footprint must also have NO text.
+            if (width <= 1 && height <= 1)
+                return;
 
             if (symbol == null)
             {
@@ -81,13 +103,44 @@ namespace CookingSort2D
                 symbol.characterSize = 0.06f;
                 symbol.fontStyle = FontStyle.Bold;
             }
-
             symbol.transform.localPosition = new Vector3(0f, 0f, -0.05f);
-            symbol.transform.localScale = new Vector3(
-                1f / Mathf.Max(1, width),
-                1f / Mathf.Max(1, height), 1f);
+            symbol.transform.localScale = Vector3.one;
             SetClusterValue(value);
         }
+
+private void StretchFootprintVisual(int width, int height)
+        {
+            AutoBind();
+            if (body == null) return;
+            Vector3 footprintScale = new Vector3(
+                Mathf.Max(1, width), Mathf.Max(1, height), 1f);
+
+            if (body.transform == transform)
+            {
+                // The prefab has its SpriteRenderer on the root. Leave that
+                // transform untouched and render a stretched child instead.
+                SpriteRenderer source = body;
+                GameObject visualObject = new GameObject("FootprintVisual");
+                visualObject.transform.SetParent(transform, false);
+                var visual = visualObject.AddComponent<SpriteRenderer>();
+                visual.sprite = source.sprite;
+                visual.sharedMaterial = source.sharedMaterial;
+                visual.color = source.color;
+                visual.flipX = source.flipX;
+                visual.flipY = source.flipY;
+                visual.sortingLayerID = source.sortingLayerID;
+                visual.sortingOrder = source.sortingOrder;
+                visual.maskInteraction = source.maskInteraction;
+                visual.spriteSortPoint = source.spriteSortPoint;
+                visualObject.transform.localScale = footprintScale;
+                source.enabled = false;
+                body = visual;
+            }
+            else
+                body.transform.localScale =
+                    Vector3.Scale(body.transform.localScale, footprintScale);
+        }
+
 
         public void SetClusterValue(int value)
         {

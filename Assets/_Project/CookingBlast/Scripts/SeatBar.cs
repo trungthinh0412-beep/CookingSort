@@ -10,9 +10,12 @@ namespace CookingSort2D
         private CookingSortGameController _game;
         [Header("Animal on Seat")]
         [SerializeField, Min(0.01f)] private float seatedAnimalScale = 1f;
-        [SerializeField, Min(0.01f)] private float seatFlyDuration = 0.32f;
-        [SerializeField, Min(0f)] private float seatFlyArcHeight = 0.55f;
+        [Tooltip("Time spent airborne, excluding take-off and landing.")]
+        [SerializeField, Min(0.01f)] private float seatFlyDuration = 0.36f;
+        [Tooltip("Height of the throw apex above the higher of the queue and the seat.")]
+        [SerializeField, Min(0f)] private float seatFlyArcHeight = 0.7f;
         [SerializeField, Range(0f, 0.3f)] private float seatFlyScalePunch = 0.12f;
+        [SerializeField] private SeatFlightFeelSettings seatFlightFeel = new SeatFlightFeelSettings();
 
         [Header("Jelly merge animation")]
         [SerializeField, Min(0.01f)] private float mergeDuration = 0.22f;
@@ -86,17 +89,20 @@ public bool TrySeat(CustomerView customer)
                     seatedAnimalScale,
                     seatFlyDuration,
                     seatFlyArcHeight,
-                    seatFlyScalePunch);
+                    seatFlyScalePunch,
+                    seatFlightFeel);
                 _seatingCustomers++;
-                StartCoroutine(FinishSeatFlightRoutine());
+                StartCoroutine(FinishSeatFlightRoutine(customer));
                 return true;
             }
             return false;
         }
 
-        private IEnumerator FinishSeatFlightRoutine()
+        private IEnumerator FinishSeatFlightRoutine(CustomerView customer)
         {
-            yield return new WaitForSecondsRealtime(Mathf.Max(0.01f, seatFlyDuration));
+            // Wait for the actual throw AND landing to finish, even at low FPS.
+            while (customer != null && customer.isActiveAndEnabled && !customer.IsSeatReady)
+                yield return null;
             _seatingCustomers = Mathf.Max(0, _seatingCustomers - 1);
             if (_seatingCustomers > 0) yield break;
 
@@ -104,7 +110,7 @@ public bool TrySeat(CustomerView customer)
             if (_game != null) _game.OnCustomerSeatFlightFinished();
         }
 
-        public CustomerView FindCustomerForColor(FoodColor color)
+        public CustomerView FindCustomerForType(FoodColor type)
         {
             for (int i = 0; i < _slots.Count; i++)
             {
@@ -112,13 +118,13 @@ public bool TrySeat(CustomerView customer)
                 if (!slot.gameObject.activeSelf || slot.IsEmpty) continue;
                 CustomerView customer = slot.Occupant;
                 if (customer != null && customer.IsSeatReady &&
-                    customer.ColorType == color && customer.Remaining > 0)
+                    customer.Type == type && customer.Remaining > 0)
                     return customer;
             }
             return null;
         }
 
-public void GetCustomersForColor(FoodColor color, List<CustomerView> results)
+public void GetCustomersForType(FoodColor type, List<CustomerView> results)
         {
             if (results == null) return;
             results.Clear();
@@ -128,15 +134,15 @@ public void GetCustomersForColor(FoodColor color, List<CustomerView> results)
                 if (!slot.gameObject.activeSelf || slot.IsEmpty) continue;
                 CustomerView customer = slot.Occupant;
                 if (customer != null && customer.IsSeatReady &&
-                    customer.ColorType == color && customer.Remaining > 0)
+                    customer.Type == type && customer.Remaining > 0)
                     results.Add(customer);
             }
         }
 
 
-        public bool HasCustomerForColor(FoodColor color)
+        public bool HasCustomerForType(FoodColor type)
         {
-            return FindCustomerForColor(color) != null;
+            return FindCustomerForType(type) != null;
         }
 
         public void CompleteCustomer(CustomerView customer)
@@ -146,6 +152,7 @@ public void GetCustomersForColor(FoodColor color, List<CustomerView> results)
             {
                 SeatSlotView slot = _slots[i];
                 if (slot.Occupant != customer) continue;
+                customer.PrepareForExit();
                 slot.Release();
                 StartCoroutine(LeaveRoutine(customer));
                 return;
@@ -158,6 +165,7 @@ public void ClearAllImmediate()
             ClearDepartingCustomers();
             _mergingCustomers.Clear();
             _mergeInProgress = false;
+            _seatingCustomers = 0;
             for (int i = 0; i < _slots.Count; i++)
             {
                 CustomerView c = _slots[i].Release();
@@ -260,6 +268,9 @@ private IEnumerator MergeThreeRoutine(SeatSlotView keepSlot, SeatSlotView second
             int combinedDemand = Mathf.Max(0, keep.Remaining) +
                                  Mathf.Max(0, second.Remaining) +
                                  Mathf.Max(0, third.Remaining);
+            int combinedCapacity = keep.ProgressCapacity +
+                                   second.ProgressCapacity +
+                                   third.ProgressCapacity;
 
             // Keep all three seats occupied until the entire merge/drop animation ends.
             // Fast taps must not put a new customer under a moving jelly blob.
@@ -347,7 +358,7 @@ private IEnumerator MergeThreeRoutine(SeatSlotView keepSlot, SeatSlotView second
 
             second.transform.localScale = Vector3.zero;
             third.transform.localScale = Vector3.zero;
-            keep.SetRemaining(combinedDemand);
+            keep.SetMergedRemaining(combinedDemand, combinedCapacity);
             keep.transform.position = mergeCenter;
             keep.transform.localScale = keepScale;
 
@@ -397,7 +408,7 @@ private IEnumerator MergeThreeRoutine(SeatSlotView keepSlot, SeatSlotView second
 
 private void TryBeginMerge()
         {
-            if (_mergeInProgress) return;
+            if (_mergeInProgress || IsSeating) return;
 
             // Any three occupied seats of the same color can merge, regardless of position.
             for (int i = 0; i < _slots.Count; i++)
@@ -408,12 +419,12 @@ private void TryBeginMerge()
                 {
                     SeatSlotView second = _slots[j];
                     if (second == null || !second.gameObject.activeSelf || second.IsEmpty ||
-                        second.Occupant.ColorType != first.Occupant.ColorType) continue;
+                        second.Occupant.Type != first.Occupant.Type) continue;
                     for (int k = j + 1; k < _slots.Count; k++)
                     {
                         SeatSlotView third = _slots[k];
                         if (third == null || !third.gameObject.activeSelf || third.IsEmpty ||
-                            third.Occupant.ColorType != first.Occupant.ColorType) continue;
+                            third.Occupant.Type != first.Occupant.Type) continue;
 
                         _mergeInProgress = true;
                         _mergingCustomers.Add(first.Occupant);

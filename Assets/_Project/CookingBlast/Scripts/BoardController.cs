@@ -8,9 +8,10 @@ namespace CookingSort2D
     public class BoardController : MonoBehaviour
     {
         
-        [Header("Prefab for each FoodColor (matches Customer logic)")]
-        [Tooltip("Index = FoodColor enum value. Empty entries use TileBase fallback.")]
-        [SerializeField] private FoodTileView[] tilePrefabsByColor = new FoodTileView[10];
+        [Header("Tile Prefabs By Match Type")]
+        [Tooltip("Prefab list order is arbitrary. Matching uses each Tile prefab's Type; variants may share a Type.")]
+        [FormerlySerializedAs("tilePrefabsByColor")]
+        [SerializeField] private FoodTileView[] tilePrefabsByType = new FoodTileView[10];
 [SerializeField] private FoodTileView tilePrefab;
         [SerializeField] private Transform tileRoot;
         [Tooltip("Fallback size used only when a Tile has no SpriteRenderer sprite.")]
@@ -57,14 +58,15 @@ private readonly List<bool> _columnBusy = new List<bool>();
 
         public bool IsServing => _serving;
         public int ConfiguredTilePrefabCount =>
-            tilePrefabsByColor != null ? tilePrefabsByColor.Length : 0;
+            tilePrefabsByType != null ? tilePrefabsByType.Length : 0;
 
         /// <summary>Returns only the prefab explicitly stored in the list; never uses TileBase.</summary>
-        public FoodTileView GetConfiguredTilePrefab(int index)
+public FoodTileView GetConfiguredTilePrefab(int index)
         {
-            return tilePrefabsByColor != null && index >= 0 && index < tilePrefabsByColor.Length
-                ? tilePrefabsByColor[index]
-                : null;
+            // The array is a prefab list, NOT an array indexed by FoodColor.
+            // Multiple prefabs can share one match type (e.g. 1x1 and 2x1 Black).
+            return tilePrefabsByType != null && index >= 0 &&
+                index < tilePrefabsByType.Length ? tilePrefabsByType[index] : null;
         }
 
         public int RemainingTileCount
@@ -75,7 +77,7 @@ private readonly List<bool> _columnBusy = new List<bool>();
                 for (int col = 0; col < _columns.Count; col++)
                     for (int row = 0; row < _columns[col].Count; row++)
                         if (_columns[col][row] != null &&
-                            _columns[col][row].ColorType != FoodColor.Neutral)
+                            _columns[col][row].Type != FoodColor.Neutral)
                             total++;
                 for (int i = 0; i < _clusters.Count; i++) total += Mathf.Max(0, _clusters[i].Remaining);
                 return total;
@@ -94,13 +96,32 @@ private readonly List<bool> _columnBusy = new List<bool>();
 
 public FoodTileView GetTilePrefab(FoodColor color)
         {
-            int index = (int)color;
-            if (tilePrefabsByColor != null && index >= 0 &&
-                index < tilePrefabsByColor.Length && tilePrefabsByColor[index] != null)
-                return tilePrefabsByColor[index];
+            if (tilePrefabsByType != null)
+                for (int i = 0; i < tilePrefabsByType.Length; i++)
+                    if (tilePrefabsByType[i] != null && tilePrefabsByType[i].Type == color)
+                        return tilePrefabsByType[i];
             // Backwards compatibility for colors without custom sprites.
-            return tilePrefab;
+            return tilePrefab != null && tilePrefab.Type == color ? tilePrefab : null;
         }
+
+public FoodTileView GetTilePrefab(FoodColor color,
+            int footprintWidth, int footprintHeight, int footprintValue)
+        {
+            // Prefer the actual authored prefab variant for an Editor footprint.
+            // Several prefabs may share a match type but have different shapes.
+            if (tilePrefabsByType != null)
+                for (int i = 0; i < tilePrefabsByType.Length; i++)
+                {
+                    FoodTileView candidate = tilePrefabsByType[i];
+                    if (candidate != null && candidate.Type == color &&
+                        candidate.FootprintWidth == footprintWidth &&
+                        candidate.FootprintHeight == footprintHeight &&
+                        candidate.FootprintValue == footprintValue)
+                        return candidate;
+                }
+            return GetTilePrefab(color);
+        }
+
 
 
 public void Initialize(CookingSortGameController game, CookingBlastLevel data)
@@ -151,7 +172,7 @@ _columnBusy.Add(false);
                 {
                     BoardClusterData cluster = data.BoardClusters[i];
                     if (cluster == null) continue;
-                    FoodTileView prefab = GetTilePrefab(cluster.color);
+                    FoodTileView prefab = GetTilePrefab(cluster.color, cluster.width, cluster.height, cluster.value);
                     if (prefab == null) continue;
                     FoodTileView view = Instantiate(prefab, tileRoot);
                     view.SetupCluster(cluster.color, cluster.value, cluster.width, cluster.height);
@@ -190,7 +211,7 @@ _columnBusy.Add(false);
                 if (IsColumnBlockedByCluster(col)) continue;
                 if (_columns[col].Count == 0) continue;
                 FoodTileView bottom = _columns[col][0];
-                if (bottom != null && seats.HasCustomerForColor(bottom.ColorType)) return true;
+                if (bottom != null && seats.HasCustomerForType(bottom.Type)) return true;
             }
             return false;
         }
@@ -280,7 +301,7 @@ private IEnumerator ServeRoutine(SeatBar seats)
                         if (column.Count == 0) continue;
 
                         FoodTileView tile = column[0];
-                        CustomerView customer = FindFreeCustomer(seats, tile.ColorType);
+                        CustomerView customer = FindFreeCustomer(seats, tile.Type);
                         if (customer == null) continue;
 
                         // Reserve demand before the tile flies, so overlapping
@@ -322,8 +343,21 @@ private IEnumerator ServeRoutine(SeatBar seats)
             int endColumn = Mathf.Min(_columnFrontRows.Count,
                 cluster.Data.anchorColumn + cluster.Data.width);
             for (int col = Mathf.Max(0, cluster.Data.anchorColumn); col < endColumn; col++)
-                bottom = Mathf.Max(bottom,
-                    GetTilesBelow(cluster, col) - _columnFrontRows[col]);
+            {
+                int support = GetTilesBelow(cluster, col) - _columnFrontRows[col];
+                for (int i = 0; i < _clusters.Count; i++)
+                {
+                    RuntimeCluster lower = _clusters[i];
+                    if (lower == null || lower == cluster || lower.Remaining <= 0 ||
+                        lower.Data == null || lower.Data.anchorRow >= cluster.Data.anchorRow)
+                        continue;
+                    BoardClusterData lowerData = lower.Data;
+                    if (col >= lowerData.anchorColumn &&
+                        col < lowerData.anchorColumn + lowerData.width)
+                        support += Mathf.Max(1, lowerData.height);
+                }
+                bottom = Mathf.Max(bottom, support);
+            }
             return Mathf.Max(0, bottom);
         }
 
@@ -381,24 +415,19 @@ private IEnumerator ServeRoutine(SeatBar seats)
         {
             if (column < 0 || column >= _columnFrontRows.Count) return compactRow;
             int frontRow = _columnFrontRows[column];
-            RuntimeCluster nearest = null;
+            int displayRow = compactRow;
             for (int i = 0; i < _clusters.Count; i++)
             {
                 RuntimeCluster cluster = _clusters[i];
                 if (cluster == null || cluster.Remaining <= 0 || cluster.Data == null) continue;
                 BoardClusterData data = cluster.Data;
-                if (column < data.anchorColumn || column >= data.anchorColumn + data.width ||
-                    GetTilesBelow(cluster, column) < frontRow)
+                if (column < data.anchorColumn || column >= data.anchorColumn + data.width)
                     continue;
-                if (nearest == null || GetTilesBelow(cluster, column) <
-                    GetTilesBelow(nearest, column))
-                    nearest = cluster;
+                int belowCount = Mathf.Max(0, GetTilesBelow(cluster, column) - frontRow);
+                if (compactRow >= belowCount)
+                    displayRow += Mathf.Max(1, data.height);
             }
-
-            if (nearest == null) return compactRow;
-            int belowCount = Mathf.Max(0, GetTilesBelow(nearest, column) - frontRow);
-            if (compactRow < belowCount) return compactRow;
-            return GetClusterBottomRow(nearest) + nearest.Data.height + compactRow - belowCount;
+            return displayRow;
         }
 
         private void LayoutClusters()
@@ -418,7 +447,7 @@ private IEnumerator ServeRoutine(SeatBar seats)
             for (int i = 0; i < _clusters.Count; i++)
             {
                 RuntimeCluster cluster = _clusters[i];
-                if (cluster.View == null) continue;
+                if (cluster.Remaining <= 0 || cluster.View == null) continue;
                 BoardClusterData data = cluster.Data;
                 Vector2 centerOffset = cluster.View.GetVisualCenterOffset(tileRoot);
                 cluster.View.transform.localPosition = new Vector3(
@@ -511,7 +540,7 @@ private void LayoutColumn(int col, bool animate, List<Coroutine> activeFalls = n
 
 private CustomerView FindFreeCustomer(SeatBar seats, FoodColor color)
         {
-            seats.GetCustomersForColor(color, _customerBuffer);
+            seats.GetCustomersForType(color, _customerBuffer);
             for (int i = 0; i < _customerBuffer.Count; i++)
             {
                 CustomerView customer = _customerBuffer[i];
@@ -533,7 +562,7 @@ private CustomerView FindFreeCustomer(SeatBar seats, FoodColor color)
 private IEnumerator ServeSingleTile(int col, FoodTileView tile, CustomerView customer, SeatBar seats)
         {
             bool flightDone = false;
-            FoodColor servedColor = tile != null ? tile.ColorType : default;
+            FoodColor servedColor = tile != null ? tile.Type : default;
 
             // Falling and flying are independent; release the column after its fall.
             var fallingTiles = new List<Coroutine>();
@@ -666,6 +695,7 @@ private IEnumerator WaitForColumnFall(int col)
             LayoutColumn(col, true, fallingTiles);
             for (int i = 0; i < fallingTiles.Count; i++)
                 if (fallingTiles[i] != null) yield return fallingTiles[i];
+            LayoutClusters();
             if (col >= 0 && col < _columnBusy.Count)
                 _columnBusy[col] = false;
         }

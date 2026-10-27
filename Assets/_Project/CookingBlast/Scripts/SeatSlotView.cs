@@ -19,22 +19,27 @@ namespace CookingSort2D
             float seatedScale,
             float flyDuration,
             float arcHeight,
-            float scalePunch)
+            float scalePunch,
+            SeatFlightFeelSettings flightFeel = null)
         {
             Occupant = customer;
             if (customer != null)
             {
+                const int seatedSortingOrder = 230;
+                const int flightSortingBoost = 10;
                 Vector3 startScale = customer.transform.localScale;
                 customer.transform.SetParent(transform, true);
                 customer.transform.localRotation = Quaternion.identity;
-                customer.SetSortingOrder(230);
+                customer.SetSortingOrder(seatedSortingOrder + flightSortingBoost);
                 customer.SetSeated(seatedScale);
                 customer.transform.localScale = startScale;
                 customer.AnimateToSeat(
                     Vector3.zero,
                     flyDuration,
                     arcHeight,
-                    scalePunch);
+                    scalePunch,
+                    flightFeel,
+                    seatedSortingOrder);
             }
             Refresh();
         }

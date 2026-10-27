@@ -21,7 +21,7 @@ namespace CookingSort2D
 [Header("Board - each column is stored bottom to top")]
         [SerializeField] private List<BoardColumnData> boardColumns = new List<BoardColumnData>();
 
-        [Header("Board clusters - replace the covered cells with one valued piece")]
+        [Header("Board footprint Tiles - replace covered cells with one valued piece")]
         [SerializeField] private List<BoardClusterData> boardClusters = new List<BoardClusterData>();
 
         [Header("Customers - each lane is stored front to back")]
@@ -120,26 +120,29 @@ if (levelNumber < 1)
                 for (int i = 0; i < boardClusters.Count; i++)
                 {
                     BoardClusterData cluster = boardClusters[i];
-                    if (cluster == null || cluster.value != BoardClusterData.DefaultValue ||
-                        cluster.width != BoardClusterData.DefaultWidth ||
-                        cluster.height != BoardClusterData.DefaultHeight)
+                    if (cluster == null)
                     {
-                        error = $"Cluster {i + 1} must be a 2 x 2 block with value 40.";
+                        error = $"Footprint {i + 1} is missing.";
+                        return false;
+                    }
+                    if (cluster.value < 1 || cluster.width < 1 || cluster.height < 1)
+                    {
+                        error = $"Footprint {i + 1} must have Width, Height and Value >= 1.";
                         return false;
                     }
                     if (cluster.anchorRow < 0)
                     {
-                        error = $"Cluster {i + 1} starts outside the board rows.";
+                        error = $"Footprint {i + 1} starts outside the board rows.";
                         return false;
                     }
                     if (cluster.color == FoodColor.Neutral)
                     {
-                        error = $"Cluster {i + 1} cannot use Neutral because it requires Customers.";
+                        error = $"Footprint {i + 1} cannot use Neutral because it requires Customers.";
                         return false;
                     }
                     if (cluster.anchorColumn < 0 || cluster.anchorColumn + cluster.width > boardColumns.Count)
                     {
-                        error = $"Cluster {i + 1} is outside the board columns.";
+                        error = $"Footprint {i + 1} is outside the board columns.";
                         return false;
                     }
                     for (int column = cluster.anchorColumn; column < cluster.anchorColumn + cluster.width; column++)
@@ -148,14 +151,14 @@ if (levelNumber < 1)
                         if (boardColumn == null || boardColumn.bottomToTop == null ||
                             cluster.anchorRow + cluster.height > boardColumn.bottomToTop.Count)
                         {
-                            error = $"Cluster {i + 1} does not fit inside the board rows.";
+                            error = $"Footprint {i + 1} does not fit inside the board rows.";
                             return false;
                         }
                         for (int row = cluster.anchorRow;
                              row < cluster.anchorRow + cluster.height; row++)
                             if (!occupiedClusterCells.Add(new Vector2Int(column, row)))
                             {
-                                error = $"Cluster {i + 1} overlaps another cluster.";
+                                error = $"Footprint {i + 1} overlaps another footprint.";
                                 return false;
                             }
                     }

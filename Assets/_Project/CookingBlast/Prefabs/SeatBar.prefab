@@ -110,17 +110,26 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CookingSort2D.SeatBar
   seatedAnimalScale: 1.1
+  seatFlyDuration: 0.18
+  seatFlyArcHeight: 1.2
+  seatFlyScalePunch: 0.12
+  seatFlightFeel:
+    launchDuration: 0.04
+    landingDuration: 0.14
+    tiltDegrees: 18
+    landingSquash: 0.16
+    reboundHeight: 0.07
   mergeDuration: 0.22
   mergePopDuration: 0.16
-  mergeFuseDuration: 0.14
-  mergeDropDuration: 0.24
-  mergeLift: 0.25
+  mergeFuseDuration: 0.1
+  mergeDropDuration: 0.15
+  mergeLift: 0.4
   mergeReboundHeight: 0.055
-  exitFlyDuration: 0.48
+  exitFlyDuration: 0.35
   exitSpinDegrees: 450
-  exitThrowHeight: 1
+  exitThrowHeight: 1.5
   exitDropDistance: 0.28
-  exitOffscreenMargin: 0.2
+  exitOffscreenMargin: 0.3
 --- !u!1001 &1088012871170821249
 PrefabInstance:
   m_ObjectHideFlags: 0

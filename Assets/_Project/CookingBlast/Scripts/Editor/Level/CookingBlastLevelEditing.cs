@@ -59,87 +59,72 @@ internal static class CookingBlastLevelEditing
         Dirty(level);
     }
 
-    internal static bool NormalizeCluster40Sizes(CookingBlastLevel level)
-    {
-        if (level == null || level.BoardClusters == null) return false;
-        bool needsMigration = false;
-        for (int i = 0; i < level.BoardClusters.Count; i++)
-        {
-            BoardClusterData cluster = level.BoardClusters[i];
-            if (cluster != null &&
-                (cluster.value != BoardClusterData.DefaultValue ||
-                 cluster.width != BoardClusterData.DefaultWidth ||
-                 cluster.height != BoardClusterData.DefaultHeight))
-            {
-                needsMigration = true;
-                break;
-            }
-        }
-        if (!needsMigration) return false;
-
-        Undo.RecordObject(level, "Migrate Cooking Blast Cluster 40 to 2x2");
-        for (int i = 0; i < level.BoardClusters.Count; i++)
-        {
-            BoardClusterData cluster = level.BoardClusters[i];
-            if (cluster == null) continue;
-            cluster.value = BoardClusterData.DefaultValue;
-            cluster.width = BoardClusterData.DefaultWidth;
-            cluster.height = BoardClusterData.DefaultHeight;
-        }
-        Dirty(level);
-        return true;
-    }
-
-    internal static bool AddCluster40(CookingBlastLevel level, int anchorColumn,
-        int anchorRow, FoodColor color, out string message)
+internal static bool AddCluster(CookingBlastLevel level, int anchorColumn,
+        int anchorRow, FoodColor color, int width, int height, int value,
+        out string message)
     {
         message = string.Empty;
         if (level == null) return false;
+        width = Mathf.Max(1, width);
+        height = Mathf.Max(1, height);
+        value = Mathf.Max(1, value);
         if (color == FoodColor.Neutral)
         {
-            message = "Cluster 40 cannot use Neutral because Neutral has no Customer.";
+            message = "A footprint Tile cannot use Neutral because Neutral has no Customer.";
             return false;
         }
-        const int width = BoardClusterData.DefaultWidth;
-        const int height = BoardClusterData.DefaultHeight;
         if (anchorColumn < 0 || anchorColumn + width > level.BoardColumns.Count)
         {
-            message = "Cluster 40 needs two columns and does not fit here.";
+            message = $"The {width} x {height} footprint does not fit in the board columns.";
             return false;
         }
+
+        int replacedTiles = 0;
+        // Validate the entire footprint BEFORE making any change. Regular
+        // tiles can be replaced automatically; an existing footprint cannot.
         for (int column = anchorColumn; column < anchorColumn + width; column++)
         {
             BoardColumnData data = level.BoardColumns[column];
             if (data == null || data.bottomToTop == null ||
                 anchorRow < 0 || anchorRow + height > data.bottomToTop.Count)
             {
-                message = "Cluster 40 needs the clicked row and the row above it.";
+                message = $"The {width} x {height} footprint does not fit in the board rows.";
                 return false;
             }
             for (int row = anchorRow; row < anchorRow + height; row++)
+            {
                 if (level.IsClusterCell(column, row, out _))
                 {
-                    message = "Cluster 40 overlaps an existing cluster.";
+                    message = "The footprint overlaps another footprint. Remove that footprint first.";
                     return false;
                 }
+                if (data.bottomToTop[row] != FoodColor.Neutral)
+                    replacedTiles++;
+            }
         }
 
-        Undo.RecordObject(level, "Place Cooking Blast Cluster 40");
+        Undo.RecordObject(level, "Place Cooking Blast footprint Tile");
         level.BoardClusters.Add(new BoardClusterData
         {
             color = color,
-            value = BoardClusterData.DefaultValue,
+            value = value,
             anchorColumn = anchorColumn,
             anchorRow = anchorRow,
             width = width,
             height = height
         });
+
+        // These logical cells now belong to ONE footprint prefab. Gameplay
+        // skips them as individual tiles because IsClusterCell returns true.
         for (int column = anchorColumn; column < anchorColumn + width; column++)
-            for (int row = anchorRow; row < anchorRow + height; row++)
-                level.BoardColumns[column].bottomToTop[row] = color;
+        for (int row = anchorRow; row < anchorRow + height; row++)
+            level.BoardColumns[column].bottomToTop[row] = color;
+
         Dirty(level);
-        message = "Placed a 2 x 2 Cluster 40 using " +
-                  color + ".";
+        message = $"Placed {width} x {height} {color} footprint (value {value}). " +
+                  $"Automatically replaced {replacedTiles} regular Tile(s).";
+        if (replacedTiles > 0)
+            message += " Check Animal demand after replacing Tiles.";
         return true;
     }
 
@@ -152,6 +137,16 @@ internal static class CookingBlastLevelEditing
             if (cluster == null || !cluster.Contains(column, row)) continue;
             Undo.RecordObject(level, "Remove Cooking Blast Cluster");
             level.BoardClusters.RemoveAt(i);
+            for (int c = cluster.anchorColumn; c < cluster.anchorColumn + cluster.width; c++)
+            for (int r = cluster.anchorRow; r < cluster.anchorRow + cluster.height; r++)
+            {
+                if (c < 0 || c >= level.BoardColumns.Count ||
+                    level.BoardColumns[c] == null ||
+                    level.BoardColumns[c].bottomToTop == null ||
+                    r < 0 || r >= level.BoardColumns[c].bottomToTop.Count ||
+                    level.IsClusterCell(c, r, out _)) continue;
+                level.BoardColumns[c].bottomToTop[r] = FoodColor.Neutral;
+            }
             Dirty(level);
             return true;
         }
@@ -164,7 +159,9 @@ internal static class CookingBlastLevelEditing
         for (int i = level.BoardClusters.Count - 1; i >= 0; i--)
         {
             BoardClusterData cluster = level.BoardClusters[i];
-            bool valid = cluster != null && cluster.anchorRow >= 0 &&
+            bool valid = cluster != null && cluster.value >= 1 &&
+                         cluster.width >= 1 && cluster.height >= 1 &&
+                         cluster.anchorRow >= 0 &&
                          cluster.anchorColumn >= 0 &&
                          cluster.anchorColumn + cluster.width <= level.BoardColumns.Count;
             if (valid)
@@ -182,7 +179,7 @@ internal static class CookingBlastLevelEditing
     {
         if (level != null && level.BoardClusters != null && level.BoardClusters.Count > 0)
         {
-            message = "Remove Cluster 40 before Auto Fill, then place it again after filling the regular Tiles.";
+            message = "Remove footprint Tiles before Auto Fill, then place them again after filling the regular Tiles.";
             return true;
         }
         message = string.Empty;
@@ -1075,8 +1072,8 @@ private static int ColorPlacementWeight(CookingBlastLevel level, Dictionary<Food
         laneCount = Mathf.Clamp(laneCount, 1, 8);
 
         // Use the same logical totals shown by TILES / NEEDED. Covered cells
-        // do not count individually; each Cluster 40 contributes 40 units of
-        // its selected color.
+        // do not count individually; each footprint Tile contributes its configured
+        // value in the selected color.
         var counts = TileCounts(level);
 
         Undo.RecordObject(level, "Generate Cooking Blast customers");

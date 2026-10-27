@@ -40,6 +40,10 @@ PrefabInstance:
       propertyPath: m_SpriteTilingProperty.oldSize.y
       value: 1.33
       objectReference: {fileID: 0}
+    - target: {fileID: 6715858668188795811, guid: 0d5fef164a3bcaf4e9b560e3a662ab4e, type: 3}
+      propertyPath: matchType
+      value: 9
+      objectReference: {fileID: 0}
     - target: {fileID: 8120659806516356812, guid: 0d5fef164a3bcaf4e9b560e3a662ab4e, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0

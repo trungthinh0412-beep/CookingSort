@@ -299,6 +299,23 @@ private void DrawStats()
             int tileTotal = level.TotalTileCount;
             var tiles = CookingBlastLevelEditing.TileCounts(level);
             var demand = CookingBlastLevelEditing.DemandCounts(level);
+            var supported = CookingBlastTileSpriteEditorPreview.GetConfiguredColors();
+            var unsupported = new System.Collections.Generic.List<string>();
+            foreach (FoodColor type in Enum.GetValues(typeof(FoodColor)))
+            {
+                if (type == FoodColor.Neutral || supported.Contains(type)) continue;
+                int amount = tiles.TryGetValue(type, out int tileCount) ? tileCount : 0;
+                int need = demand.TryGetValue(type, out int customerCount)
+                    ? customerCount : 0;
+                if (amount > 0 || need > 0)
+                    unsupported.Add(type + " (" + amount + " Tile / " + need + " demand)");
+            }
+            if (unsupported.Count > 0)
+                EditorGUILayout.HelpBox(
+                    "Level contains Match Types without a complete Tile + Animal prefab pair: " +
+                    string.Join(", ", unsupported.ToArray()) +
+                    ". Existing level data is preserved; these entries must be replaced " +
+                    "before the level can spawn reliably.", MessageType.Warning);
             int demandTotal = 0;
             foreach (int count in demand.Values) demandTotal += count;
 
@@ -742,37 +759,40 @@ private void DrawCustomerGrid(float available)
 
 private void DrawCustomerPalette()
     {
-        EditorGUILayout.LabelField("ANIMAL LIST", EditorStyles.miniBoldLabel);
+        var animals = CookingBlastTileSpriteEditorPreview.GetConfiguredAnimalPrefabs();
+        EditorGUILayout.LabelField("ANIMAL PREFABS (" + animals.Count + ")",
+            EditorStyles.miniBoldLabel);
         var demandCounts = CookingBlastLevelEditing.DemandCounts(level);
         var tileCounts = CookingBlastLevelEditing.TileCounts(level);
+        var playable = CookingBlastTileSpriteEditorPreview.GetConfiguredColors();
 
-        foreach (FoodColor color in CookingBlastTileFromImageWindow.GetAvailableTilePalette())
+        foreach (CustomerView animal in animals)
         {
-            if (color == FoodColor.Neutral) continue;
-            int demand = demandCounts.TryGetValue(color, out int d) ? d : 0;
-            int tiles = tileCounts.TryGetValue(color, out int t) ? t : 0;
+            FoodColor type = animal.Type;
+            int demand = demandCounts.TryGetValue(type, out int d) ? d : 0;
+            int tiles = tileCounts.TryGetValue(type, out int t) ? t : 0;
+            Rect row = GUILayoutUtility.GetRect(166, 39);
+            EditorGUI.DrawRect(row,
+                !deleteCustomerTool && type == paintColor ?
+                    new Color(.24f, .36f, .48f) : new Color(.16f, .18f, .22f));
 
-            Rect rect = GUILayoutUtility.GetRect(166, 29);
-            EditorGUI.DrawRect(rect,
-                !deleteCustomerTool && color == paintColor
-                    ? new Color(.24f, .36f, .48f)
-                    : new Color(.16f, .18f, .22f));
-            Rect animalIcon = new Rect(rect.x + 5, rect.y + 5, 19, 19);
-            if (!CookingBlastTileSpriteEditorPreview.DrawAnimal(animalIcon, color))
-                EditorGUI.DrawRect(animalIcon, CookingSortPalette.Get(color));
-            GUI.Label(new Rect(rect.x + 30, rect.y + 4, 94, 22),
-                (!deleteCustomerTool && color == paintColor ? "• " : "") +
-                color.ToString());
-            GUI.Label(new Rect(rect.xMax - 38, rect.y + 4, 35, 22),
-                demand.ToString(), EditorStyles.boldLabel);
+            Rect iconRect = new Rect(row.x + 3, row.y + 3, 31, 31);
+            if (!CookingBlastTileSpriteEditorPreview.DrawAnimal(iconRect, type))
+                EditorGUI.DrawRect(iconRect, CookingSortPalette.Get(type));
+            GUI.Label(new Rect(row.x + 38, row.y + 3, 122, 17),
+                animal.name, EditorStyles.miniBoldLabel);
+            string suffix = playable.Contains(type) ? "" : " (no Tile)";
+            GUI.Label(new Rect(row.x + 38, row.y + 19, 123, 17),
+                type + " " + demand + "/" + tiles + suffix, EditorStyles.miniLabel);
 
-            if (GUI.Button(rect, new GUIContent("",
-                color + ": " +
-                demand + " customer demand / " + tiles + " board tiles"),
-                GUIStyle.none))
+            if (GUI.Button(row, new GUIContent("",
+                animal.name + " [" + type + "] - Demand " + demand +
+                ", Tiles " + tiles), GUIStyle.none))
             {
+                if (!playable.Contains(type))
+                    continue; // Show unmatched prefab, but never author broken orders.
                 EndCustomerStroke();
-                paintColor = color;
+                paintColor = type;
                 deleteCustomerTool = false;
                 customerPriorityPicking = false;
             }
@@ -780,38 +800,26 @@ private void DrawCustomerPalette()
 
         GUILayout.Space(6);
         Rect deleteRect = GUILayoutUtility.GetRect(166, 30);
-        EditorGUI.DrawRect(deleteRect, deleteCustomerTool
-            ? new Color(.50f, .22f, .23f)
-            : new Color(.23f, .17f, .19f));
+        EditorGUI.DrawRect(deleteRect, deleteCustomerTool ?
+            new Color(.50f, .22f, .23f) : new Color(.23f, .17f, .19f));
         EditorGUI.DrawRect(new Rect(deleteRect.x + 5, deleteRect.y + 5, 19, 19),
             new Color(.88f, .27f, .30f));
-        var iconStyle = new GUIStyle(EditorStyles.miniBoldLabel)
-        {
-            alignment = TextAnchor.MiddleCenter
-        };
-        iconStyle.normal.textColor = Color.white;
-        GUI.Label(new Rect(deleteRect.x + 5, deleteRect.y + 5, 19, 19), "X", iconStyle);
+        var style = new GUIStyle(EditorStyles.miniBoldLabel);
+        style.alignment = TextAnchor.MiddleCenter;
+        style.normal.textColor = Color.white;
+        GUI.Label(new Rect(deleteRect.x + 5, deleteRect.y + 5, 19, 19), "X", style);
         GUI.Label(new Rect(deleteRect.x + 30, deleteRect.y + 4, 131, 23),
             (deleteCustomerTool ? "• " : "") + "Delete Customer",
             EditorStyles.miniBoldLabel);
-
         if (GUI.Button(deleteRect, new GUIContent("",
-            "Select the Delete Customer tool, then click a Customer in the grid. Ctrl+Z to undo."),
-            GUIStyle.none))
+            "Select Delete Customer and click an Animal in the grid."), GUIStyle.none))
         {
             EndCustomerStroke();
             deleteCustomerTool = true;
             customerPriorityPicking = false;
         }
-
         GUILayout.Space(5);
-        EditorGUILayout.LabelField(deleteCustomerTool
-            ? "Tool: Delete Customer"
-            : "Brush: " + paintColor,
-            EditorStyles.boldLabel);
-        EditorGUILayout.HelpBox(deleteCustomerTool
-            ? "Click any Customer cell to remove that Customer. Click a color above to return to painting. Ctrl+Z to undo."
-            : "Numbers show total demand for each color. Choose Delete Customer below the palette to remove one from the grid.",
-            MessageType.None);
+        EditorGUILayout.LabelField(deleteCustomerTool ?
+            "Tool: Delete Customer" : "Animal: " + paintColor, EditorStyles.boldLabel);
     }
 }

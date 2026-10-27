@@ -136,7 +136,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 606c5eb35598d1d48aa6e8a3c53334e3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CookingSort2D.BoardController
-  tilePrefabsByColor:
+  tilePrefabsByType:
   - {fileID: 16311396740857959, guid: 41f6f8f3de4ea9644808f4fefd69d666, type: 3}
   - {fileID: 16311396740857959, guid: db8d5d9eb43ae4a4ca43264831d45cb2, type: 3}
   - {fileID: 16311396740857959, guid: 286bd73d2794a854582468f319cdd0a3, type: 3}
@@ -145,6 +145,8 @@ MonoBehaviour:
   - {fileID: 16311396740857959, guid: 5584d080553292f419fd7f1e46a11faa, type: 3}
   - {fileID: 16311396740857959, guid: 8c02037925ca6e44283ce8107ab85af5, type: 3}
   - {fileID: 16311396740857959, guid: c48c0d82532fbd747aad63856fe68f82, type: 3}
+  - {fileID: 16311396740857959, guid: 5b68861e87f89a8429ed1f60ba0b8cfa, type: 3}
+  - {fileID: 16311396740857959, guid: 8ddaa05bda8247b4f8e4a034adcd4694, type: 3}
   tilePrefab: {fileID: 112428899413308147, guid: ea3e74737b6150a4ea6035a00534c5d8, type: 3}
   tileRoot: {fileID: 7174922274440986648}
   cellSize: 0.8

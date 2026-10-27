@@ -1,14 +1,16 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace CookingSort2D
 {
     public class CustomerQueue : MonoBehaviour
     {
         
-        [Header("Animal prefabs matched to Tile FoodColor")]
-        [Tooltip("Index = FoodColor enum value; missing entries fall back to AnimalBase.")]
-        [SerializeField] private CustomerView[] animalPrefabsByColor = new CustomerView[10];
+        [Header("Animal Prefabs By Match Type")]
+        [Tooltip("Prefab list order is arbitrary. Animal Type must match a Tile Type, not its list index.")]
+        [FormerlySerializedAs("animalPrefabsByColor")]
+        [SerializeField] private CustomerView[] animalPrefabsByType = new CustomerView[10];
 [SerializeField] private CustomerView customerPrefab;
         
         [SerializeField] private Transform slotsRoot;
@@ -46,23 +48,22 @@ private void Awake()
 
 public CustomerView GetAnimalPrefab(FoodColor type)
         {
-            int index = (int)type;
-            if (animalPrefabsByColor != null && index >= 0 &&
-                index < animalPrefabsByColor.Length &&
-                animalPrefabsByColor[index] != null)
-                return animalPrefabsByColor[index];
-            return customerPrefab;
+            if (animalPrefabsByType != null)
+                for (int i = 0; i < animalPrefabsByType.Length; i++)
+                    if (animalPrefabsByType[i] != null && animalPrefabsByType[i].Type == type)
+                        return animalPrefabsByType[i];
+            return customerPrefab != null && customerPrefab.Type == type ? customerPrefab : null;
         }
 
         public int ConfiguredAnimalPrefabCount =>
-            animalPrefabsByColor != null ? animalPrefabsByColor.Length : 0;
+            animalPrefabsByType != null ? animalPrefabsByType.Length : 0;
 
         /// <summary>Returns only the Animal explicitly stored in the list; never uses AnimalBase.</summary>
-        public CustomerView GetConfiguredAnimalPrefab(int index)
+public CustomerView GetConfiguredAnimalPrefab(int index)
         {
-            return animalPrefabsByColor != null && index >= 0 && index < animalPrefabsByColor.Length
-                ? animalPrefabsByColor[index]
-                : null;
+            // Return the actual list entry. Prefab order need not follow enum IDs.
+            return animalPrefabsByType != null && index >= 0 &&
+                index < animalPrefabsByType.Length ? animalPrefabsByType[index] : null;
         }
 
 

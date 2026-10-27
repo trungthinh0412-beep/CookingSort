@@ -17,7 +17,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &5321759113455905926
 RectTransform:
   m_ObjectHideFlags: 0
@@ -230,6 +230,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 399504adea847ec419f3e2cf24233c86, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CookingSort2D.CustomerView
+  matchType: 0
   body: {fileID: 935351445869505619}
   count: {fileID: 2282990251111241162}
   countBadge: {fileID: 4759627572592004962}
