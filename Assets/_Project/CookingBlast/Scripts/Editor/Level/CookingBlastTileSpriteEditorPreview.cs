@@ -21,7 +21,17 @@ internal static class CookingBlastTileSpriteEditorPreview
     private static readonly Dictionary<FoodColor, Sprite> Cache =
         new Dictionary<FoodColor, Sprite>();
 
-    
+    private static readonly Dictionary<FoodColor, string> EditorAnimalPrefabOverrides =
+        new Dictionary<FoodColor, string>
+        {
+            { FoodColor.Blue, "Assets/_Project/CookingBlast/Prefabs/Animal/Animal 1.prefab" },
+            { FoodColor.Pink, "Assets/_Project/CookingBlast/Prefabs/Animal/Animal 4.prefab" },
+            { FoodColor.Yellow, "Assets/_Project/CookingBlast/Prefabs/Animal/Animal 6.prefab" },
+            { FoodColor.Green, "Assets/_Project/CookingBlast/Prefabs/Animal/Animal 2.prefab" },
+            { FoodColor.Purple, "Assets/_Project/CookingBlast/Prefabs/Animal/Animal 5.prefab" },
+            { FoodColor.Orange, "Assets/_Project/CookingBlast/Prefabs/Animal/Animal 3.prefab" }
+        };
+
     private static bool animalLoaded;
     private static readonly Dictionary<FoodColor, Sprite> AnimalCache =
         new Dictionary<FoodColor, Sprite>();
@@ -74,6 +84,18 @@ internal static Sprite GetAnimalSprite(FoodColor type)
             {
                 foreach (FoodColor color in System.Enum.GetValues(typeof(FoodColor)))
                 {
+                    if (EditorAnimalPrefabOverrides.TryGetValue(color, out string prefabPath))
+                    {
+                        GameObject animalAsset =
+                            AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+                        SpriteRenderer editorRenderer = animalAsset != null
+                            ? animalAsset.GetComponentInChildren<SpriteRenderer>(true)
+                            : null;
+                        if (editorRenderer != null && editorRenderer.sprite != null)
+                            AnimalCache[color] = editorRenderer.sprite;
+                        continue;
+                    }
+
                     CustomerView animal = queue.GetAnimalPrefab(color);
                     if (animal == null || animal.gameObject.name.Contains("AnimalBase"))
                         continue;

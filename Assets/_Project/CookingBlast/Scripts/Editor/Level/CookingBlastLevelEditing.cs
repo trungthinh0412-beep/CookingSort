@@ -208,6 +208,34 @@ internal static class CookingBlastLevelEditing
         Dirty(level);
     }
 
+    internal static int MakeAllTilesNeutral(CookingBlastLevel level, out int removedClusters)
+    {
+        removedClusters = 0;
+        if (level == null || level.BoardColumns == null) return 0;
+
+        int changedTiles = 0;
+        foreach (BoardColumnData column in level.BoardColumns)
+        {
+            if (column == null || column.bottomToTop == null) continue;
+            foreach (FoodColor color in column.bottomToTop)
+                if (color != FoodColor.Neutral) changedTiles++;
+        }
+
+        removedClusters = level.BoardClusters != null ? level.BoardClusters.Count : 0;
+        if (changedTiles == 0 && removedClusters == 0) return 0;
+
+        Undo.RecordObject(level, "Make all Cooking Blast tiles Neutral");
+        foreach (BoardColumnData column in level.BoardColumns)
+        {
+            if (column == null || column.bottomToTop == null) continue;
+            for (int row = 0; row < column.bottomToTop.Count; row++)
+                column.bottomToTop[row] = FoodColor.Neutral;
+        }
+        level.BoardClusters?.Clear();
+        Dirty(level);
+        return changedTiles;
+    }
+
 internal static int FloodFillBoard(CookingBlastLevel level, int startColumn, int startRow, FoodColor newColor)
     {
         if (level == null || level.BoardColumns == null) return 0;

@@ -92,6 +92,21 @@ internal void Draw(CookingBlastLevel level, ref FoodColor brush, ref int columns
                 EditorGUIUtility.labelWidth = oldWidth;
                 if (GUILayout.Button("Resize", GUILayout.Width(75)))
                     CookingBlastLevelEditing.ResizeBoard(level, columns, rows, brush);
+                if (GUILayout.Button(new GUIContent("Make All Tiles Neutral",
+                        "Keep the board dimensions, turn every Tile into Neutral, and remove all Cluster 40 entries. Customers are unchanged."),
+                    GUILayout.Width(170)))
+                {
+                    EndStroke();
+                    int changedTiles = CookingBlastLevelEditing.MakeAllTilesNeutral(
+                        level, out int removedClusters);
+                    brush = FoodColor.Neutral;
+                    fillStatus = changedTiles > 0 || removedClusters > 0
+                        ? "Changed " + changedTiles + " Tile(s) to Neutral and removed " +
+                          removedClusters + " Cluster(s). Customers were unchanged. Ctrl+Z to undo."
+                        : "All Tiles are already Neutral and there are no Clusters.";
+                    fillStatusType = MessageType.Info;
+                    GUIUtility.ExitGUI();
+                }
             }
 
             GUILayout.Space(6);
