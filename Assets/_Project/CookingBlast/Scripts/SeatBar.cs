@@ -29,13 +29,11 @@ namespace CookingSort2D
         [SerializeField, Min(0f)] private float exitOffscreenMargin = 0.2f;
         private readonly HashSet<CustomerView> _mergingCustomers = new HashSet<CustomerView>();
         private readonly HashSet<CustomerView> _departingCustomers = new HashSet<CustomerView>();
-        private int _departingClusterEffects;
         private bool _mergeInProgress;
         private int _seatingCustomers;
         public bool IsMerging => _mergeInProgress;
         public bool IsSeating => _seatingCustomers > 0;
-        public bool HasDepartingCustomers =>
-            _departingCustomers.Count > 0 || _departingClusterEffects > 0;
+        public bool HasDepartingCustomers => _departingCustomers.Count > 0;
 
         public bool IsFull
         {
@@ -70,7 +68,6 @@ public void Initialize(CookingSortGameController game, int seatCount)
             _mergingCustomers.Clear();
             _mergeInProgress = false;
             _seatingCustomers = 0;
-            _departingClusterEffects = 0;
             _game = game;
             CacheSlots();
             for (int i = 0; i < _slots.Count; i++)
@@ -91,22 +88,15 @@ public bool TrySeat(CustomerView customer)
                     seatFlyArcHeight,
                     seatFlyScalePunch);
                 _seatingCustomers++;
-                StartCoroutine(FinishSeatFlightRoutine(customer));
+                StartCoroutine(FinishSeatFlightRoutine());
                 return true;
             }
             return false;
         }
 
-        private IEnumerator FinishSeatFlightRoutine(CustomerView customer)
+        private IEnumerator FinishSeatFlightRoutine()
         {
             yield return new WaitForSecondsRealtime(Mathf.Max(0.01f, seatFlyDuration));
-
-            // CustomerView owns the actual seat-flight animation. Its coroutine
-            // can finish one frame after this timer depending on update order.
-            // Do not wake the Board until the animal is truly selectable.
-            while (customer != null && customer.IsSeated && !customer.IsSeatReady)
-                yield return null;
-
             _seatingCustomers = Mathf.Max(0, _seatingCustomers - 1);
             if (_seatingCustomers > 0) yield break;
 
@@ -168,7 +158,6 @@ public void ClearAllImmediate()
             ClearDepartingCustomers();
             _mergingCustomers.Clear();
             _mergeInProgress = false;
-            _departingClusterEffects = 0;
             for (int i = 0; i < _slots.Count; i++)
             {
                 CustomerView c = _slots[i].Release();
@@ -196,37 +185,6 @@ private IEnumerator LeaveRoutine(CustomerView customer)
             customer.SetSortingOrder(270);
 
             Transform sprite = customer.transform;
-            yield return ThrowOutsideRoutine(sprite);
-
-            _departingCustomers.Remove(customer);
-            if (customer != null) Destroy(customer.gameObject);
-            if (_game != null) _game.OnCustomerLeftSeat();
-        }
-
-        public void ThrowClusterOutside(FoodTileView clusterView)
-        {
-            if (clusterView == null) return;
-            clusterView.transform.SetParent(transform, true);
-            // Keep the departing Cluster below seated/departing Animals.
-            clusterView.SetSortingOrder(228);
-            _departingClusterEffects++;
-            StartCoroutine(ThrowClusterOutsideRoutine(clusterView));
-        }
-
-        private IEnumerator ThrowClusterOutsideRoutine(FoodTileView clusterView)
-        {
-            if (clusterView != null)
-            {
-                yield return ThrowOutsideRoutine(clusterView.transform);
-                if (clusterView != null) Destroy(clusterView.gameObject);
-            }
-            _departingClusterEffects = Mathf.Max(0, _departingClusterEffects - 1);
-            if (_game != null) _game.OnBoardEffectFinished();
-        }
-
-        private IEnumerator ThrowOutsideRoutine(Transform sprite)
-        {
-            if (sprite == null) yield break;
             Vector3 start = sprite.position;
             Quaternion startRotation = sprite.rotation;
 
@@ -235,8 +193,7 @@ private IEnumerator LeaveRoutine(CustomerView customer)
             Camera gameCamera = Camera.main;
             if (gameCamera != null)
             {
-                float depth = Vector3.Dot(start - gameCamera.transform.position,
-                    gameCamera.transform.forward);
+                float depth = Vector3.Dot(start - gameCamera.transform.position, gameCamera.transform.forward);
                 Vector3 outsideLeft = gameCamera.ViewportToWorldPoint(
                     new Vector3(-Mathf.Max(0f, exitOffscreenMargin), 0.5f, depth));
                 targetX = Mathf.Min(start.x - 2f, outsideLeft.x);
@@ -244,12 +201,13 @@ private IEnumerator LeaveRoutine(CustomerView customer)
 
             float elapsed = 0f;
             float duration = Mathf.Max(0.01f, exitFlyDuration);
-            while (elapsed < duration && sprite != null)
+            while (elapsed < duration && customer != null)
             {
                 elapsed += Time.unscaledDeltaTime;
                 float t = Mathf.Clamp01(elapsed / duration);
 
-                // Shared thrown-object arc for completed Animals and Clusters.
+                // A thrown-object arc: steady horizontal motion, a modest lift,
+                // then a gravity-like drop. No takeoff squash or shrinking.
                 float arc = 4f * t * (1f - t) * Mathf.Max(0f, exitThrowHeight);
                 float fall = t * t * Mathf.Max(0f, exitDropDistance);
                 sprite.position = new Vector3(
@@ -260,6 +218,10 @@ private IEnumerator LeaveRoutine(CustomerView customer)
                     Quaternion.Euler(0f, 0f, Mathf.Max(0f, exitSpinDegrees) * t);
                 yield return null;
             }
+
+            _departingCustomers.Remove(customer);
+            if (customer != null) Destroy(customer.gameObject);
+            if (_game != null) _game.OnCustomerLeftSeat();
         }
     
 

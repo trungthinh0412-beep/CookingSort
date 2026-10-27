@@ -10,14 +10,12 @@ internal static class CookingBlastTileSpriteEditorPreview
     private static readonly Dictionary<FoodColor, string> EditorSpriteOverrides =
         new Dictionary<FoodColor, string>
         {
-            { FoodColor.Blue, "Assets/_Project/CookingBlast/Art/Element_block_1x1/Blue_.png" },
-            { FoodColor.Pink, "Assets/_Project/CookingBlast/Art/Element_block_1x1/Pink.png" },
-            { FoodColor.Yellow, "Assets/_Project/CookingBlast/Art/Element_block_1x1/Yellow_.png" },
-            { FoodColor.Green, "Assets/_Project/CookingBlast/Art/Element_block_1x1/Green_.png" },
-            { FoodColor.Red, "Assets/_Project/CookingBlast/Art/Element_block_1x1/Red_.png" },
-            { FoodColor.Purple, "Assets/_Project/CookingBlast/Art/Element_block_1x1/Purple_.png" },
-            { FoodColor.Cyan, "Assets/_Project/CookingBlast/Art/Element_block_1x1/Cyan.png" },
-            { FoodColor.Orange, "Assets/_Project/CookingBlast/Art/Element_block_1x1/Orange_.png" }
+            { FoodColor.Blue, "Assets/_Project/CookingBlast/Art/Element_block/Blue.png" },
+            { FoodColor.Pink, "Assets/_Project/CookingBlast/Art/Element_block/Pink.png" },
+            { FoodColor.Yellow, "Assets/_Project/CookingBlast/Art/Element_block/Yellow.png" },
+            { FoodColor.Green, "Assets/_Project/CookingBlast/Art/Element_block/Green.png" },
+            { FoodColor.Purple, "Assets/_Project/CookingBlast/Art/Element_block/Purple.png" },
+            { FoodColor.Orange, "Assets/_Project/CookingBlast/Art/Element_block/Orange.png" }
         };
 
     private static readonly Dictionary<FoodColor, Sprite> Cache =
@@ -55,11 +53,8 @@ private static bool loaded;
                     if (EditorSpriteOverrides.TryGetValue(color, out string spritePath))
                     {
                         Sprite editorSprite = AssetDatabase.LoadAssetAtPath<Sprite>(spritePath);
-                        if (editorSprite != null)
-                        {
-                            Cache[color] = editorSprite;
-                            continue;
-                        }
+                        if (editorSprite != null) Cache[color] = editorSprite;
+                        continue;
                     }
 
                     FoodTileView tile = board.GetTilePrefab(color);
@@ -97,10 +92,8 @@ internal static Sprite GetAnimalSprite(FoodColor type)
                             ? animalAsset.GetComponentInChildren<SpriteRenderer>(true)
                             : null;
                         if (editorRenderer != null && editorRenderer.sprite != null)
-                        {
                             AnimalCache[color] = editorRenderer.sprite;
-                            continue;
-                        }
+                        continue;
                     }
 
                     CustomerView animal = queue.GetAnimalPrefab(color);

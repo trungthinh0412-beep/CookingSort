@@ -193,7 +193,7 @@ internal static void EnsureAllLevelStructures()
         CookingBlastLevel level = root.GetComponent<CookingBlastLevel>();
         if (level == null) level = root.AddComponent<CookingBlastLevel>();
 
-        BoardController board = EnsureBoard(root.transform);
+        BoardController board = EnsureNested<BoardController>(root.transform, "Board", BoardPrefabPath, new Vector3(0f, 1.35f, 0f));
         SeatBar seatBar = EnsureNested<SeatBar>(root.transform, "SeatBar", SeatBarPrefabPath, new Vector3(0f, -2.25f, 0f));
         CustomerQueue queue = EnsureNested<CustomerQueue>(root.transform, "CustomerQueue", CustomerQueuePrefabPath, new Vector3(0f, -4.35f, 0f));
 
@@ -203,29 +203,6 @@ internal static void EnsureAllLevelStructures()
         so.FindProperty("customerQueue").objectReferenceValue = queue;
         so.ApplyModifiedPropertiesWithoutUndo();
         EditorUtility.SetDirty(level);
-    }
-
-    private static BoardController EnsureBoard(Transform root)
-    {
-        Transform authoredTransform = root.Find("BG/Top/Board");
-        BoardController authoredBoard = authoredTransform != null
-            ? authoredTransform.GetComponent<BoardController>()
-            : null;
-
-        BoardController board = authoredBoard != null
-            ? authoredBoard
-            : EnsureNested<BoardController>(root, "Board", BoardPrefabPath,
-                new Vector3(0f, 1.35f, 0f));
-
-        // Older setup runs created a second Board directly under the level
-        // because they only searched root/Board. The authored, screen-scaled
-        // Board under BG/Top is the one gameplay should initialize.
-        Transform redundantRootBoard = root.Find("Board");
-        if (authoredBoard != null && redundantRootBoard != null &&
-            redundantRootBoard != authoredBoard.transform)
-            UnityEngine.Object.DestroyImmediate(redundantRootBoard.gameObject);
-
-        return board;
     }
 
     private static T EnsureNested<T>(Transform root, string childName, string prefabPath, Vector3 localPosition) where T : Component

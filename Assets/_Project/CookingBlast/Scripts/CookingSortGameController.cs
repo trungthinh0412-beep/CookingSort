@@ -113,11 +113,6 @@ public void SetLevelDefinition(CookingBlastLevel level)
             EvaluateState();
         }
 
-        public void OnBoardEffectFinished()
-        {
-            EvaluateState();
-        }
-
 public void OnSeatMergeFinished()
         {
             if (_gameEnded) return;
