@@ -3,14 +3,35 @@ using CookingSort2D;
 using UnityEditor;
 using UnityEngine;
 
-// Sprite previews use the SAME Tile prefabs configured on Board.prefab.
-// Red/Cyan without custom prefab continue using the legacy color swatch.
+// The level editor can override preview artwork without changing gameplay's
+// Board prefab mapping. Colors without an override still use Board.prefab.
 internal static class CookingBlastTileSpriteEditorPreview
 {
+    private static readonly Dictionary<FoodColor, string> EditorSpriteOverrides =
+        new Dictionary<FoodColor, string>
+        {
+            { FoodColor.Blue, "Assets/_Project/CookingBlast/Art/Element_block/Blue.png" },
+            { FoodColor.Pink, "Assets/_Project/CookingBlast/Art/Element_block/Pink.png" },
+            { FoodColor.Yellow, "Assets/_Project/CookingBlast/Art/Element_block/Yellow.png" },
+            { FoodColor.Green, "Assets/_Project/CookingBlast/Art/Element_block/Green.png" },
+            { FoodColor.Purple, "Assets/_Project/CookingBlast/Art/Element_block/Purple.png" },
+            { FoodColor.Orange, "Assets/_Project/CookingBlast/Art/Element_block/Orange.png" }
+        };
+
     private static readonly Dictionary<FoodColor, Sprite> Cache =
         new Dictionary<FoodColor, Sprite>();
 
-    
+    private static readonly Dictionary<FoodColor, string> EditorAnimalPrefabOverrides =
+        new Dictionary<FoodColor, string>
+        {
+            { FoodColor.Blue, "Assets/_Project/CookingBlast/Prefabs/Animal/Animal 1.prefab" },
+            { FoodColor.Pink, "Assets/_Project/CookingBlast/Prefabs/Animal/Animal 4.prefab" },
+            { FoodColor.Yellow, "Assets/_Project/CookingBlast/Prefabs/Animal/Animal 6.prefab" },
+            { FoodColor.Green, "Assets/_Project/CookingBlast/Prefabs/Animal/Animal 2.prefab" },
+            { FoodColor.Purple, "Assets/_Project/CookingBlast/Prefabs/Animal/Animal 5.prefab" },
+            { FoodColor.Orange, "Assets/_Project/CookingBlast/Prefabs/Animal/Animal 3.prefab" }
+        };
+
     private static bool animalLoaded;
     private static readonly Dictionary<FoodColor, Sprite> AnimalCache =
         new Dictionary<FoodColor, Sprite>();
@@ -29,6 +50,13 @@ private static bool loaded;
             {
                 foreach (FoodColor color in System.Enum.GetValues(typeof(FoodColor)))
                 {
+                    if (EditorSpriteOverrides.TryGetValue(color, out string spritePath))
+                    {
+                        Sprite editorSprite = AssetDatabase.LoadAssetAtPath<Sprite>(spritePath);
+                        if (editorSprite != null) Cache[color] = editorSprite;
+                        continue;
+                    }
+
                     FoodTileView tile = board.GetTilePrefab(color);
                     if (tile == null || tile.gameObject.name.Contains("TileBase"))
                         continue;
@@ -56,6 +84,18 @@ internal static Sprite GetAnimalSprite(FoodColor type)
             {
                 foreach (FoodColor color in System.Enum.GetValues(typeof(FoodColor)))
                 {
+                    if (EditorAnimalPrefabOverrides.TryGetValue(color, out string prefabPath))
+                    {
+                        GameObject animalAsset =
+                            AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+                        SpriteRenderer editorRenderer = animalAsset != null
+                            ? animalAsset.GetComponentInChildren<SpriteRenderer>(true)
+                            : null;
+                        if (editorRenderer != null && editorRenderer.sprite != null)
+                            AnimalCache[color] = editorRenderer.sprite;
+                        continue;
+                    }
+
                     CustomerView animal = queue.GetAnimalPrefab(color);
                     if (animal == null || animal.gameObject.name.Contains("AnimalBase"))
                         continue;

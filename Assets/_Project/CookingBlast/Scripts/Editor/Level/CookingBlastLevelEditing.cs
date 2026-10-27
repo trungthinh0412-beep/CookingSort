@@ -208,6 +208,34 @@ internal static class CookingBlastLevelEditing
         Dirty(level);
     }
 
+    internal static int MakeAllTilesNeutral(CookingBlastLevel level, out int removedClusters)
+    {
+        removedClusters = 0;
+        if (level == null || level.BoardColumns == null) return 0;
+
+        int changedTiles = 0;
+        foreach (BoardColumnData column in level.BoardColumns)
+        {
+            if (column == null || column.bottomToTop == null) continue;
+            foreach (FoodColor color in column.bottomToTop)
+                if (color != FoodColor.Neutral) changedTiles++;
+        }
+
+        removedClusters = level.BoardClusters != null ? level.BoardClusters.Count : 0;
+        if (changedTiles == 0 && removedClusters == 0) return 0;
+
+        Undo.RecordObject(level, "Make all Cooking Blast tiles Neutral");
+        foreach (BoardColumnData column in level.BoardColumns)
+        {
+            if (column == null || column.bottomToTop == null) continue;
+            for (int row = 0; row < column.bottomToTop.Count; row++)
+                column.bottomToTop[row] = FoodColor.Neutral;
+        }
+        level.BoardClusters?.Clear();
+        Dirty(level);
+        return changedTiles;
+    }
+
 internal static int FloodFillBoard(CookingBlastLevel level, int startColumn, int startRow, FoodColor newColor)
     {
         if (level == null || level.BoardColumns == null) return 0;
@@ -1075,6 +1103,74 @@ private static int ColorPlacementWeight(CookingBlastLevel level, Dictionary<Food
         }
         so.ApplyModifiedProperties();
         Dirty(level);
+    }
+
+    internal static bool ShuffleCustomerPositions(CookingBlastLevel level)
+    {
+        if (level == null || level.CustomerLanes == null) return false;
+
+        var customers = new List<CustomerOrderData>();
+        foreach (CustomerLaneData lane in level.CustomerLanes)
+        {
+            if (lane == null || lane.frontToBack == null) continue;
+            customers.AddRange(lane.frontToBack);
+        }
+
+        if (customers.Count < 2) return false;
+
+        var originalColors = new List<FoodColor?>();
+        foreach (CustomerOrderData customer in customers)
+            originalColors.Add(customer != null ? customer.color : (FoodColor?)null);
+
+        var random = new System.Random(Guid.NewGuid().GetHashCode());
+        for (int i = customers.Count - 1; i > 0; i--)
+        {
+            int swapIndex = random.Next(i + 1);
+            CustomerOrderData temp = customers[i];
+            customers[i] = customers[swapIndex];
+            customers[swapIndex] = temp;
+        }
+
+        bool visibleOrderChanged = false;
+        for (int i = 0; i < customers.Count; i++)
+        {
+            FoodColor? shuffledColor = customers[i] != null
+                ? customers[i].color
+                : (FoodColor?)null;
+            if (shuffledColor == originalColors[i]) continue;
+            visibleOrderChanged = true;
+            break;
+        }
+
+        // Avoid a no-op-looking click when the random permutation happens to
+        // leave the same color sequence and at least two Animal colors exist.
+        if (!visibleOrderChanged)
+        {
+            FoodColor? firstColor = originalColors[0];
+            for (int i = 1; i < customers.Count; i++)
+            {
+                FoodColor? candidateColor = customers[i] != null
+                    ? customers[i].color
+                    : (FoodColor?)null;
+                if (candidateColor == firstColor) continue;
+                CustomerOrderData temp = customers[0];
+                customers[0] = customers[i];
+                customers[i] = temp;
+                break;
+            }
+        }
+
+        Undo.RecordObject(level, "Shuffle Cooking Blast animal positions");
+        int customerIndex = 0;
+        foreach (CustomerLaneData lane in level.CustomerLanes)
+        {
+            if (lane == null || lane.frontToBack == null) continue;
+            for (int row = 0; row < lane.frontToBack.Count; row++)
+                lane.frontToBack[row] = customers[customerIndex++];
+        }
+
+        Dirty(level);
+        return true;
     }
 
 internal static bool TryGenerateExactCustomerCount(
