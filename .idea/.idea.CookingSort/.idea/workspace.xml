@@ -10,14 +10,33 @@
     <configurations />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7385c607-852b-4957-a358-4c32033ba9ab" name="Changes" comment="" />
+    <list default="true" id="7385c607-852b-4957-a358-4c32033ba9ab" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.CookingSort/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.CookingSort/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Config/CookingBlastLevelConfig.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Config/CookingBlastLevelConfig.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Prefabs/Animal/AnimalBase.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Prefabs/Animal/AnimalBase.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Prefabs/CustomerQueue.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Prefabs/CustomerQueue.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Prefabs/Level/Level 1.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Prefabs/Level/Level 1.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Prefabs/Level/Level 11.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Prefabs/Level/Level 11.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Scripts/CookingSortTypes.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Scripts/CookingSortTypes.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Scripts/CustomerQueue.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Scripts/CustomerQueue.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Scripts/CustomerView.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Scripts/CustomerView.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Scripts/Editor/Level/CookingBlastLevelAddressablesSetup.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Scripts/Editor/Level/CookingBlastLevelAddressablesSetup.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Scripts/Editor/Level/CookingBlastLevelEditorWindow.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Scripts/Editor/Level/CookingBlastLevelEditorWindow.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Prefabs/Popup/PopupTrayFull.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Prefabs/Popup/PopupTrayFull.prefab" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="DpaMonitoringSettings">
+    <option name="firstShow" value="false" />
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="mock:///Immediate Window" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="McpProjectServerCommands">
     <commands />
@@ -94,10 +113,24 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
-    "node.js.selected.package.tslint": "(autodetect)"
+    "Device#class com.jetbrains.rider.plugins.unity.run.devices.UnityEditorDeviceKind#com.jetbrains.rider.plugins.unity.run.devices.UnityDevicesProvider#Unity Attach To: Attach to": "Unity Editor",
+    "DeviceKind#com.jetbrains.rider.plugins.unity.run.devices.UnityDevicesProvider": "Unity Editor",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.MCP Project settings loaded": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "Unity Attach To.Attach to.executor": "Debug",
+    "cidr.known.project.marker": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "git-widget-placeholder": "main",
+    "node.js.detected.package.eslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm"
   }
 }]]></component>
-  <component name="RunManager" selected="Attach to Unity Editor.Attach to Unity Editor">
+  <component name="RunManager" selected="Unity Attach To.Attach to">
     <configuration name="Start Unity" type="RunUnityExe" factoryName="Unity Executable">
       <option name="EXE_PATH" value="C:\Program Files\Unity\Hub\Editor\6000.3.10f1\Editor\Unity.exe" />
       <option name="PROGRAM_PARAMETERS" value="-projectPath C:\Users\GALAXY\Documents\GitHub\CookingSort -debugCodeOptimization" />

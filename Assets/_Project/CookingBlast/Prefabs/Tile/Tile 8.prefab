@@ -10,7 +10,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 112428899413308147, guid: ea3e74737b6150a4ea6035a00534c5d8, type: 3}
       propertyPath: matchType
-      value: 9
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 112428899413308147, guid: ea3e74737b6150a4ea6035a00534c5d8, type: 3}
       propertyPath: usePrefabSprite
@@ -19,7 +19,7 @@ PrefabInstance:
     - target: {fileID: 671727886453563808, guid: ea3e74737b6150a4ea6035a00534c5d8, type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 21300000, guid: 45f5f1772e492f64ab5462c78c83f437, type: 3}
+      objectReference: {fileID: 21300000, guid: a6c99427625bcea4d9df956a6900a348, type: 3}
     - target: {fileID: 1003155784706234160, guid: ea3e74737b6150a4ea6035a00534c5d8, type: 3}
       propertyPath: m_Name
       value: Tile 8

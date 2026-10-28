@@ -2,6 +2,7 @@ using System.Text.RegularExpressions;
 using CookingSort2D;
 using UnityEditor;
 using UnityEditor.AddressableAssets;
+using UnityEditor.AddressableAssets.Build.DataBuilders;
 using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.AddressableAssets.Settings.GroupSchemas;
 using UnityEngine;
@@ -74,5 +75,22 @@ internal static class CookingBlastLevelAddressablesSetup
         settings.SetDirty(AddressableAssetSettings.ModificationEvent.BatchModification, null, true, true);
         AssetDatabase.SaveAssets();
         Debug.Log($"[CookingBlast] Synced valid level prefabs to Addressables group '{GroupName}'.");
+    }
+
+    internal static void UseAssetDatabaseForPlaytest()
+    {
+        AddressableAssetSettings settings = AddressableAssetSettingsDefaultObject.GetSettings(true);
+        if (settings == null) return;
+
+        for (int i = 0; i < settings.DataBuilders.Count; i++)
+        {
+            if (!(settings.DataBuilders[i] is BuildScriptFastMode)) continue;
+            if (settings.ActivePlayModeDataBuilderIndex != i)
+                settings.ActivePlayModeDataBuilderIndex = i;
+            return;
+        }
+
+        Debug.LogWarning("[CookingBlast] Addressables Fast Mode is missing. " +
+                         "Playtest may load stale bundled level data.");
     }
 }

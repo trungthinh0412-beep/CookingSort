@@ -25,12 +25,15 @@ namespace CookingSort2D
     {
         public FoodColor color;
         [Min(1)] public int demand = 10;
+        [Tooltip("Show this customer as a mystery Egg in gameplay until the player reveals it.")]
+        public bool isEgg;
 
         public CustomerOrderData() { }
-        public CustomerOrderData(FoodColor color, int demand)
+        public CustomerOrderData(FoodColor color, int demand, bool isEgg = false)
         {
             this.color = color;
             this.demand = Mathf.Max(1, demand);
+            this.isEgg = isEgg;
         }
     }
 
