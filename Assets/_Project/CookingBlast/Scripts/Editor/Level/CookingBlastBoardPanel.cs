@@ -29,7 +29,8 @@ internal sealed class CookingBlastBoardPanel
     
     [SerializeField] private FoodTileView selectedTilePrefab;
     [SerializeField] private bool showPrefabList = true;
-[SerializeField] private bool cluster40Mode;
+    [SerializeField] private bool cluster40Mode;
+    [SerializeField] private bool cluster40PresetMode;
 private bool painting;
     private int lastColumn = -1;
     private int lastRow = -1;
@@ -69,16 +70,20 @@ internal void Draw(CookingBlastLevel level, ref FoodColor brush, ref int columns
             }
             GUILayout.Space(8);
 
-            int currentTool = cluster40Mode ? 2 : bucketMode ? 1 : 0;
+            int currentTool = cluster40PresetMode ? 2 : cluster40Mode ? 3 : bucketMode ? 1 : 0;
             int tool = GUILayout.Toolbar(currentTool,
-                new[] { "Brush  •  Tiles", "Bucket  •  Region", "Prefab Footprint" },
-                GUILayout.Height(28), GUILayout.Width(Mathf.Min(610f, Mathf.Max(330f, width - 38f))));
+                new[] { "Brush  •  Tiles", "Bucket  •  Region", "Cluster 40 (2x2)", "Prefab Footprint" },
+                GUILayout.Height(28), GUILayout.Width(Mathf.Min(780f, Mathf.Max(440f, width - 38f))));
             bool nextBucketMode = tool == 1;
-            bool nextClusterMode = tool == 2;
-            if (nextBucketMode != bucketMode || nextClusterMode != cluster40Mode)
+            bool nextCluster40PresetMode = tool == 2;
+            bool nextClusterMode = tool == 3;
+            if (nextBucketMode != bucketMode ||
+                nextCluster40PresetMode != cluster40PresetMode ||
+                nextClusterMode != cluster40Mode)
             {
                 EndStroke();
                 bucketMode = nextBucketMode;
+                cluster40PresetMode = nextCluster40PresetMode;
                 cluster40Mode = nextClusterMode;
             }
             using (new EditorGUILayout.HorizontalScope())
@@ -90,13 +95,21 @@ internal void Draw(CookingBlastLevel level, ref FoodColor brush, ref int columns
                     EndStroke();
                     brush = FoodColor.Neutral;
                     bucketMode = false;
+                    cluster40PresetMode = false;
                     cluster40Mode = false;
                 }
                 GUILayout.Label("Footprint placement clears regular Tiles automatically.",
                     EditorStyles.miniLabel);
             }
             
-if (cluster40Mode)
+            if (cluster40PresetMode)
+            {
+                EditorGUILayout.HelpBox(
+                    "Click a cell to use it as the bottom-left corner of a 2 x 2 Cluster with value 40. " +
+                    "The current Brush color is used. Click an existing footprint to remove it.",
+                    MessageType.Info);
+            }
+            else if (cluster40Mode)
             {
                 FoodTileView footprintPrefab = ResolveFootprintPrefab(level, brush);
                 int footprintWidth = footprintPrefab != null ? footprintPrefab.FootprintWidth : 1;
@@ -258,22 +271,30 @@ if (cluster40Mode)
                 brush = data.bottomToTop[r];
                 ev.Use();
             }
-            else if (cluster40Mode && ev.type == EventType.MouseDown && ev.button == 0)
+            else if ((cluster40PresetMode || cluster40Mode) &&
+                     ev.type == EventType.MouseDown && ev.button == 0)
             {
                 EndStroke();
-                FoodTileView footprintPrefab = ResolveFootprintPrefab(level, brush);
-                if (footprintPrefab == null)
-                    fillStatus = $"No Tile prefab is assigned for {brush}.";
-                else
+                if (cluster40PresetMode)
                     CookingBlastLevelEditing.AddCluster(level, c, r, brush,
-                        footprintPrefab.FootprintWidth,
-                        footprintPrefab.FootprintHeight,
-                        footprintPrefab.FootprintValue,
-                        out fillStatus);
+                        2, 2, 40, out fillStatus);
+                else
+                {
+                    FoodTileView footprintPrefab = ResolveFootprintPrefab(level, brush);
+                    if (footprintPrefab == null)
+                        fillStatus = $"No Tile prefab is assigned for {brush}.";
+                    else
+                        CookingBlastLevelEditing.AddCluster(level, c, r, brush,
+                            footprintPrefab.FootprintWidth,
+                            footprintPrefab.FootprintHeight,
+                            footprintPrefab.FootprintValue,
+                            out fillStatus);
+                }
                 fillStatusType = fillStatus.StartsWith("Placed") ? MessageType.Info : MessageType.Warning;
                 ev.Use();
             }
-            else if (!cluster40Mode && ev.type == EventType.MouseDown && ev.button == 0 &&
+            else if (!cluster40PresetMode && !cluster40Mode &&
+                     ev.type == EventType.MouseDown && ev.button == 0 &&
                      (bucketMode || ev.shift))
             {
                 EndStroke();
@@ -287,7 +308,7 @@ if (cluster40Mode)
                 fillStatusType = MessageType.Info;
                 ev.Use();
             }
-            else if (!cluster40Mode && !bucketMode &&
+            else if (!cluster40PresetMode && !cluster40Mode && !bucketMode &&
                      (ev.type == EventType.MouseDown || (ev.type == EventType.MouseDrag && painting)) &&
                      ev.button == 0)
             {
@@ -351,7 +372,8 @@ if (cluster40Mode)
                     brush = cluster.color;
                     ev.Use();
                 }
-                else if (cluster40Mode && ev.type == EventType.MouseDown && ev.button == 0)
+                else if ((cluster40PresetMode || cluster40Mode) &&
+                         ev.type == EventType.MouseDown && ev.button == 0)
                 {
                     CookingBlastLevelEditing.RemoveClusterAt(level,
                         cluster.anchorColumn, cluster.anchorRow);
@@ -425,6 +447,7 @@ private void DrawConfiguredTilePrefabs(ref FoodColor brush)
                 brush = prefab.Type;
                 if (prefab.UsesFootprint)
                 {
+                    cluster40PresetMode = false;
                     cluster40Mode = true;
                     bucketMode = false;
                 }
