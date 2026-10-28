@@ -25,6 +25,7 @@ namespace CookingSort2D
         [SerializeField] private FoodColor matchType = FoodColor.Blue;
 
         [SerializeField] private SpriteRenderer body;
+        [SerializeField] private Sprite eggSprite;
         [SerializeField] private TextMeshProUGUI count;
         [SerializeField] private Image countBadge;
         [SerializeField] private Collider2D hitbox;
@@ -37,6 +38,10 @@ namespace CookingSort2D
         private bool _seated;
         private bool _seatReady;
         private int _progressCapacity;
+        private bool _eggHidden;
+        private Sprite _animalSprite;
+        private SpriteAnimator _spriteAnimator;
+        private bool _resumeAnimatorAfterEgg;
 
         private Coroutine _pulseRoutine;
         private Vector3 _seatedBaseScale = Vector3.one;
@@ -50,6 +55,7 @@ namespace CookingSort2D
         public bool IsSeated => _seated;
         public bool IsSeatReady => _seated && _seatReady;
         public bool IsFront => _front;
+        public bool IsEggHidden => _eggHidden;
         public int Demand => Mathf.Max(1, demand);
 
         public void BindQueue(CustomerQueue queue, int laneIndex, CustomerOrderData order)
@@ -58,6 +64,25 @@ namespace CookingSort2D
             _laneIndex = laneIndex;
             _seated = false;
             _seatReady = false;
+            _animalSprite = body != null ? body.sprite : null;
+            _spriteAnimator = GetComponent<SpriteAnimator>();
+            Sprite mysterySprite = eggSprite != null
+                ? eggSprite
+                : queue != null ? queue.EggSprite : null;
+            _eggHidden = order != null && order.isEgg && queue != null &&
+                         mysterySprite != null;
+            _resumeAnimatorAfterEgg = _eggHidden && _spriteAnimator != null &&
+                                      _spriteAnimator.enabled;
+            if (_eggHidden)
+            {
+                // Animal variants animate this same SpriteRenderer every frame.
+                // Pause that writer before applying the Egg sprite, otherwise
+                // it immediately replaces EGG_Mystic with an animal frame.
+                if (_resumeAnimatorAfterEgg)
+                    _spriteAnimator.enabled = false;
+                if (body != null)
+                    body.sprite = mysterySprite;
+            }
             Remaining = Demand;
             _progressCapacity = Demand;
             RefreshVisual();
@@ -184,6 +209,24 @@ namespace CookingSort2D
         {
             if (_front && !_seated && _queue != null)
                 _queue.TrySelect(this);
+        }
+
+        /// <summary>
+        /// Reveals the configured animal without selecting it. The first click
+        /// opens the Egg; a later click follows the normal seat flow.
+        /// </summary>
+        public bool RevealEgg()
+        {
+            if (!_eggHidden) return false;
+            _eggHidden = false;
+            if (body != null && _animalSprite != null)
+                body.sprite = _animalSprite;
+            if (_resumeAnimatorAfterEgg && _spriteAnimator != null)
+            {
+                _spriteAnimator.enabled = true;
+                _resumeAnimatorAfterEgg = false;
+            }
+            return true;
         }
 
         private void RefreshVisual()

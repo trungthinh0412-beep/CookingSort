@@ -221,13 +221,13 @@ private void DrawCustomerEditor()
                 ? "Click Customers to set priority #1, #2, #3... • Click again to unpin"
                 : deleteCustomerTool
                     ? "DELETE TOOL ACTIVE • Click a Customer to remove it • Ctrl+Z to undo"
-                    : "Click/drag = paint • Right-click = pick color • Shift+click = delete • Ctrl+Z = Undo",
+                    : "Click/drag = paint • Red circle = Egg • Right-click = pick color • Shift+click = delete • Ctrl+Z = Undo",
                 EditorStyles.miniLabel);
             EditorGUILayout.HelpBox(customerPriorityPicking
                 ? "Choose Tile fill priority directly on the Customer grid; numbered badges show your picks."
                 : deleteCustomerTool
                     ? "Delete Customer is selected from COLOR LIST. Click a Customer to remove it. Click a color to switch back to painting."
-                    : "Each lane is a column. FRONT at top, BACK below. Click + to add or select Delete Customer from COLOR LIST to remove.",
+                    : "Each lane is a column. FRONT at top, BACK below. Click the circle on an Animal to toggle its Egg state; its configured color remains visible here.",
                 MessageType.None);
             customerPriorityPicking = false;
 
@@ -445,6 +445,7 @@ private void TestInGameplayScene()
             if (levelAsset == null) throw new InvalidOperationException("Level prefab is missing CookingBlastLevel.");
 
             SyncPlayableLevels();
+            CookingBlastLevelAddressablesSetup.UseAssetDatabaseForPlaytest();
             var scene = EditorSceneManager.OpenScene("Assets/_Project/CookingBlast/Scenes/CookingBlastGameplay.unity", OpenSceneMode.Single);
             CookingSortGameController game = UnityEngine.Object.FindFirstObjectByType<CookingSortGameController>();
             if (game == null) throw new InvalidOperationException("CookingBlastGameplay scene is missing CookingSortGameController.");
@@ -527,6 +528,17 @@ private void RemoveCustomer(int lane, int row)
         CookingBlastLevelEditing.Dirty(level);
     }
 
+private void ToggleCustomerEgg(int lane, int row)
+    {
+        if (lane < 0 || lane >= level.CustomerLanes.Count) return;
+        var orders = level.CustomerLanes[lane]?.frontToBack;
+        if (orders == null || row < 0 || row >= orders.Count || orders[row] == null)
+            return;
+        Undo.RecordObject(level, "Toggle mystery Egg");
+        orders[row].isEgg = !orders[row].isEgg;
+        CookingBlastLevelEditing.Dirty(level);
+    }
+
 
 
 private void PaintCustomer(int lane, int row, FoodColor color)
@@ -600,6 +612,9 @@ private void DrawCustomerDetails()
                 int animalDemand = level.GetCustomerDemand(updatedColor);
                 order.FindPropertyRelative("demand").intValue = animalDemand;
                 GUILayout.Label(animalDemand.ToString(), GUILayout.Width(70));
+                EditorGUILayout.PropertyField(order.FindPropertyRelative("isEgg"),
+                    new GUIContent("Egg", "Display as EGG_Mystic in gameplay until clicked."),
+                    GUILayout.Width(55));
                 using (new EditorGUI.DisabledScope(i == 0))
                     if (GUILayout.Button("↑", GUILayout.Width(25))) { moveIndex = i; move = -1; }
                 using (new EditorGUI.DisabledScope(i == list.arraySize - 1))
@@ -615,6 +630,7 @@ private void DrawCustomerDetails()
                 var order = list.GetArrayElementAtIndex(index);
                 order.FindPropertyRelative("color").enumValueIndex = (int)paintColor;
                 order.FindPropertyRelative("demand").intValue = level.GetCustomerDemand(paintColor);
+                order.FindPropertyRelative("isEgg").boolValue = false;
             }
             EditorGUILayout.EndVertical();
         }
@@ -655,6 +671,7 @@ private void DrawCustomerGrid(float available)
             {
                 bool append = row == count;
                 Rect cell = new Rect(area.x + 28 + lane * size, area.y + 26 + row * size, size - 3, size - 3);
+                Rect eggToggleRect = default;
                 if (append)
                 {
                     EditorGUI.DrawRect(cell, new Color(.18f, .22f, .27f));
@@ -697,9 +714,32 @@ private void DrawCustomerGrid(float available)
                     }
                     else
                         GUI.Label(labelRect, CookingSortPalette.ShortName(customer.color) + " " + level.GetCustomerDemand(customer.color), style);
+
+                    eggToggleRect = new Rect(cell.x + 3, cell.y + 3, 18, 18);
+                    var eggMarkerStyle = new GUIStyle(EditorStyles.boldLabel)
+                    {
+                        alignment = TextAnchor.MiddleCenter,
+                        fontSize = 16
+                    };
+                    eggMarkerStyle.normal.textColor = customer.isEgg
+                        ? new Color(1f, .18f, .18f)
+                        : new Color(.58f, .58f, .58f, .9f);
+                    GUI.Label(eggToggleRect, new GUIContent(customer.isEgg ? "●" : "○",
+                        customer.isEgg
+                            ? "Mystery Egg enabled. Click to show the normal Animal in gameplay."
+                            : "Click to mark this Animal as a mystery Egg."), eggMarkerStyle);
                 }
 
                 if (!GUI.enabled || !cell.Contains(ev.mousePosition)) continue;
+                if (!append && eggToggleRect.Contains(ev.mousePosition) &&
+                    ev.type == EventType.MouseDown && ev.button == 0)
+                {
+                    EndCustomerStroke();
+                    ToggleCustomerEgg(lane, row);
+                    ev.Use();
+                    Repaint();
+                    continue;
+                }
                 if (!append && ev.type == EventType.MouseDown && ev.button == 1)
                 {
                     paintColor = orders[row].color;

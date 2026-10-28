@@ -3693,12 +3693,20 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4242704948146206076, guid: 95f8175585ce18147bb023ffc7228d14, type: 3}
+      propertyPath: customerLanes.Array.data[1].frontToBack.Array.data[0].isEgg
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4242704948146206076, guid: 95f8175585ce18147bb023ffc7228d14, type: 3}
       propertyPath: customerLanes.Array.data[1].frontToBack.Array.data[1].color
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4242704948146206076, guid: 95f8175585ce18147bb023ffc7228d14, type: 3}
       propertyPath: customerLanes.Array.data[1].frontToBack.Array.data[2].color
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4242704948146206076, guid: 95f8175585ce18147bb023ffc7228d14, type: 3}
+      propertyPath: customerLanes.Array.data[1].frontToBack.Array.data[2].isEgg
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4242704948146206076, guid: 95f8175585ce18147bb023ffc7228d14, type: 3}
       propertyPath: customerLanes.Array.data[1].frontToBack.Array.data[3].color
@@ -3734,6 +3742,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4242704948146206076, guid: 95f8175585ce18147bb023ffc7228d14, type: 3}
       propertyPath: customerLanes.Array.data[2].frontToBack.Array.data[3].color
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4242704948146206076, guid: 95f8175585ce18147bb023ffc7228d14, type: 3}
+      propertyPath: customerLanes.Array.data[2].frontToBack.Array.data[3].isEgg
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4242704948146206076, guid: 95f8175585ce18147bb023ffc7228d14, type: 3}

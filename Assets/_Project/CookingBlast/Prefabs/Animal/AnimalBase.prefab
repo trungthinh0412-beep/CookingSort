@@ -232,6 +232,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CookingSort2D.CustomerView
   matchType: 0
   body: {fileID: 935351445869505619}
+  eggSprite: {fileID: 21300000, guid: b45622fcaa829ef4db65209a2ceb4e12, type: 3}
   count: {fileID: 2282990251111241162}
   countBadge: {fileID: 4759627572592004962}
   hitbox: {fileID: 5542376764456775770}
