@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using TMPro;
 using UnityEngine;
 
 namespace CookingSort2D
@@ -12,7 +13,10 @@ namespace CookingSort2D
 
         [SerializeField] private bool usePrefabSprite = false;
 [SerializeField] private SpriteRenderer body;
-        [SerializeField] private TextMesh symbol;
+
+        [Header("Footprint Value UI")]
+        [Tooltip("Create a TextMeshPro child in each 2x1/1x2/2x2 prefab and drag it here. Runtime never creates this Text automatically.")]
+        [SerializeField] private TMP_Text valueText;
 
         [Header("Board Footprint")]
         [Tooltip("Number of logical Board cells occupied horizontally when placed from the Level Editor.")]
@@ -75,9 +79,10 @@ public void Setup(FoodColor color)
                     : usePrefabSprite ? Color.white : CookingSortPalette.Get(color);
             // Regular 1x1 tiles are artwork-only, without letters or numbers.
             // Footprints bigger than 1x1 explicitly enable their value label.
-            if (symbol != null)
+            if (valueText != null)
             {
-                symbol.text = string.Empty;
+                valueText.text = string.Empty;
+                valueText.gameObject.SetActive(false);
             }
         }
 
@@ -92,19 +97,12 @@ public void SetupCluster(FoodColor color, int value, int width, int height)
             if (width <= 1 && height <= 1)
                 return;
 
-            if (symbol == null)
+            if (valueText == null)
             {
-                GameObject label = new GameObject("ClusterValue");
-                label.transform.SetParent(transform, false);
-                symbol = label.AddComponent<TextMesh>();
-                symbol.anchor = TextAnchor.MiddleCenter;
-                symbol.alignment = TextAlignment.Center;
-                symbol.fontSize = 72;
-                symbol.characterSize = 0.06f;
-                symbol.fontStyle = FontStyle.Bold;
+                Debug.LogWarning($"[CookingBlast] Footprint prefab '{name}' has no Value Text assigned.", this);
+                return;
             }
-            symbol.transform.localPosition = new Vector3(0f, 0f, -0.05f);
-            symbol.transform.localScale = Vector3.one;
+            valueText.gameObject.SetActive(true);
             SetClusterValue(value);
         }
 
@@ -144,9 +142,8 @@ private void StretchFootprintVisual(int width, int height)
 
         public void SetClusterValue(int value)
         {
-            if (symbol == null) return;
-            symbol.text = Mathf.Max(0, value).ToString();
-            symbol.color = Color.white;
+            if (valueText == null) return;
+            valueText.text = Mathf.Max(0, value).ToString();
         }
 
 public void FitToCell(float targetSize)
@@ -165,10 +162,16 @@ public void FitToCell(float targetSize)
         {
             AutoBind();
             if (body != null) body.sortingOrder = order;
-            if (symbol != null)
+            if (valueText != null)
             {
-                MeshRenderer r = symbol.GetComponent<MeshRenderer>();
+                Renderer r = valueText.GetComponent<Renderer>();
                 if (r != null) r.sortingOrder = order + 1;
+                Canvas canvas = valueText.GetComponentInParent<Canvas>();
+                if (canvas != null)
+                {
+                    canvas.overrideSorting = true;
+                    canvas.sortingOrder = order + 1;
+                }
             }
         }
 
@@ -221,11 +224,6 @@ private IEnumerator ConsumeRoutine(Transform target, Action onComplete)
         private void AutoBind()
         {
             if (body == null) body = GetComponent<SpriteRenderer>();
-            if (symbol == null)
-            {
-                Transform t = transform.Find("Symbol");
-                if (t != null) symbol = t.GetComponent<TextMesh>();
-            }
         }
     }
 }
