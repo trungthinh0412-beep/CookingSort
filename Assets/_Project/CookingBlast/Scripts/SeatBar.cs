@@ -33,6 +33,7 @@ namespace CookingSort2D
         private readonly HashSet<CustomerView> _mergingCustomers = new HashSet<CustomerView>();
         private readonly HashSet<CustomerView> _departingCustomers = new HashSet<CustomerView>();
         private bool _mergeInProgress;
+        private CustomerView _activeMergeReceiver;
         private int _seatingCustomers;
         public bool IsMerging => _mergeInProgress;
         public bool IsSeating => _seatingCustomers > 0;
@@ -70,6 +71,7 @@ public void Initialize(CookingSortGameController game, int seatCount)
             ClearDepartingCustomers();
             _mergingCustomers.Clear();
             _mergeInProgress = false;
+            _activeMergeReceiver = null;
             _seatingCustomers = 0;
             _game = game;
             CacheSlots();
@@ -165,6 +167,7 @@ public void ClearAllImmediate()
             ClearDepartingCustomers();
             _mergingCustomers.Clear();
             _mergeInProgress = false;
+            _activeMergeReceiver = null;
             _seatingCustomers = 0;
             for (int i = 0; i < _slots.Count; i++)
             {
@@ -236,6 +239,7 @@ private IEnumerator LeaveRoutine(CustomerView customer)
 private void FinishMerge()
         {
             _mergingCustomers.Clear();
+            _activeMergeReceiver = null;
             _mergeInProgress = false;
             TryBeginMerge();
             if (_game != null) _game.OnSeatMergeFinished();
@@ -248,10 +252,11 @@ private IEnumerator MergeThreeRoutine(SeatSlotView keepSlot, SeatSlotView second
             CustomerView second = secondSlot.Occupant;
             CustomerView third = thirdSlot.Occupant;
 
-            // No tiles may land on a customer while it is turning into jelly.
+            // Donor animals must finish their reserved flights before their
+            // remaining demand is transferred. The receiver may keep eating.
             BoardController board = _game != null ? _game.Board : null;
             while (board != null &&
-                   (board.HasTileInFlight(keep) || board.HasTileInFlight(second) || board.HasTileInFlight(third)))
+                   (board.HasTileInFlight(second) || board.HasTileInFlight(third)))
                 yield return null;
 
             if (keep == null || second == null || third == null ||
@@ -271,6 +276,12 @@ private IEnumerator MergeThreeRoutine(SeatSlotView keepSlot, SeatSlotView second
             int combinedCapacity = keep.ProgressCapacity +
                                    second.ProgressCapacity +
                                    third.ProgressCapacity;
+
+            // Commit the merge before animation. Tile arrivals during the
+            // animation now subtract from the combined value instead of being
+            // overwritten at the end.
+            keep.SetMergedRemaining(combinedDemand, combinedCapacity);
+            _activeMergeReceiver = keep;
 
             // Keep all three seats occupied until the entire merge/drop animation ends.
             // Fast taps must not put a new customer under a moving jelly blob.
@@ -358,7 +369,6 @@ private IEnumerator MergeThreeRoutine(SeatSlotView keepSlot, SeatSlotView second
 
             second.transform.localScale = Vector3.zero;
             third.transform.localScale = Vector3.zero;
-            keep.SetMergedRemaining(combinedDemand, combinedCapacity);
             keep.transform.position = mergeCenter;
             keep.transform.localScale = keepScale;
 
@@ -414,16 +424,19 @@ private void TryBeginMerge()
             for (int i = 0; i < _slots.Count; i++)
             {
                 SeatSlotView first = _slots[i];
-                if (first == null || !first.gameObject.activeSelf || first.IsEmpty) continue;
+                if (first == null || !first.gameObject.activeSelf || first.IsEmpty ||
+                    first.Occupant == null || first.Occupant.HasMerged) continue;
                 for (int j = i + 1; j < _slots.Count; j++)
                 {
                     SeatSlotView second = _slots[j];
                     if (second == null || !second.gameObject.activeSelf || second.IsEmpty ||
+                        second.Occupant == null || second.Occupant.HasMerged ||
                         second.Occupant.Type != first.Occupant.Type) continue;
                     for (int k = j + 1; k < _slots.Count; k++)
                     {
                         SeatSlotView third = _slots[k];
                         if (third == null || !third.gameObject.activeSelf || third.IsEmpty ||
+                            third.Occupant == null || third.Occupant.HasMerged ||
                             third.Occupant.Type != first.Occupant.Type) continue;
 
                         _mergeInProgress = true;
@@ -441,6 +454,12 @@ private void TryBeginMerge()
 public bool IsMergingCustomer(CustomerView customer)
         {
             return customer != null && _mergingCustomers.Contains(customer);
+        }
+
+        public bool CanReceiveTiles(CustomerView customer)
+        {
+            return customer != null &&
+                   (!IsMergingCustomer(customer) || customer == _activeMergeReceiver);
         }
 
 

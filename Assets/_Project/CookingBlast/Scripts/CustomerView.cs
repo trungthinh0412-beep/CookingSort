@@ -50,6 +50,7 @@ namespace CookingSort2D
         public bool IsSeated => _seated;
         public bool IsSeatReady => _seated && _seatReady;
         public bool IsFront => _front;
+        public bool HasMerged { get; private set; }
         public int Demand => Mathf.Max(1, demand);
 
         public void BindQueue(CustomerQueue queue, int laneIndex, CustomerOrderData order)
@@ -58,6 +59,7 @@ namespace CookingSort2D
             _laneIndex = laneIndex;
             _seated = false;
             _seatReady = false;
+            HasMerged = false;
             Remaining = Demand;
             _progressCapacity = Demand;
             RefreshVisual();
@@ -382,6 +384,7 @@ namespace CookingSort2D
         {
             Remaining = Mathf.Max(0, remaining);
             _progressCapacity = Mathf.Max(Remaining, progressCapacity, 1);
+            HasMerged = true;
             RefreshCount();
             RefreshDemandFill();
         }
