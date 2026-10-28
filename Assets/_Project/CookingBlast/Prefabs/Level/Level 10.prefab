@@ -2142,7 +2142,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4242704948146206076, guid: 95f8175585ce18147bb023ffc7228d14, type: 3}
       propertyPath: 'boardColumns.Array.data[6].bottomToTop.Array.data[11]'
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4242704948146206076, guid: 95f8175585ce18147bb023ffc7228d14, type: 3}
       propertyPath: 'boardColumns.Array.data[6].bottomToTop.Array.data[12]'

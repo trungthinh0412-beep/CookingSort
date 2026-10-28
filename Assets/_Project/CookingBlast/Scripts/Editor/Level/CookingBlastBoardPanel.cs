@@ -7,6 +7,10 @@ using UnityEngine;
 [Serializable]
 internal sealed class CookingBlastBoardPanel
 {
+    private const float GridViewportHeight = 600f;
+    private const float GridMinCellSize = 20f;
+    private const float GridMaxCellSize = 38f;
+
     private int selectedColumn;
     private bool showLists;
     
@@ -215,8 +219,14 @@ internal void Draw(CookingBlastLevel level, ref FoodColor brush, ref int columns
                 using (new EditorGUILayout.VerticalScope())
                 {
                     EditorGUILayout.LabelField("TOP", EditorStyles.centeredGreyMiniLabel);
-                    gridScroll = EditorGUILayout.BeginScrollView(gridScroll, GUILayout.Height(420));
-                    DrawGrid(level, ref brush, Mathf.Max(280, width - 230));
+                    gridScroll = EditorGUILayout.BeginScrollView(gridScroll,
+                        GUILayout.Height(GridViewportHeight));
+                    using (new EditorGUILayout.HorizontalScope())
+                    {
+                        GUILayout.FlexibleSpace();
+                        DrawGrid(level, ref brush, Mathf.Max(280f, width - 230f));
+                        GUILayout.FlexibleSpace();
+                    }
                     EditorGUILayout.EndScrollView();
                     EditorGUILayout.LabelField("BOTTOM / FIRST SERVED", EditorStyles.centeredGreyMiniLabel);
                 }
@@ -239,7 +249,8 @@ internal void Draw(CookingBlastLevel level, ref FoodColor brush, ref int columns
             EditorGUILayout.HelpBox("Set dimensions and press Resize to start.", MessageType.Info);
             return;
         }
-        float size = Mathf.Clamp((available-32) / columns, 20, 38);
+        float size = Mathf.Clamp((available - 32f) / columns,
+            GridMinCellSize, GridMaxCellSize);
         Rect area = GUILayoutUtility.GetRect(columns*size+30, rows*size+30, GUILayout.ExpandWidth(false));
         EditorGUI.DrawRect(area, new Color(.07f,.09f,.15f));
         var ev = Event.current;
