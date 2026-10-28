@@ -11,18 +11,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7385c607-852b-4957-a358-4c32033ba9ab" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.CookingSort/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.CookingSort/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Config/CookingBlastLevelConfig.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Config/CookingBlastLevelConfig.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Prefabs/Animal/AnimalBase.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Prefabs/Animal/AnimalBase.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Plugins/Android/mainTemplate.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Plugins/Android/mainTemplate.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Plugins/Android/settingsTemplate.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Plugins/Android/settingsTemplate.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Art/Background/Bg.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Art/Background/Bg.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Art/Background/Game_play_Bg.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Art/Background/Game_play_Bg.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Art/Background/Table.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Art/Background/Table.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Prefabs/CustomerQueue.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Prefabs/CustomerQueue.prefab" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Prefabs/Level/Level 1.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Prefabs/Level/Level 1.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Prefabs/Level/Level 11.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Prefabs/Level/Level 11.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Scripts/CookingSortTypes.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Scripts/CookingSortTypes.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Scripts/CustomerQueue.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Scripts/CustomerQueue.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Scripts/CustomerView.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Scripts/CustomerView.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Scripts/Editor/Level/CookingBlastLevelAddressablesSetup.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Scripts/Editor/Level/CookingBlastLevelAddressablesSetup.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Scripts/Editor/Level/CookingBlastLevelEditorWindow.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Scripts/Editor/Level/CookingBlastLevelEditorWindow.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Prefabs/Popup/PopupTrayFull.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Prefabs/Popup/PopupTrayFull.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Prefabs/Level/LevelBase/LevelBase.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Prefabs/Level/LevelBase/LevelBase.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Prefabs/SeatBar.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Prefabs/SeatBar.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Prefabs/Popup/PopupInGame.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Prefabs/Popup/PopupInGame.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProjectSettings/AndroidResolverDependencies.xml" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/AndroidResolverDependencies.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -111,25 +110,25 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Device#class com.jetbrains.rider.plugins.unity.run.devices.UnityEditorDeviceKind#com.jetbrains.rider.plugins.unity.run.devices.UnityDevicesProvider#Unity Attach To: Attach to": "Unity Editor",
-    "DeviceKind#com.jetbrains.rider.plugins.unity.run.devices.UnityDevicesProvider": "Unity Editor",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.MCP Project settings loaded": "true",
-    "RunOnceActivity.cidr.known.project.marker": "true",
-    "RunOnceActivity.readMode.enableVisualFormatting": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "Unity Attach To.Attach to.executor": "Debug",
-    "cidr.known.project.marker": "true",
-    "codeWithMe.voiceChat.enabledByDefault": "false",
-    "git-widget-placeholder": "main",
-    "node.js.detected.package.eslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Device#class com.jetbrains.rider.plugins.unity.run.devices.UnityEditorDeviceKind#com.jetbrains.rider.plugins.unity.run.devices.UnityDevicesProvider#Unity Attach To: Attach to&quot;: &quot;Unity Editor&quot;,
+    &quot;DeviceKind#com.jetbrains.rider.plugins.unity.run.devices.UnityDevicesProvider&quot;: &quot;Unity Editor&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;Unity Attach To.Attach to.executor&quot;: &quot;Debug&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager" selected="Unity Attach To.Attach to">
     <configuration name="Start Unity" type="RunUnityExe" factoryName="Unity Executable">
       <option name="EXE_PATH" value="C:\Program Files\Unity\Hub\Editor\6000.3.10f1\Editor\Unity.exe" />

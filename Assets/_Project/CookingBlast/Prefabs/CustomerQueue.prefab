@@ -47,7 +47,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2aca5e7ae179e3f4c8ea276d0e24d2f1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CookingSort2D.CustomerQueue
-  animalPrefabsByColor:
+  animalPrefabsByType:
   - {fileID: 4776464956154622149, guid: b94cc8fdb4fbf6c48bbd2d9e4830e999, type: 3}
   - {fileID: 4776464956154622149, guid: 5e28c57eacecf3a45ac80932093f29ed, type: 3}
   - {fileID: 4776464956154622149, guid: c3de8af3bf76c864cb8623825a8f43d7, type: 3}
