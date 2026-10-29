@@ -37,13 +37,25 @@ public int LevelNumber => levelNumber;
         public List<BoardClusterData> BoardClusters => boardClusters;
         public List<CustomerLaneData> CustomerLanes => customerLanes;
 
-        public int GetCustomerDemand(FoodColor color)
+
+
+public int GetCustomerDemand(FoodColor color)
         {
             CustomerView prefab = customerQueue != null
                 ? customerQueue.GetAnimalPrefab(color)
                 : null;
             return prefab != null ? prefab.Demand : 20;
         }
+
+public int GetCustomerDemand(CustomerOrderData order)
+        {
+            if (order == null) return 20;
+            CustomerView animal = customerQueue != null
+                ? customerQueue.GetAnimalPrefab(order) : null;
+            return animal != null ? animal.Demand : GetCustomerDemand(order.color);
+        }
+
+
 
         public int TotalTileCount
         {
@@ -217,7 +229,7 @@ if (levelNumber < 1)
                     }
                     customerCount++;
                     if (!demandCounts.ContainsKey(order.color)) demandCounts[order.color] = 0;
-                    demandCounts[order.color] += GetCustomerDemand(order.color);
+                    demandCounts[order.color] += GetCustomerDemand(order);
                 }
             }
 

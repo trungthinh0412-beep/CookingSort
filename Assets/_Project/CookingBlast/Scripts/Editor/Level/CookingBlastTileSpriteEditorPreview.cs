@@ -186,6 +186,32 @@ internal static Sprite GetAnimalSprite(FoodColor type)
         return found;
     }
 
+internal static bool DrawAnimal(Rect area, CustomerOrderData order)
+    {
+        if (order == null) return false;
+        if (order.animalPrefab != null && order.animalPrefab.Type == order.color)
+            return DrawAnimal(area, order.animalPrefab);
+        return DrawAnimal(area, order.color);
+    }
+
+
+private static bool DrawAnimalSprite(Rect area, Sprite sprite)
+    {
+        if (sprite == null || sprite.texture == null) return false;
+        Rect source = sprite.rect;
+        Texture2D texture = sprite.texture;
+        float factor = Mathf.Min(area.width / source.width, area.height / source.height);
+        float width = source.width * factor;
+        float height = source.height * factor;
+        Rect destination = new Rect(area.center.x - width * .5f,
+            area.center.y - height * .5f, width, height);
+        Rect uv = new Rect(source.x / texture.width, source.y / texture.height,
+            source.width / texture.width, source.height / texture.height);
+        GUI.DrawTextureWithTexCoords(destination, texture, uv, true);
+        return true;
+    }
+
+
 internal static List<FoodColor> GetConfiguredColors()
     {
         // Only playable match types: BOTH an explicitly configured Tile AND
@@ -217,6 +243,19 @@ internal static bool DrawAnimal(Rect area, FoodColor type)
         GUI.DrawTextureWithTexCoords(destination, texture, uv, true);
         return true;
     }
+
+// Each Animal prefab gets its own sprite in the prefab palette.
+    // The Customer grid still draws by match type, as before.
+
+
+internal static bool DrawAnimal(Rect area, CustomerView prefab)
+    {
+        if (prefab == null) return false;
+        SpriteRenderer renderer = prefab.GetComponentInChildren<SpriteRenderer>(true);
+        if (renderer == null || renderer.sprite == null) return false;
+        return DrawAnimalSprite(area, renderer.sprite);
+    }
+
 
 
 

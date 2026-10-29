@@ -24,6 +24,8 @@ namespace CookingSort2D
     public class CustomerOrderData
     {
         public FoodColor color;
+        [Tooltip("Optional selected Animal prefab (variant). Null keeps existing levels compatible.")]
+        public CustomerView animalPrefab;
         [Min(1)] public int demand = 10;
         [Tooltip("Show this customer as a mystery Egg in gameplay until the player reveals it.")]
         public bool isEgg;
@@ -51,6 +53,7 @@ namespace CookingSort2D
         public const int DefaultWidth = 2;
         public const int DefaultHeight = 2;
 
+        
         public FoodColor color;
         [Min(1)] public int value = DefaultValue;
         [Min(0)] public int anchorColumn;

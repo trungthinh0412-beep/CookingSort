@@ -10,7 +10,9 @@ public sealed class CookingBlastLevelEditorWindow : EditorWindow
 {
     [SerializeField] private GameObject levelAsset;
     [SerializeField] private int newLevelNumber = 2;
-    [SerializeField] private FoodColor paintColor = FoodColor.Blue;
+    
+    [SerializeField] private CustomerView selectedAnimalPrefab;
+[SerializeField] private FoodColor paintColor = FoodColor.Blue;
     [SerializeField] private int boardColumns = 10;
     [SerializeField] private int boardRows = 10;
     [SerializeField] private int laneCount = 4;
@@ -509,12 +511,17 @@ private void DrawPieceButton(string label, GameObject target, Color color)
 private void AddCustomer(int lane, FoodColor color, int ignoredDemand)
     {
         if (lane < 0 || lane >= level.CustomerLanes.Count) return;
-        Undo.RecordObject(level, "Add Cooking Blast customer");
-        if (level.CustomerLanes[lane] == null) level.CustomerLanes[lane] = new CustomerLaneData();
+        Undo.RecordObject(level, "Add Cooking Blast animal");
+        if (level.CustomerLanes[lane] == null)
+            level.CustomerLanes[lane] = new CustomerLaneData();
         if (level.CustomerLanes[lane].frontToBack == null)
-            level.CustomerLanes[lane].frontToBack = new System.Collections.Generic.List<CustomerOrderData>();
-        level.CustomerLanes[lane].frontToBack.Add(
-            new CustomerOrderData(color, level.GetCustomerDemand(color)));
+            level.CustomerLanes[lane].frontToBack =
+                new System.Collections.Generic.List<CustomerOrderData>();
+        var order = new CustomerOrderData(color, level.GetCustomerDemand(color));
+        if (selectedAnimalPrefab != null && selectedAnimalPrefab.Type == color)
+            order.animalPrefab = selectedAnimalPrefab;
+        order.demand = level.GetCustomerDemand(order);
+        level.CustomerLanes[lane].frontToBack.Add(order);
         CookingBlastLevelEditing.Dirty(level);
     }
 
@@ -548,10 +555,17 @@ private void PaintCustomer(int lane, int row, FoodColor color)
         lastCustomerRow = row;
         if (lane < 0 || lane >= level.CustomerLanes.Count) return;
         var orders = level.CustomerLanes[lane]?.frontToBack;
-        if (orders == null || row < 0 || row >= orders.Count || orders[row] == null || orders[row].color == color) return;
-        Undo.RecordObject(level, "Paint customer color");
-        orders[row].color = color;
-        orders[row].demand = level.GetCustomerDemand(color);
+        if (orders == null || row < 0 || row >= orders.Count || orders[row] == null)
+            return;
+        var order = orders[row];
+        CustomerView desiredPrefab =
+            selectedAnimalPrefab != null && selectedAnimalPrefab.Type == color
+                ? selectedAnimalPrefab : null;
+        if (order.color == color && order.animalPrefab == desiredPrefab) return;
+        Undo.RecordObject(level, "Paint Cooking Blast animal");
+        order.color = color;
+        order.animalPrefab = desiredPrefab;
+        order.demand = level.GetCustomerDemand(order);
         CookingBlastLevelEditing.Dirty(level);
     }
 
@@ -600,18 +614,35 @@ private void DrawCustomerDetails()
                 var colorProp = order.FindPropertyRelative("color");
                 Rect swatch = GUILayoutUtility.GetRect(20, 20, GUILayout.Width(20));
                 FoodColor animalColor = (FoodColor)colorProp.enumValueIndex;
-                if (!CookingBlastTileSpriteEditorPreview.DrawAnimal(swatch, animalColor))
+                if (!CookingBlastTileSpriteEditorPreview.DrawAnimal(swatch, level.CustomerLanes[lane].frontToBack[i]))
                     EditorGUI.DrawRect(swatch, CookingSortPalette.Get(animalColor));
                 FoodColor updatedColor = CookingBlastTileSpriteEditorPreview.DrawAvailableColorPopup(
                     (FoodColor)colorProp.enumValueIndex, GUILayout.Width(140));
+                var animalProp = order.FindPropertyRelative("animalPrefab");
                 if ((FoodColor)colorProp.enumValueIndex != updatedColor)
                 {
                     colorProp.enumValueIndex = (int)updatedColor;
-                    order.FindPropertyRelative("demand").intValue = level.GetCustomerDemand(updatedColor);
+                    animalProp.objectReferenceValue = null;
                 }
-                int animalDemand = level.GetCustomerDemand(updatedColor);
+                EditorGUILayout.PropertyField(animalProp,
+                    new GUIContent("", "Exact Animal prefab for this Customer"),
+                    GUILayout.Width(115));
+                CustomerView chosen = animalProp.objectReferenceValue as CustomerView;
+                if (chosen != null)
+                {
+                    if (!CookingBlastTileSpriteEditorPreview.GetConfiguredAnimalPrefabs().Contains(chosen))
+                        animalProp.objectReferenceValue = null;
+                    else if (chosen.Type != updatedColor)
+                    {
+                        updatedColor = chosen.Type;
+                        colorProp.enumValueIndex = (int)updatedColor;
+                    }
+                }
+                chosen = animalProp.objectReferenceValue as CustomerView;
+                int animalDemand = chosen != null && chosen.Type == updatedColor
+                    ? chosen.Demand : level.GetCustomerDemand(updatedColor);
                 order.FindPropertyRelative("demand").intValue = animalDemand;
-                GUILayout.Label(animalDemand.ToString(), GUILayout.Width(70));
+                GUILayout.Label(animalDemand.ToString(), GUILayout.Width(40));
                 EditorGUILayout.PropertyField(order.FindPropertyRelative("isEgg"),
                     new GUIContent("Egg", "Display as EGG_Mystic in gameplay until clicked."),
                     GUILayout.Width(55));
@@ -631,6 +662,11 @@ private void DrawCustomerDetails()
                 order.FindPropertyRelative("color").enumValueIndex = (int)paintColor;
                 order.FindPropertyRelative("demand").intValue = level.GetCustomerDemand(paintColor);
                 order.FindPropertyRelative("isEgg").boolValue = false;
+                order.FindPropertyRelative("animalPrefab").objectReferenceValue =
+                    selectedAnimalPrefab != null && selectedAnimalPrefab.Type == paintColor
+                        ? selectedAnimalPrefab : null;
+                if (selectedAnimalPrefab != null && selectedAnimalPrefab.Type == paintColor)
+                    order.FindPropertyRelative("demand").intValue = selectedAnimalPrefab.Demand;
             }
             EditorGUILayout.EndVertical();
         }
@@ -686,7 +722,7 @@ private void DrawCustomerGrid(float available)
                         EditorGUI.DrawRect(new Rect(cell.x - 1, cell.y - 1, cell.width + 2, cell.height + 2),
                             new Color(.65f, .85f, 1f));
                     EditorGUI.DrawRect(cell, new Color(.14f, .16f, .20f));
-                    bool hasAnimalSprite = CookingBlastTileSpriteEditorPreview.DrawAnimal(cell, customer.color);
+                    bool hasAnimalSprite = CookingBlastTileSpriteEditorPreview.DrawAnimal(cell, customer);
                     if (!hasAnimalSprite)
                         EditorGUI.DrawRect(new Rect(cell.x + 2, cell.y + 2,
                             cell.width - 4, cell.height - 4), color);
@@ -710,10 +746,10 @@ private void DrawCustomerGrid(float available)
                         Rect demandRect = new Rect(cell.x + 7, cell.yMax - 19, cell.width - 14, 17);
                         EditorGUI.DrawRect(demandRect, new Color(0f, 0f, 0f, .70f));
                         style.normal.textColor = Color.white;
-                        GUI.Label(demandRect, level.GetCustomerDemand(customer.color).ToString(), style);
+                        GUI.Label(demandRect, level.GetCustomerDemand(customer).ToString(), style);
                     }
                     else
-                        GUI.Label(labelRect, CookingSortPalette.ShortName(customer.color) + " " + level.GetCustomerDemand(customer.color), style);
+                        GUI.Label(labelRect, CookingSortPalette.ShortName(customer.color) + " " + level.GetCustomerDemand(customer), style);
 
                     eggToggleRect = new Rect(cell.x + 3, cell.y + 3, 18, 18);
                     var eggMarkerStyle = new GUIStyle(EditorStyles.boldLabel)
@@ -743,6 +779,11 @@ private void DrawCustomerGrid(float available)
                 if (!append && ev.type == EventType.MouseDown && ev.button == 1)
                 {
                     paintColor = orders[row].color;
+                    selectedAnimalPrefab = orders[row].animalPrefab != null
+                        ? orders[row].animalPrefab
+                        : level.CustomerQueue != null
+                            ? level.CustomerQueue.GetAnimalPrefab(orders[row])
+                            : null;
                     deleteCustomerTool = false;
                     customerPriorityPicking = false;
                     ev.Use();
@@ -813,26 +854,27 @@ private void DrawCustomerPalette()
             int tiles = tileCounts.TryGetValue(type, out int t) ? t : 0;
             Rect row = GUILayoutUtility.GetRect(166, 39);
             EditorGUI.DrawRect(row,
-                !deleteCustomerTool && type == paintColor ?
+                !deleteCustomerTool && selectedAnimalPrefab == animal ?
                     new Color(.24f, .36f, .48f) : new Color(.16f, .18f, .22f));
 
             Rect iconRect = new Rect(row.x + 3, row.y + 3, 31, 31);
-            if (!CookingBlastTileSpriteEditorPreview.DrawAnimal(iconRect, type))
+            if (!CookingBlastTileSpriteEditorPreview.DrawAnimal(iconRect, animal))
                 EditorGUI.DrawRect(iconRect, CookingSortPalette.Get(type));
             GUI.Label(new Rect(row.x + 38, row.y + 3, 122, 17),
                 animal.name, EditorStyles.miniBoldLabel);
             string suffix = playable.Contains(type) ? "" : " (no Tile)";
             GUI.Label(new Rect(row.x + 38, row.y + 19, 123, 17),
-                type + " " + demand + "/" + tiles + suffix, EditorStyles.miniLabel);
+                type + "  Demand " + animal.Demand + suffix, EditorStyles.miniLabel);
 
             if (GUI.Button(row, new GUIContent("",
-                animal.name + " [" + type + "] - Demand " + demand +
-                ", Tiles " + tiles), GUIStyle.none))
+                animal.name + " [" + type + "] - Individual demand " + animal.Demand +
+                ", total type demand " + demand + ", Tiles " + tiles), GUIStyle.none))
             {
                 if (!playable.Contains(type))
                     continue; // Show unmatched prefab, but never author broken orders.
                 EndCustomerStroke();
                 paintColor = type;
+                selectedAnimalPrefab = animal;
                 deleteCustomerTool = false;
                 customerPriorityPicking = false;
             }
@@ -860,6 +902,9 @@ private void DrawCustomerPalette()
         }
         GUILayout.Space(5);
         EditorGUILayout.LabelField(deleteCustomerTool ?
-            "Tool: Delete Customer" : "Animal: " + paintColor, EditorStyles.boldLabel);
+            "Tool: Delete Customer" : "Animal: " +
+            (selectedAnimalPrefab != null &&
+             selectedAnimalPrefab.Type == paintColor
+                ? selectedAnimalPrefab.name : paintColor.ToString()), EditorStyles.boldLabel);
     }
 }

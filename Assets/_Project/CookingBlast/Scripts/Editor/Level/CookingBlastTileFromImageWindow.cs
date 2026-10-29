@@ -623,7 +623,7 @@ private void DrawCustomerGrid()
                             selected ? new Color(1f, .86f, .34f) :
                                 new Color(.65f, .85f, 1f));
                     EditorGUI.DrawRect(cell, new Color(.13f, .15f, .19f));
-                    bool hasAnimal = CookingBlastTileSpriteEditorPreview.DrawAnimal(cell, order.color);
+                    bool hasAnimal = CookingBlastTileSpriteEditorPreview.DrawAnimal(cell, order);
                     if (!hasAnimal)
                         EditorGUI.DrawRect(new Rect(cell.x + 3, cell.y + 3,
                             cell.width - 6, cell.height - 6), tint);

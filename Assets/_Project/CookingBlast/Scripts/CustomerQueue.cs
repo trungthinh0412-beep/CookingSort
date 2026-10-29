@@ -47,6 +47,8 @@ private void Awake()
             CacheSlots();
         }
 
+
+
 public CustomerView GetAnimalPrefab(FoodColor type)
         {
             if (animalPrefabsByType != null)
@@ -55,6 +57,21 @@ public CustomerView GetAnimalPrefab(FoodColor type)
                         return animalPrefabsByType[i];
             return customerPrefab != null && customerPrefab.Type == type ? customerPrefab : null;
         }
+
+public CustomerView GetAnimalPrefab(CustomerOrderData order)
+        {
+            if (order == null) return null;
+            CustomerView overridePrefab = order.animalPrefab;
+            if (overridePrefab != null && overridePrefab.Type == order.color &&
+                animalPrefabsByType != null)
+            {
+                for (int i = 0; i < animalPrefabsByType.Length; i++)
+                    if (animalPrefabsByType[i] == overridePrefab) return overridePrefab;
+            }
+            return GetAnimalPrefab(order.color);
+        }
+
+
 
         public int ConfiguredAnimalPrefabCount =>
             animalPrefabsByType != null ? animalPrefabsByType.Length : 0;
@@ -94,7 +111,7 @@ public void Initialize(CookingSortGameController game, CookingBlastLevel data)
                 {
                     CustomerOrderData order = laneData.frontToBack[row];
                     if (order == null) continue;
-                    CustomerView animalPrefab = GetAnimalPrefab(order.color);
+                    CustomerView animalPrefab = GetAnimalPrefab(order);
                     if (animalPrefab == null)
                     {
                         Debug.LogError("[CookingBlast] Missing Animal prefab for " +
