@@ -61,6 +61,8 @@ namespace CookingSort2D
         }
         private readonly List<ServeCandidate> _serveCandidates = new List<ServeCandidate>();
         private readonly List<RuntimeCluster> _clusters = new List<RuntimeCluster>();
+        private readonly Dictionary<Transform, Coroutine> _clusterMoveRoutines =
+            new Dictionary<Transform, Coroutine>();
         private readonly List<int> _columnFrontRows = new List<int>();
 private readonly List<bool> _columnBusy = new List<bool>();
         private readonly Dictionary<CustomerView, int> _customerFlights = new Dictionary<CustomerView, int>();
@@ -119,6 +121,24 @@ public FoodTileView GetTilePrefab(FoodColor color)
             // Backwards compatibility for colors without custom sprites.
             return tilePrefab != null && tilePrefab.Type == color ? tilePrefab : null;
         }
+
+public FoodTileView GetClusterPrefab(BoardClusterData cluster)
+        {
+            if (cluster == null) return null;
+            FoodTileView exact = cluster.tilePrefab;
+            if (exact != null && exact.Type == cluster.color &&
+                exact.FootprintWidth == cluster.width &&
+                exact.FootprintHeight == cluster.height &&
+                exact.FootprintValue == cluster.value &&
+                tilePrefabsByType != null)
+            {
+                for (int i = 0; i < tilePrefabsByType.Length; i++)
+                    if (tilePrefabsByType[i] == exact) return exact;
+            }
+            return GetTilePrefab(cluster.color, cluster.width,
+                cluster.height, cluster.value);
+        }
+
 
 public FoodTileView GetTilePrefab(FoodColor color,
             int footprintWidth, int footprintHeight, int footprintValue)
@@ -188,7 +208,7 @@ _columnBusy.Add(false);
                 {
                     BoardClusterData cluster = data.BoardClusters[i];
                     if (cluster == null) continue;
-                    FoodTileView prefab = GetTilePrefab(cluster.color, cluster.width, cluster.height, cluster.value);
+                    FoodTileView prefab = GetClusterPrefab(cluster);
                     if (prefab == null) continue;
                     FoodTileView view = Instantiate(prefab, tileRoot);
                     view.SetupCluster(cluster.color, cluster.value, cluster.width, cluster.height);
@@ -238,6 +258,7 @@ public void ClearBoard()
             StopAllCoroutines();
             _columns.Clear();
             _clusters.Clear();
+            _clusterMoveRoutines.Clear();
             _columnFrontRows.Clear();
 _columnBusy.Clear();
             _customerFlights.Clear();
@@ -508,12 +529,25 @@ private IEnumerator ServeRoutine(SeatBar seats)
                     continue;
                 int belowCount = Mathf.Max(0, GetTilesBelow(cluster, column) - frontRow);
                 if (compactRow >= belowCount)
-                    displayRow += Mathf.Max(1, data.height);
+                {
+                    // A footprint spanning several columns rests on the tallest
+                    // support among them. Shorter columns therefore need an
+                    // empty gap below the footprint as well as its own height.
+                    // Using only `+ height` lets their upper 1x1 Tiles occupy
+                    // the same display rows as a 2x1/2x2 footprint.
+                    int clusterBottom = GetClusterBottomRow(cluster);
+                    int rowAboveFootprint = clusterBottom +
+                        Mathf.Max(1, data.height) +
+                        (compactRow - belowCount);
+                    displayRow = Mathf.Max(displayRow, rowAboveFootprint);
+                }
             }
             return displayRow;
         }
 
-        private void LayoutClusters()
+        private void LayoutClusters(
+            bool animate = false,
+            List<Coroutine> activeFalls = null)
         {
             if (tileRoot == null || _columns.Count == 0) return;
             float tileWidth = _layoutCellSize.x > 0.0001f
@@ -533,13 +567,36 @@ private IEnumerator ServeRoutine(SeatBar seats)
                 if (cluster.Remaining <= 0 || cluster.View == null) continue;
                 BoardClusterData data = cluster.Data;
                 Vector2 centerOffset = cluster.View.GetVisualCenterOffset(tileRoot);
-                cluster.View.transform.localPosition = new Vector3(
+                int displayRow = GetClusterBottomRow(cluster);
+                Vector3 target = new Vector3(
                     startX + (data.anchorColumn + (data.width - 1) * .5f) * stepX -
                     centerOffset.x,
-                    (GetClusterBottomRow(cluster) + (data.height - 1) * .5f) * stepY -
+                    (displayRow + (data.height - 1) * .5f) * stepY -
                     centerOffset.y,
                     0f);
-                cluster.View.SetSortingOrder(20 + _maxRows);
+                // Use the same bottom-to-top rule as regular Tiles. A footprint
+                // at a higher row must render behind rows below it instead of
+                // always being forced to the front.
+                cluster.View.SetSortingOrder(10 + _maxRows - displayRow);
+                if (animate)
+                {
+                    Transform clusterTransform = cluster.View.transform;
+                    if (_clusterMoveRoutines.TryGetValue(
+                            clusterTransform, out Coroutine runningMove) &&
+                        runningMove != null)
+                    {
+                        StopCoroutine(runningMove);
+                    }
+
+                    Coroutine fall = StartCoroutine(
+                        MoveTileRoutine(clusterTransform, target));
+                    _clusterMoveRoutines[clusterTransform] = fall;
+                    if (activeFalls != null) activeFalls.Add(fall);
+                }
+                else
+                {
+                    cluster.View.transform.localPosition = target;
+                }
             }
         }
 
@@ -592,7 +649,7 @@ private void LayoutColumn(int col, bool animate, List<Coroutine> activeFalls = n
                     bottomY + displayRow * stepY - centerOffset.y,
                     0f);
                 // Bottom tiles render in front of the rows above them.
-                tile.SetSortingOrder(10 + _maxRows - row);
+                tile.SetSortingOrder(10 + _maxRows - displayRow);
                 if (animate)
                 {
                     // Start every tile's fall together; the caller may wait for all of them.
@@ -665,7 +722,10 @@ private IEnumerator ServeSingleTile(int col, FoodTileView tile, CustomerView cus
             // Falling and flying are independent; release the column after its fall.
             var fallingTiles = new List<Coroutine>();
             LayoutColumn(col, true, fallingTiles);
-            LayoutClusters();
+            // Footprints and 1x1 Tiles must move in the same animation pass.
+            // Teleporting a 2x1/2x2 footprint while its column is falling makes
+            // the regular Tiles appear to pass through it.
+            LayoutClusters(true, fallingTiles);
 
             if (tile != null && customer != null)
                 tile.ConsumeTo(customer.transform, () => flightDone = true);
@@ -792,9 +852,9 @@ private IEnumerator WaitForColumnFall(int col)
         {
             var fallingTiles = new List<Coroutine>();
             LayoutColumn(col, true, fallingTiles);
+            LayoutClusters(true, fallingTiles);
             for (int i = 0; i < fallingTiles.Count; i++)
                 if (fallingTiles[i] != null) yield return fallingTiles[i];
-            LayoutClusters();
             if (col >= 0 && col < _columnBusy.Count)
                 _columnBusy[col] = false;
         }

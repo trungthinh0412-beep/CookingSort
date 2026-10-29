@@ -49,6 +49,8 @@ namespace CookingSort2D
     [Serializable]
     public class BoardClusterData
     {
+        [Tooltip("Exact special Tile prefab variant, for multiple prefabs sharing the same Type and dimensions.")]
+        public FoodTileView tilePrefab;
         public const int DefaultValue = 40;
         public const int DefaultWidth = 2;
         public const int DefaultHeight = 2;

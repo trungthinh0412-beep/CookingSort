@@ -18,7 +18,9 @@ public sealed class CookingBlastLevelEditorWindow : EditorWindow
     [SerializeField] private int laneCount = 4;
     [SerializeField] private int minDemand = 12;
     [SerializeField] private int maxDemand = 18;
-    [SerializeField] private int randomSeed = 1001;
+    
+    [SerializeField] private bool generateSpecialAnimals;
+[SerializeField] private int randomSeed = 1001;
     [SerializeField] private int paletteMask = (1 << (int)FoodColor.Blue) | (1 << (int)FoodColor.Pink);
 
     [SerializeField] private CookingBlastBoardPanel boardPanel = new CookingBlastBoardPanel();
@@ -109,6 +111,7 @@ private void OnLostFocus()
             scroll = EditorGUILayout.BeginScrollView(scroll);
             DrawSettings();
             GUILayout.Space(6);
+            
             DrawBoardEditor();
             GUILayout.Space(8);
             DrawCustomerEditor();
@@ -183,6 +186,9 @@ private void DrawSettings()
         EditorGUILayout.HelpBox("Board, SeatBar and CustomerQueue are nested inside this level prefab. Click a piece above to select it in Prefab Mode.", MessageType.None);
     }
 
+
+
+
 private void DrawBoardEditor()
     {
         boardPanel.Draw(level, ref paintColor, ref boardColumns, ref boardRows, ref paletteMask, ref randomSeed, position.width, laneCount, minDemand, maxDemand);
@@ -232,7 +238,10 @@ private void DrawCustomerEditor()
                     : "Each lane is a column. FRONT at top, BACK below. Click the circle on an Animal to toggle its Egg state; its configured color remains visible here.",
                 MessageType.None);
             customerPriorityPicking = false;
-
+            generateSpecialAnimals = EditorGUILayout.ToggleLeft(
+                new GUIContent("Generate Special Animals (prefab variants)",
+                    "Only affects Auto Generate From Board. Off = regular Animal prefabs; On = include variants with matching Demand."),
+                generateSpecialAnimals);
             using (new EditorGUILayout.HorizontalScope())
             {
                 float laneLabelWidth = EditorGUIUtility.labelWidth;
@@ -248,7 +257,11 @@ private void DrawCustomerEditor()
                 if (GUILayout.Button("Auto Generate From Board", GUILayout.Width(180)))
                 {
                     EndCustomerStroke();
-                    CookingBlastLevelEditing.AutoGenerateCustomers(level, laneCount, minDemand, maxDemand);
+                    bool ok = CookingBlastSeparateGenerator.GenerateAnimals(
+                        level, laneCount, generateSpecialAnimals,
+                        UnityEngine.Random.Range(1, int.MaxValue), out string result);
+                    if (ok) boardPanel.ResetPriority(level);
+                    SetStatus(result, ok ? MessageType.Info : MessageType.Warning);
                     GUIUtility.ExitGUI();
                 }
                 if (GUILayout.Button(new GUIContent("Shuffle Animal Positions",

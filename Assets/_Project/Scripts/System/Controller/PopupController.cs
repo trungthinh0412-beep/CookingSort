@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -28,7 +28,14 @@ public class PopupController : SingletonDontDestroy<PopupController>
     [SerializeField] private NotifyTagItem notifyTagItemPrefab;
 
     [SerializeField] private PopupConfig popupConfig;
+
+
+    [Header("Development / Debug")]
+    [Tooltip("Opt-in: show the floating Debug Console on startup only when Testing mode is also enabled. Off by default to keep gameplay unobstructed.")]
+    [SerializeField] private bool showDebugConsoleOnStart = false;
     [SerializeField] private GameConfig gameConfig;
+
+    private PopupDebugConsole _debugConsoleInstance;
 
 
     // ============================================================
@@ -108,7 +115,9 @@ public class PopupController : SingletonDontDestroy<PopupController>
             blockUI2.SetBlockUIState(false);
         }
 
-        if (gameConfig != null &&
+        // Do not overlay the game with the Debug Console just because
+        // GameConfig.isTesting is enabled. It must be explicitly opted in.
+        if (showDebugConsoleOnStart && gameConfig != null &&
             gameConfig.isTesting)
         {
             InitializeDebugConsole();
@@ -1011,6 +1020,14 @@ public class PopupController : SingletonDontDestroy<PopupController>
 
     public void InitializeDebugConsole()
     {
+        if (_debugConsoleInstance != null)
+        {
+            if (!_debugConsoleInstance.gameObject.activeSelf)
+                _debugConsoleInstance.Show(PopupAnimation.None);
+
+            return;
+        }
+
         if (popupConfig == null ||
             popupConfig.popupDebugConsole == null ||
             canvasTransform == null)
@@ -1018,18 +1035,16 @@ public class PopupController : SingletonDontDestroy<PopupController>
             return;
         }
 
-        PopupDebugConsole popupDebugConsole =
+        _debugConsoleInstance =
             Instantiate(
                 popupConfig.popupDebugConsole,
                 canvasTransform
             );
 
-        popupDebugConsole.Canvas.sortingOrder =
-            999;
+        if (_debugConsoleInstance.Canvas != null)
+            _debugConsoleInstance.Canvas.sortingOrder = 999;
 
-        popupDebugConsole.Show(
-            PopupAnimation.None
-        );
+        _debugConsoleInstance.Show(PopupAnimation.None);
     }
 
 
