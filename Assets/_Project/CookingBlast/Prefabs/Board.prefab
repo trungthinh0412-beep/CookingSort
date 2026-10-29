@@ -157,3 +157,5 @@ MonoBehaviour:
   scanInterval: 0.14
   minimumScanInterval: 0.1
   scanAccelerationPerTile: 0.003
+  nearSourceWeight: 1
+  farSourceWeight: 2
