@@ -75,13 +75,13 @@ public class MainTabSwipeController : MonoBehaviour
         LeanTouch.OnFingerUp -= OnFingerUp;
     }
 
-    public void GoToTab(int targetIndex)
+    public bool GoToTab(int targetIndex)
     {
         if (!CanStartTransition() ||
             targetIndex < 0 ||
             targetIndex >= bottomTabBar.TabCount)
         {
-            return;
+            return false;
         }
 
         int currentIndex =
@@ -90,20 +90,31 @@ public class MainTabSwipeController : MonoBehaviour
         if (targetIndex == currentIndex)
         {
             bottomTabBar.SetSelectedInstant(currentIndex);
-            return;
+            return true;
+        }
+
+        // Several navigation buttons share one Coming Soon page. There is
+        // only one RectTransform, so it cannot slide out and in simultaneously.
+        if (popupController.GetMainTabPopup(currentIndex) ==
+            popupController.GetMainTabPopup(targetIndex))
+        {
+            popupController.SetComingSoonTabIndex(targetIndex);
+            bottomTabBar.SetSelectedInstant(targetIndex);
+            return true;
         }
 
         if (!BeginTransition(
                 currentIndex,
                 targetIndex))
         {
-            return;
+            return false;
         }
 
         settleCoroutine =
             StartCoroutine(
                 SettleTransition(true)
             );
+        return true;
     }
 
     private void OnFingerDown(LeanFinger finger)
@@ -220,6 +231,12 @@ public class MainTabSwipeController : MonoBehaviour
         if (IsTransitioning ||
             popupController == null ||
             bottomTabBar == null)
+        {
+            return false;
+        }
+
+        if (popupController.GetMainTabPopup(sourceIndex) ==
+            popupController.GetMainTabPopup(targetIndex))
         {
             return false;
         }
@@ -367,6 +384,7 @@ public class MainTabSwipeController : MonoBehaviour
 
         if (commit)
         {
+            popupController.SetComingSoonTabIndex(toIndex);
             popupController.CompleteMainTabTransition(
                 fromPopup,
                 toPopup
@@ -432,6 +450,15 @@ public class MainTabSwipeController : MonoBehaviour
 
         for (int i = 0; i < raycastResults.Count; i++)
         {
+            // A tap or a small drag on the navigation bar belongs to its
+            // Button. Letting the page-swipe recognizer claim the same finger
+            // makes BottomBar clicks feel intermittent.
+            if (raycastResults[i].gameObject
+                    .GetComponentInParent<BottomTabBar>() != null)
+            {
+                return true;
+            }
+
             ScrollRect scrollRect =
                 raycastResults[i]
                     .gameObject

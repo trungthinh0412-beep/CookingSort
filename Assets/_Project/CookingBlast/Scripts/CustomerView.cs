@@ -11,6 +11,8 @@ namespace CookingSort2D
     {
         [Tooltip("Short squash before the animal is thrown upwards.")]
         [Min(0f)] public float launchDuration = 0.04f;
+        [Tooltip("Amount of squash while preparing to leave the queue. Lower values make the take-off feel softer without changing flight time.")]
+        [Range(0f, 0.35f)] public float launchSquash = 0.035f;
         [Tooltip("Time for the impact squash and small landing rebound.")]
         [Min(0f)] public float landingDuration = 0.14f;
         [Range(0f, 35f)] public float tiltDegrees = 18f;
@@ -331,7 +333,8 @@ namespace CookingSort2D
             while (elapsed < launchDuration)
             {
                 float t = Mathf.Clamp01(elapsed / launchDuration);
-                float squash = Mathf.Sin(t * Mathf.PI) * landingSquash * 0.55f;
+                float squash = Mathf.Sin(t * Mathf.PI) *
+                    Mathf.Clamp(feel.launchSquash, 0f, 0.35f);
                 transform.localScale = Vector3.Scale(startScale,
                     new Vector3(1f + squash, 1f - squash, 1f));
                 elapsed += Time.unscaledDeltaTime;

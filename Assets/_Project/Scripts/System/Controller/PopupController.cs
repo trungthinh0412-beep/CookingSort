@@ -403,6 +403,20 @@ public class PopupController : SingletonDontDestroy<PopupController>
         GameObject go =
             bottomBarInstance.gameObject;
 
+        // HomeEntranceAnimator temporarily disables this CanvasGroup while
+        // moving between Home and Kingdom. If that transition is cancelled
+        // or its popup is disabled, the persistent BottomBar can stay visible
+        // with input still locked. Showing the bar must always restore input.
+        if (visible)
+        {
+            CanvasGroup inputGroup = go.GetComponent<CanvasGroup>();
+            if (inputGroup != null)
+            {
+                inputGroup.interactable = true;
+                inputGroup.blocksRaycasts = true;
+            }
+        }
+
         if (go.activeSelf == visible)
         {
             if (visible)
@@ -443,9 +457,18 @@ public class PopupController : SingletonDontDestroy<PopupController>
     // 5 MAIN POPUPS
     // ============================================================
 
+    private int comingSoonTabIndex = 0;
+
+    public void SetComingSoonTabIndex(int index)
+    {
+        if (index == 0 || index == 1 || index == 3 || index == 4)
+            comingSoonTabIndex = index;
+    }
+
     private bool IsMainBottomBarPopup(Type popupType)
     {
         return
+            popupType == typeof(PopupComingSoon) ||
             popupType == typeof(PopupShop) ||
             popupType == typeof(PopupLeague) ||
             popupType == typeof(PopupHome) ||
@@ -458,15 +481,12 @@ public class PopupController : SingletonDontDestroy<PopupController>
         switch (index)
         {
             case 0:
-                return Get<PopupShop>();
             case 1:
-                return Get<PopupLeague>();
+            case 3:
+            case 4:
+                return Get<PopupComingSoon>();
             case 2:
                 return Get<PopupHome>();
-            case 3:
-                return Get<PopupCollection>();
-            case 4:
-                return Get<PopupKingdom>();
             default:
                 return null;
         }
@@ -474,6 +494,9 @@ public class PopupController : SingletonDontDestroy<PopupController>
 
     public int GetMainTabIndex(Popup popup)
     {
+        if (popup is PopupComingSoon)
+            return comingSoonTabIndex;
+
         if (popup is PopupShop)
             return 0;
 

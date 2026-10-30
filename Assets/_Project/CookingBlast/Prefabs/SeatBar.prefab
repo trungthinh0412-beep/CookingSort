@@ -114,7 +114,8 @@ MonoBehaviour:
   seatFlyArcHeight: 1.2
   seatFlyScalePunch: 0.12
   seatFlightFeel:
-    launchDuration: 0.04
+    launchDuration: 0.015
+    launchSquash: 0.035
     landingDuration: 0.14
     tiltDegrees: 18
     landingSquash: 0.16

@@ -336,8 +336,33 @@ public class BottomTabBar : MonoBehaviour
         if (!IsValidIndex(newIndex))
             return;
 
-        if (newIndex == currentIndex)
+        PopupController popupController = PopupController.Instance;
+        if (popupController != null &&
+            popupController.GetMainTabPopup(newIndex) == null)
+        {
+            int activeIndex = popupController.GetCurrentMainTabIndex();
+            if (IsValidIndex(activeIndex))
+                SetSelectedInstant(activeIndex);
+
+            popupController.SetBottomBarVisible(true);
+            Debug.LogWarning(
+                $"[BottomTabBar] Tab {newIndex} has no popup configured."
+            );
             return;
+        }
+
+        if (newIndex == currentIndex)
+        {
+            // The selected main tab may still have an overlay popup above it.
+            // Pressing its icon should close that overlay and return to the
+            // selected page instead of silently doing nothing.
+            if (PopupController.Instance != null &&
+                PopupController.Instance.GetCurrentMainTabIndex() != newIndex)
+            {
+                OpenPopup(newIndex);
+            }
+            return;
+        }
 
         SoundController.Instance.PlayFX(SoundName.MenuBar);
 
@@ -1285,7 +1310,22 @@ public class BottomTabBar : MonoBehaviour
             return;
         }
 
+        if (PopupController.Instance.GetMainTabPopup(index) == null)
+        {
+            int activeIndex =
+                PopupController.Instance.GetCurrentMainTabIndex();
+            if (IsValidIndex(activeIndex))
+                SetSelectedInstant(activeIndex);
 
+            PopupController.Instance.SetBottomBarVisible(true);
+            Debug.LogWarning(
+                $"[BottomTabBar] Cannot open tab {index}: popup is missing."
+            );
+            return;
+        }
+
+
+        PopupController.Instance.SetComingSoonTabIndex(index);
         PopupController.Instance.HideAll();
 
 
@@ -1293,7 +1333,7 @@ public class BottomTabBar : MonoBehaviour
         {
             case 0:
                 PopupController.Instance
-                    .Show<PopupShop>(
+                    .Show<PopupComingSoon>(
                         PopupAnimation.None
                     );
                 break;
@@ -1301,7 +1341,7 @@ public class BottomTabBar : MonoBehaviour
 
             case 1:
                 PopupController.Instance
-                    .Show<PopupLeague>(
+                    .Show<PopupComingSoon>(
                         PopupAnimation.None
                     );
                 break;
@@ -1316,7 +1356,7 @@ public class BottomTabBar : MonoBehaviour
 
             case 3:
                 PopupController.Instance
-                    .Show<PopupCollection>(
+                    .Show<PopupComingSoon>(
                         PopupAnimation.None
                     );
                 break;
@@ -1324,7 +1364,7 @@ public class BottomTabBar : MonoBehaviour
 
             case 4:
                 PopupController.Instance
-                    .Show<PopupKingdom>(
+                    .Show<PopupComingSoon>(
                         PopupAnimation.None
                     );
                 break;
