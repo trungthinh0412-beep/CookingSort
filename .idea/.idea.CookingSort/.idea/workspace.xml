@@ -12,13 +12,22 @@
   <component name="ChangeListManager">
     <list default="true" id="7385c607-852b-4957-a358-4c32033ba9ab" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.CookingSort/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.CookingSort/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AddressableAssetsData/AddressableAssetSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/AddressableAssetsData/AddressableAssetSettings.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/AddressableAssetsData/AssetGroups/CookingBlast Levels.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/AddressableAssetsData/AssetGroups/CookingBlast Levels.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Epic Toon FX/Materials/Basics/snow_AB.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Epic Toon FX/Materials/Basics/snow_AB.mat" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Art/Background/Bg.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Art/Background/Bg.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Art/Background/Game_play_Bg.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Art/Background/Game_play_Bg.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Art/Background/Table.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Art/Background/Table.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Prefabs/Popup/PopupLose.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Prefabs/Popup/PopupLose.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/_Project/Prefabs/Popup/PopupWin.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Prefabs/Popup/PopupWin.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Art/Background/Top_Bg.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Art/Background/Top_Bg.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Art/Element_Animal/Wait_Aniaml.psd" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Art/Element_Animal/Wait_Aniaml.psd" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Art/Element_block/Blue_.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Art/Element_block/Blue_.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Art/Element_block/Purple_.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Art/Element_block/Purple_.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Prefabs/Board.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Prefabs/Board.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Prefabs/Level/LevelBase/LevelBase.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Prefabs/Level/LevelBase/LevelBase.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Scripts/BoardController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Scripts/BoardController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Scripts/CookingSortGameController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Scripts/CookingSortGameController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Scripts/FoodTileView.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/CookingBlast/Scripts/FoodTileView.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Fonts/Mikado/HVD Fonts  MikadoBlack SDF.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Fonts/Mikado/HVD Fonts  MikadoBlack SDF.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Prefabs/Popup/PopupInGame.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Prefabs/Popup/PopupInGame.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/_Project/Textures/GUI/0. Loading/loading_bg.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/_Project/Textures/GUI/0. Loading/loading_bg.png" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -41,23 +50,23 @@
   <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.4160463181380367" />
-      <entry key="MS500" value="4.188662832000851" />
-      <entry key="S2" value="6.64683765328602" />
-      <entry key="S5" value="7.501261782023829" />
-      <entry key="S10" value="8.379098938041592" />
-      <entry key="S30" value="11.906611482526804" />
-      <entry key="S60" value="15.872287309077068" />
-      <entry key="M2" value="19.720876638629434" />
-      <entry key="M5" value="23.108018370739117" />
-      <entry key="M10" value="24.48129753696941" />
-      <entry key="M15" value="24.970599114716197" />
-      <entry key="M30" value="25.47663075251299" />
-      <entry key="H1" value="25.73644295744988" />
-      <entry key="H2" value="26.107476556965445" />
-      <entry key="H4" value="32.682393383032306" />
-      <entry key="D1" value="137.54025516211925" />
-      <entry key="W1" value="206.82605479956646" />
+      <entry key="MS100" value="2.114554294603347" />
+      <entry key="MS500" value="6.338942008118237" />
+      <entry key="S2" value="17.26378087445892" />
+      <entry key="S5" value="26.942085534247415" />
+      <entry key="S10" value="32.73870214150429" />
+      <entry key="S30" value="37.900921655297104" />
+      <entry key="S60" value="39.44016127191952" />
+      <entry key="M2" value="43.57868096027326" />
+      <entry key="M5" value="95.82383460103343" />
+      <entry key="M10" value="219.73116619369213" />
+      <entry key="M15" value="356.30898365287976" />
+      <entry key="M30" value="722.6795959606038" />
+      <entry key="H1" value="1164.4875887850205" />
+      <entry key="H2" value="1580.5059464860865" />
+      <entry key="H4" value="1956.9041088938986" />
+      <entry key="D1" value="2561.746359595791" />
+      <entry key="W1" value="2849.2694242894077" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -79,23 +88,23 @@
       <entry key="W1" value="0.0" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.3372637617873235" />
-      <entry key="MS500" value="4.131566514995184" />
-      <entry key="S2" value="6.6209345727763225" />
-      <entry key="S5" value="7.489260422390807" />
-      <entry key="S10" value="8.372553821093154" />
-      <entry key="S30" value="11.903235112137391" />
-      <entry key="S60" value="15.86959757564853" />
-      <entry key="M2" value="19.71899129807988" />
-      <entry key="M5" value="23.107065110609344" />
-      <entry key="M10" value="24.480779737330163" />
-      <entry key="M15" value="24.970244074222162" />
-      <entry key="M30" value="25.47644812791713" />
-      <entry key="H1" value="25.73635033313931" />
-      <entry key="H2" value="26.10742978487733" />
-      <entry key="H4" value="32.68236815210254" />
-      <entry key="D1" value="137.5402461534649" />
-      <entry key="W1" value="206.8260530575818" />
+      <entry key="MS100" value="2.033412808392946" />
+      <entry key="MS500" value="6.273131492611835" />
+      <entry key="S2" value="17.20126860770988" />
+      <entry key="S5" value="26.88934851262042" />
+      <entry key="S10" value="32.701938452724626" />
+      <entry key="S30" value="37.88525529436908" />
+      <entry key="S60" value="39.431805572453904" />
+      <entry key="M2" value="43.5742671093259" />
+      <entry key="M5" value="95.82142007209096" />
+      <entry key="M10" value="219.72920868799383" />
+      <entry key="M15" value="356.3071204262321" />
+      <entry key="M30" value="722.6778998690444" />
+      <entry key="H1" value="1164.4862672593392" />
+      <entry key="H2" value="1580.5050534028558" />
+      <entry key="H4" value="1956.9035504957737" />
+      <entry key="D1" value="2561.7462344608566" />
+      <entry key="W1" value="2849.269404107559" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{

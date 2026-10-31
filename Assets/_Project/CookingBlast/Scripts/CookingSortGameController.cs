@@ -77,6 +77,7 @@ public void SetLevelDefinition(CookingBlastLevel level)
         public bool TrySeatCustomer(CustomerView customer)
         {
             if (_gameEnded || customer == null || seatBar == null || board == null) return false;
+            if (board.IsIntroAnimating) return false;
             if (!seatBar.TrySeat(customer)) return false;
 
             EvaluateState();
@@ -150,6 +151,7 @@ public void ContinueAfterWin()
         private void EvaluateState()
         {
             if (_gameEnded || board == null || seatBar == null) return;
+            if (board.IsIntroAnimating) return;
 
             // Airborne tiles have left the board but are not served yet.
             // Wait for the scan pipeline and any merge before deciding win/fail.
