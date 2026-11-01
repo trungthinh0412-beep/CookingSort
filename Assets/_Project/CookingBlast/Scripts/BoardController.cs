@@ -26,6 +26,29 @@ namespace CookingSort2D
         [Tooltip("Extra pause after a column finishes sliding down. Keep at 0 for an immediate drop-to-flight handoff.")]
         [SerializeField, Min(0f)] private float serveInterval = 0f;
         [SerializeField, Min(0.01f)] private float dropDuration = 0.13f;
+
+        [Header("Level intro")]
+        [Tooltip("Drop the Board into place in alternating left-to-right / right-to-left rows when a level starts.")]
+        [SerializeField] private bool playIntroAnimation = true;
+        [Tooltip("How far above the highest Board row each block starts.")]
+        [SerializeField, Min(0f)] private float introDropHeight = 4f;
+        [Tooltip("Seconds each block takes to reach its authored Board position.")]
+        [SerializeField, Min(0.01f)] private float introDropDuration = 0.06f;
+        [Tooltip("Delay between consecutive blocks. Keep this small for a fast domino effect.")]
+        [SerializeField, Min(0f)] private float introStagger = 0.008f;
+        [Tooltip("How far an intro block drops below its final position before bouncing back.")]
+        [SerializeField, Min(0f)] private float introOvershootDistance = 0.1f;
+        [Tooltip("Seconds each block gently settles after landing during the level intro.")]
+        [SerializeField, Min(0f)] private float introElasticityDuration = 0.09f;
+        [Tooltip("Small squash and stretch amount when an intro block lands.")]
+        [SerializeField, Range(0f, 0.25f)] private float introElasticityStrength = 0.055f;
+
+        [Header("Drop elasticity")]
+        [Tooltip("Seconds blocks keep bouncing after they fall to fill an eaten Tile's space.")]
+        [SerializeField, Min(0f)] private float dropElasticityDuration = 0.06f;
+        [Tooltip("Squash and stretch amount for blocks falling after an Animal eats a Tile.")]
+        [SerializeField, Range(0f, 0.25f)] private float dropElasticityStrength = 0.012f;
+
         [Header("Tile scanning")]
         [Tooltip("Starting delay between tile launches for each customer")]
         [SerializeField, Min(0f)] private float scanInterval = 0.14f;
@@ -59,8 +82,16 @@ namespace CookingSort2D
             public Vector3 Position;
             public bool IsCluster => Cluster != null;
         }
+        private sealed class IntroBlock
+        {
+            public Transform Transform;
+            public Vector3 Target;
+            public int Row;
+            public float Column;
+        }
         private readonly List<ServeCandidate> _serveCandidates = new List<ServeCandidate>();
         private readonly List<RuntimeCluster> _clusters = new List<RuntimeCluster>();
+        private readonly List<IntroBlock> _introBlocks = new List<IntroBlock>();
         private readonly Dictionary<Transform, Coroutine> _clusterMoveRoutines =
             new Dictionary<Transform, Coroutine>();
         private readonly List<int> _columnFrontRows = new List<int>();
@@ -71,10 +102,12 @@ private readonly List<bool> _columnBusy = new List<bool>();
         private readonly Dictionary<FoodColor, int> _typeRoundRobinCursor = new Dictionary<FoodColor, int>();
         private CookingSortGameController _game;
         private bool _serving;
+        private bool _introAnimating;
         private int _maxRows;
         private Vector2 _layoutCellSize;
 
         public bool IsServing => _serving;
+        public bool IsIntroAnimating => _introAnimating;
         public int ConfiguredTilePrefabCount =>
             tilePrefabsByType != null ? tilePrefabsByType.Length : 0;
 
@@ -224,11 +257,13 @@ _columnBusy.Add(false);
             MeasureLayoutCellSize();
             LayoutAll(false);
             LayoutClusters();
+            if (playIntroAnimation)
+                StartIntroAnimation();
         }
 
         public void BeginServeLoop(SeatBar seats)
         {
-            if (_serving || seats == null || !isActiveAndEnabled) return;
+            if (_serving || _introAnimating || seats == null || !isActiveAndEnabled) return;
             StartCoroutine(ServeRoutine(seats));
         }
 
@@ -255,9 +290,11 @@ _columnBusy.Add(false);
 public void ClearBoard()
         {
             _serving = false;
+            _introAnimating = false;
             StopAllCoroutines();
             _columns.Clear();
             _clusters.Clear();
+            _introBlocks.Clear();
             _clusterMoveRoutines.Clear();
             _columnFrontRows.Clear();
 _columnBusy.Clear();
@@ -438,6 +475,155 @@ private IEnumerator ServeRoutine(SeatBar seats)
         private void LayoutAll(bool animate)
         {
             for (int col = 0; col < _columns.Count; col++) LayoutColumn(col, animate);
+        }
+
+        private void StartIntroAnimation()
+        {
+            _introBlocks.Clear();
+            float highestTargetY = float.MinValue;
+            int bottomRow = int.MaxValue;
+
+            for (int col = 0; col < _columns.Count; col++)
+            {
+                List<FoodTileView> column = _columns[col];
+                for (int row = 0; row < column.Count; row++)
+                {
+                    FoodTileView tile = column[row];
+                    if (tile == null) continue;
+                    int displayRow = GetTileDisplayRow(col, row);
+                    Vector3 target = tile.transform.localPosition;
+                    _introBlocks.Add(new IntroBlock
+                    {
+                        Transform = tile.transform,
+                        Target = target,
+                        Row = displayRow,
+                        Column = col
+                    });
+                    highestTargetY = Mathf.Max(highestTargetY, target.y);
+                    bottomRow = Mathf.Min(bottomRow, displayRow);
+                }
+            }
+
+            for (int i = 0; i < _clusters.Count; i++)
+            {
+                RuntimeCluster cluster = _clusters[i];
+                if (cluster == null || cluster.View == null || cluster.Data == null) continue;
+                BoardClusterData data = cluster.Data;
+                int displayRow = GetClusterBottomRow(cluster) + Mathf.Max(1, data.height) - 1;
+                Vector3 target = cluster.View.transform.localPosition;
+                _introBlocks.Add(new IntroBlock
+                {
+                    Transform = cluster.View.transform,
+                    Target = target,
+                    Row = displayRow,
+                    Column = data.anchorColumn + (Mathf.Max(1, data.width) - 1) * 0.5f
+                });
+                highestTargetY = Mathf.Max(highestTargetY, target.y);
+                bottomRow = Mathf.Min(bottomRow, displayRow);
+            }
+
+            if (_introBlocks.Count == 0) return;
+
+            int firstRow = bottomRow;
+            _introBlocks.Sort((a, b) =>
+            {
+                // Build the Board upward: the bottom row lands first, while
+                // every individual block still slides down from above.
+                int rowOrder = a.Row.CompareTo(b.Row);
+                if (rowOrder != 0) return rowOrder;
+                bool leftToRight = ((a.Row - firstRow) & 1) == 0;
+                return leftToRight
+                    ? a.Column.CompareTo(b.Column)
+                    : b.Column.CompareTo(a.Column);
+            });
+
+            float spawnY = highestTargetY + Mathf.Max(0f, introDropHeight);
+            for (int i = 0; i < _introBlocks.Count; i++)
+            {
+                IntroBlock block = _introBlocks[i];
+                if (block.Transform == null) continue;
+                Vector3 start = block.Target;
+                start.y = spawnY;
+                block.Transform.localPosition = start;
+                block.Transform.gameObject.SetActive(false);
+            }
+
+            _introAnimating = true;
+            StartCoroutine(PlayIntroRoutine());
+        }
+
+        private IEnumerator PlayIntroRoutine()
+        {
+            float stagger = Mathf.Max(0f, introStagger);
+            for (int i = 0; i < _introBlocks.Count; i++)
+            {
+                IntroBlock block = _introBlocks[i];
+                if (block.Transform != null)
+                {
+                    block.Transform.gameObject.SetActive(true);
+                    StartCoroutine(MoveIntroBlockRoutine(block.Transform, block.Target));
+                }
+                if (stagger > 0f && i < _introBlocks.Count - 1)
+                    yield return new WaitForSecondsRealtime(stagger);
+            }
+
+            yield return new WaitForSecondsRealtime(
+                Mathf.Max(0.01f, introDropDuration) + Mathf.Max(0f, introElasticityDuration));
+            _introAnimating = false;
+            _introBlocks.Clear();
+        }
+
+        private IEnumerator MoveIntroBlockRoutine(Transform targetTransform, Vector3 target)
+        {
+            if (targetTransform == null) yield break;
+            Vector3 start = targetTransform.localPosition;
+            Vector3 authoredScale = targetTransform.localScale;
+            Vector3 overshootTarget = target + Vector3.down * Mathf.Max(0f, introOvershootDistance);
+            float elapsed = 0f;
+            float duration = Mathf.Max(0.01f, introDropDuration);
+            while (elapsed < duration && targetTransform != null)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                float t = Mathf.Clamp01(elapsed / duration);
+                float eased = 1f - Mathf.Pow(1f - t, 3f);
+                targetTransform.localPosition = Vector3.LerpUnclamped(start, overshootTarget, eased);
+
+                float strength = Mathf.Max(0f, introElasticityStrength);
+                float airStretch = Mathf.Sin(t * Mathf.PI) * strength * 0.25f;
+                float landingSquash = t * t * strength * 0.55f;
+                targetTransform.localScale = new Vector3(
+                    authoredScale.x * (1f - airStretch + landingSquash),
+                    authoredScale.y * (1f + airStretch - landingSquash),
+                    authoredScale.z);
+                yield return null;
+            }
+            if (targetTransform == null) yield break;
+
+            targetTransform.localPosition = overshootTarget;
+            elapsed = 0f;
+            float elasticityDuration = Mathf.Max(0f, introElasticityDuration);
+            while (elapsed < elasticityDuration && targetTransform != null)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                float t = Mathf.Clamp01(elapsed / Mathf.Max(0.01f, elasticityDuration));
+                float returnEased = 1f - Mathf.Pow(1f - t, 3f);
+                targetTransform.localPosition =
+                    Vector3.LerpUnclamped(overshootTarget, target, returnEased);
+
+                float wobble = Mathf.Cos(t * Mathf.PI * 3f) * (1f - t) *
+                               Mathf.Max(0f, introElasticityStrength) * 0.55f;
+                targetTransform.localScale = new Vector3(
+                    authoredScale.x * (1f + wobble),
+                    authoredScale.y * (1f - wobble),
+                    authoredScale.z);
+                yield return null;
+            }
+
+            if (targetTransform != null)
+            {
+                targetTransform.localPosition = target;
+                targetTransform.localScale = authoredScale;
+            }
         }
 
         private int GetClusterBottomRow(RuntimeCluster cluster)
@@ -664,17 +850,47 @@ private void LayoutColumn(int col, bool animate, List<Coroutine> activeFalls = n
         {
             if (targetTransform == null) yield break;
             Vector3 start = targetTransform.localPosition;
+            Vector3 authoredScale = targetTransform.localScale;
             float elapsed = 0f;
             float duration = Mathf.Max(0.01f, dropDuration);
             while (elapsed < duration && targetTransform != null)
             {
                 elapsed += Time.unscaledDeltaTime;
                 float t = Mathf.Clamp01(elapsed / duration);
-                t = 1f - Mathf.Pow(1f - t, 3f);
-                targetTransform.localPosition = Vector3.LerpUnclamped(start, target, t);
+                float eased = 1f - Mathf.Pow(1f - t, 3f);
+                targetTransform.localPosition = Vector3.LerpUnclamped(start, target, eased);
+
+                float stretch = Mathf.Sin(t * Mathf.PI) *
+                                Mathf.Max(0f, dropElasticityStrength) * 0.35f;
+                targetTransform.localScale = new Vector3(
+                    authoredScale.x * (1f - stretch),
+                    authoredScale.y * (1f + stretch),
+                    authoredScale.z);
                 yield return null;
             }
-            if (targetTransform != null) targetTransform.localPosition = target;
+            if (targetTransform == null) yield break;
+
+            targetTransform.localPosition = target;
+            elapsed = 0f;
+            float elasticityDuration = Mathf.Max(0f, dropElasticityDuration);
+            while (elapsed < elasticityDuration && targetTransform != null)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                float t = Mathf.Clamp01(elapsed / Mathf.Max(0.01f, elasticityDuration));
+                float wobble = Mathf.Sin(t * Mathf.PI * 3f) * (1f - t) *
+                               Mathf.Max(0f, dropElasticityStrength);
+                targetTransform.localScale = new Vector3(
+                    authoredScale.x * (1f + wobble),
+                    authoredScale.y * (1f - wobble),
+                    authoredScale.z);
+                yield return null;
+            }
+
+            if (targetTransform != null)
+            {
+                targetTransform.localPosition = target;
+                targetTransform.localScale = authoredScale;
+            }
         }
     
 
