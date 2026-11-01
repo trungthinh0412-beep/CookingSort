@@ -17,6 +17,8 @@ namespace CookingSort2D
     public sealed class SpineSilhouetteOutline : MonoBehaviour
     {
         [Header("White outline")]
+        [Tooltip("Optional material using World/Custom/Screen Space Outline. Keep the atlas material on the SkeletonRenderer.")]
+        [SerializeField] private Material outlineMaterialTemplate;
         [SerializeField] private Color outlineColor = Color.white;
         [Tooltip("Width in reference pixels. It follows the character's Transform scale.")]
         [SerializeField, Range(0f, 24f)] private float outlineWidth = 6f;
@@ -118,7 +120,7 @@ namespace CookingSort2D
                 outlineRenderer.enabled = sourceRenderer.enabled && !sourceRenderer.forceRenderingOff &&
                     skeletonRenderer.enabled && skeletonRenderer.valid;
             }
-            if (dirty) RefreshOutline();
+            if (dirty || outlineMaterialTemplate != null) RefreshOutline();
         }
 
         /// <summary>Also usable by editor previews after manually evaluating a pose.</summary>
@@ -128,6 +130,22 @@ namespace CookingSort2D
                 sourceFilter == null || skeletonRenderer == null) return;
 
             Mesh mesh = sourceFilter.sharedMesh; // Spine alternates between two meshes.
+            float outlineWidth = this.outlineWidth;
+            float softness = this.softness;
+            Color outlineColor = this.outlineColor;
+            float glowWidth = this.glowWidth;
+            Color glowColor = this.glowColor;
+            float glowStrength = this.glowStrength;
+            if (outlineMaterialTemplate != null && outlineMaterialTemplate.HasProperty("_FillWidth"))
+            {
+                outlineWidth = Mathf.Max(0f, outlineMaterialTemplate.GetFloat("_FillWidth"));
+                outlineColor = outlineMaterialTemplate.GetColor("_FillColor");
+                outlineColor.a *= outlineMaterialTemplate.GetFloat("_OutlineAlpha");
+                softness = outlineMaterialTemplate.GetFloat("_Softness");
+                glowWidth = Mathf.Max(0f, outlineMaterialTemplate.GetFloat("_GlowWidth"));
+                glowColor = outlineMaterialTemplate.GetColor("_GlowColor");
+                glowStrength = outlineMaterialTemplate.GetFloat("_GlowStrength");
+            }
             float opacity = skeletonRenderer.Skeleton != null ? skeletonRenderer.Skeleton.A : 0f;
             bool visible = sourceRenderer.enabled && !sourceRenderer.forceRenderingOff &&
                 skeletonRenderer.enabled && skeletonRenderer.valid && mesh != null &&
@@ -239,7 +257,11 @@ namespace CookingSort2D
             reportedUnsupported = false;
             if (maskMaterial == null) maskMaterial = NewMaterial(maskShader);
             if (distanceMaterial == null) distanceMaterial = NewMaterial(distanceShader);
-            if (outlineMaterial == null) outlineMaterial = NewMaterial(outlineShader);
+            Shader displayShader = outlineMaterialTemplate != null &&
+                outlineMaterialTemplate.HasProperty("_FillWidth")
+                ? outlineMaterialTemplate.shader : outlineShader;
+            if (outlineMaterial == null) outlineMaterial = NewMaterial(displayShader);
+            else if (outlineMaterial.shader != displayShader) outlineMaterial.shader = displayShader;
             if (commands == null) commands = new CommandBuffer { name = "Spine silhouette mask" };
             if (drawProperties == null) drawProperties = new MaterialPropertyBlock();
 

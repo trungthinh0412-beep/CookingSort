@@ -131,6 +131,7 @@ GameObject:
   - component: {fileID: 258294269}
   - component: {fileID: 258294268}
   - component: {fileID: 258294267}
+  - component: {fileID: 258294271}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -228,6 +229,30 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &258294271
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 258294266}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 07b29b1004f8987459c023c161225a9c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CookingSort2D.SharedCameraOutline
+  outlineStyle: {fileID: 2100000, guid: e18f48d442f8f85438bddd4e99f3a0e7, type: 2}
+  resolutionScale: 0.5
+  alphaThreshold: 0.1
+  flipMaskY: 1
+  targetLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  maskShader: {fileID: 4800000, guid: 983674f060949484ab5135bf18c18dc7, type: 3}
+  distanceShader: {fileID: 4800000, guid: c71037a689964bd499eccce0492ff3c8, type: 3}
+  compositeShader: {fileID: 4800000, guid: 83b6cf93f73ab56478875b281cfddf59, type: 3}
+  renderStatus: No enabled Camera Outline Target
+  renderedSubmeshes: 0
 --- !u!1001 &532230603
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -236,6 +261,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1819210388}
     m_Modifications:
+    - target: {fileID: 595654994400155074, guid: d46e629ac21400743b8826af5428d03e, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
+      objectReference: {fileID: 0}
     - target: {fileID: 1388060638590486946, guid: d46e629ac21400743b8826af5428d03e, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -315,6 +344,14 @@ PrefabInstance:
     - target: {fileID: 1388060638590486946, guid: d46e629ac21400743b8826af5428d03e, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3757618230716677060, guid: d46e629ac21400743b8826af5428d03e, type: 3}
+      propertyPath: m_fontColor32.rgba
+      value: 4280964593
+      objectReference: {fileID: 0}
+    - target: {fileID: 3757618230716677060, guid: d46e629ac21400743b8826af5428d03e, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
       objectReference: {fileID: 0}
     - target: {fileID: 6892924280100785267, guid: d46e629ac21400743b8826af5428d03e, type: 3}
       propertyPath: m_Name

@@ -4,6 +4,9 @@ Shader "Custom/AbsoluteCornerFold"
     {
         _MainTex ("Card Texture", 2D) = "white" {}
         _Color ("Tint", Color) = (1,1,1,1)
+        [Toggle(_STRAIGHT_ALPHA_INPUT)] _StraightAlphaInput ("Straight Alpha Texture", Int) = 0
+        [HideInInspector] _StencilRef ("Stencil Reference", Float) = 1
+        [HideInInspector][Enum(UnityEngine.Rendering.CompareFunction)] _StencilComp ("Stencil Comparison", Float) = 8
         
         _PullX ("Pull X (Right)", Range(-5, 5)) = 1.0
         _PullY ("Pull Y (Down)", Range(-5, 5)) = -1.0
@@ -23,15 +26,23 @@ Shader "Custom/AbsoluteCornerFold"
         
         Cull Off      
         Lighting Off
-        ZWrite On     
-        Blend SrcAlpha OneMinusSrcAlpha 
+        ZWrite Off
+        Blend One OneMinusSrcAlpha
+        Stencil
+        {
+            Ref [_StencilRef]
+            Comp [_StencilComp]
+            Pass Keep
+        }
 
         Pass
         {
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #pragma shader_feature _ _STRAIGHT_ALPHA_INPUT
             #include "UnityCG.cginc"
+            #include "Assets/Spine/Runtime/spine-unity/Shaders/CGIncludes/Spine-Common.cginc"
 
             struct appdata_t
             {
@@ -76,11 +87,20 @@ Shader "Custom/AbsoluteCornerFold"
 
                 OUT.vertex = UnityObjectToClipPos(IN.vertex);
                 OUT.texcoord = TRANSFORM_TEX(IN.texcoord, _MainTex);
-                OUT.color = IN.color * _Color;
+                OUT.color = PMAGammaToTargetSpace(IN.color);
+                OUT.color.rgb *= _Color.rgb * _Color.a;
+                OUT.color.a *= _Color.a;
                 return OUT;
             }
 
-            // We will do the heavy lifting cleanly in the C# script by passing the exact local vertex position.
+            fixed4 frag(v2f IN) : SV_Target
+            {
+                fixed4 texColor = tex2D(_MainTex, IN.texcoord);
+                #if defined(_STRAIGHT_ALPHA_INPUT)
+                    texColor.rgb *= texColor.a;
+                #endif
+                return texColor * IN.color;
+            }
             ENDCG
         }
     }

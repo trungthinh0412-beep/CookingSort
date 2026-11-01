@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: character_Material
-  m_Shader: {fileID: 4800000, guid: a1f1620a84a596442b714920ab33eefc, type: 3}
+  m_Shader: {fileID: 4800000, guid: 9910ca45e2840da4b91fd5b42806dcbe, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -28,11 +28,18 @@ Material:
         m_Texture: {fileID: 2800000, guid: 503e08bd9ae3c024cb7eae324678f9c2, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _MaskTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
     - _Cutoff: 0.1
+    - _FillWidth: 3.4
     - _GlowStrength: 0.65
-    - _GlowWidth: 12
+    - _GlowWidth: 5.3
+    - _Opacity: 1
+    - _OutlineAlpha: 1
     - _OutlineMipLevel: 0
     - _OutlineOpaqueAlpha: 1
     - _OutlineReferenceTexWidth: 1024
@@ -47,6 +54,7 @@ Material:
     - _ThresholdEnd: 0.25
     - _Use8Neighbourhood: 1
     m_Colors:
+    - _FillColor: {r: 1, g: 1, b: 1, a: 1}
     - _GlowColor: {r: 1, g: 1, b: 1, a: 0}
     - _OutlineColor: {r: 1, g: 1, b: 0, a: 1}
   m_BuildTextureStacks: []
