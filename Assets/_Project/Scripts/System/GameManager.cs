@@ -37,7 +37,6 @@ public partial class GameManager : SingletonDontDestroy<GameManager>
         if (PopupController.Instance != null)
         {
             PopupController.Instance.HideAll();
-            PopupController.Instance.Show<PopupBackground>();
             PopupController.Instance.Show<PopupHome>();
         }
     }

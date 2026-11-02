@@ -64,7 +64,6 @@ public class IngamePauseMenu : MonoBehaviour
         if (PopupController.Instance != null)
         {
             PopupController.Instance.HideAll();
-            PopupController.Instance.Show<PopupBackground>(PopupAnimation.None);
             PopupController.Instance.Show<PopupHome>(PopupAnimation.None);
         }
         SceneManager.LoadScene("GameplayScene");

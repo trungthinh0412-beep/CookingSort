@@ -1285,7 +1285,7 @@ MonoBehaviour:
   popupConfig: {fileID: 11400000, guid: c45c30f794c42b745b31ed68ceaa4b50, type: 2}
   popupSpecialsPrefab: {fileID: -361204575093850574, guid: f7c6095ebc4361dab86f21b3e4058c69, type: 3}
   popupCareerPrefab: {fileID: -361204575093850574, guid: 08d71a6fcd5472ebb97032c4f5169d7a, type: 3}
-  showDebugConsoleOnStart: 1
+  showDebugConsoleOnStart: 0
   gameConfig: {fileID: 11400000, guid: abfd885ca77eae94b9344b757069ee64, type: 2}
   bottomBarPrefab: {fileID: 1582264075637253865}
   bottomBarSortingOrder: 500

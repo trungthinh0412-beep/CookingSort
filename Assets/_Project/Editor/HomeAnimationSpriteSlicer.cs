@@ -7,30 +7,33 @@ using UnityEngine;
 internal static class HomeAnimationSpriteSlicer
 {
     private const string SourceAssetPath =
-        "Assets/_Project/Textures/GUI/1. Home/Home_animation.png";
+        "Assets/_Project/Textures/GUI/1. Home/Home_animation2.png";
+    private const string PopupHomeAssetPath =
+        "Assets/_Project/Prefabs/Popup/PopupHome.prefab";
 
-    private const int FrameWidth = 753;
-    private const int FrameHeight = 642;
+    private const int FrameWidth = 720;
+    private const int FrameHeight = 724;
     private const int Columns = 10;
-    private const int Rows = 6;
+    private const int Rows = 8;
     private const int FramesPerSheet = Columns * Rows;
     private const int SheetWidth = FrameWidth * Columns;
     private const int SheetHeight = FrameHeight * Rows;
     private const int AndroidMaxSize = 8192;
+    private const int SourcePreviewMaxSize = 2048;
 
     private static readonly SheetDefinition[] Sheets =
     {
         new SheetDefinition(
-            "Assets/_Project/Textures/GUI/1. Home/Home_animation_000_059.png",
+            "Assets/_Project/Textures/GUI/1. Home/Home_animation2_000_079.png",
             0
         ),
         new SheetDefinition(
-            "Assets/_Project/Textures/GUI/1. Home/Home_animation_060_119.png",
-            60
+            "Assets/_Project/Textures/GUI/1. Home/Home_animation2_080_159.png",
+            80
         ),
         new SheetDefinition(
-            "Assets/_Project/Textures/GUI/1. Home/Home_animation_120_179.png",
-            120
+            "Assets/_Project/Textures/GUI/1. Home/Home_animation2_160_239.png",
+            160
         )
     };
 
@@ -48,6 +51,11 @@ internal static class HomeAnimationSpriteSlicer
 
     private static void EnsureCorrectLayout()
     {
+        // Opening prefab contents while entering Play Mode invokes Awake on
+        // components inside preview scenes. Validate assets only in Edit Mode.
+        if (EditorApplication.isPlayingOrWillChangePlaymode)
+            return;
+
         if (EditorApplication.isCompiling || EditorApplication.isUpdating)
         {
             EditorApplication.delayCall += EnsureCorrectLayout;
@@ -65,6 +73,8 @@ internal static class HomeAnimationSpriteSlicer
         {
             ApplySheet(sheet, force);
         }
+
+        ConfigurePopupHomeAnimation();
     }
 
     private static void ConfigureSourceTexture()
@@ -72,10 +82,19 @@ internal static class HomeAnimationSpriteSlicer
         TextureImporter importer =
             AssetImporter.GetAtPath(SourceAssetPath) as TextureImporter;
 
-        if (importer == null || !NeedsQualityUpdate(importer))
+        if (importer == null || !NeedsSourcePreviewUpdate(importer))
             return;
 
-        ApplyMaximumQualitySettings(importer);
+        importer.textureType = TextureImporterType.Default;
+        importer.maxTextureSize = SourcePreviewMaxSize;
+        importer.mipmapEnabled = false;
+        importer.filterMode = FilterMode.Bilinear;
+        importer.textureCompression = TextureImporterCompression.Compressed;
+        importer.compressionQuality = 50;
+        importer.crunchedCompression = false;
+        importer.alphaIsTransparency = true;
+        importer.npotScale = TextureImporterNPOTScale.None;
+        importer.ClearPlatformTextureSettings("Android");
         importer.SaveAndReimport();
     }
 
@@ -107,15 +126,15 @@ internal static class HomeAnimationSpriteSlicer
         SpriteRect[] existingRects = dataProvider.GetSpriteRects();
         bool layoutIsCorrect = HasCorrectLayout(
             existingRects,
-            sheet.FirstFrame
+            sheet
         );
         bool qualityIsCorrect = !NeedsQualityUpdate(importer);
 
         if (!force && layoutIsCorrect && qualityIsCorrect)
             return;
 
-        Dictionary<string, GUID> existingIds = existingRects
-            .GroupBy(spriteRect => spriteRect.name)
+        Dictionary<Rect, GUID> existingIdsByRect = existingRects
+            .GroupBy(spriteRect => spriteRect.rect)
             .ToDictionary(group => group.Key, group => group.First().spriteID);
 
         SpriteRect[] spriteRects = new SpriteRect[FramesPerSheet];
@@ -124,13 +143,19 @@ internal static class HomeAnimationSpriteSlicer
 
         for (int localIndex = 0; localIndex < FramesPerSheet; localIndex++)
         {
-            int globalIndex = sheet.FirstFrame + localIndex;
             int row = localIndex / Columns;
             int column = localIndex % Columns;
-            string spriteName = $"Home_animation_{globalIndex}";
+            int globalIndex = GetGlobalFrameIndex(sheet, row, column);
+            string spriteName = $"Home_animation2_{globalIndex}";
+            Rect frameRect = new Rect(
+                column * FrameWidth,
+                (Rows - 1 - row) * FrameHeight,
+                FrameWidth,
+                FrameHeight
+            );
 
-            GUID spriteId = existingIds.TryGetValue(
-                spriteName,
+            GUID spriteId = existingIdsByRect.TryGetValue(
+                frameRect,
                 out GUID existingId
             )
                 ? existingId
@@ -139,12 +164,7 @@ internal static class HomeAnimationSpriteSlicer
             SpriteRect spriteRect = new SpriteRect
             {
                 name = spriteName,
-                rect = new Rect(
-                    column * FrameWidth,
-                    (Rows - 1 - row) * FrameHeight,
-                    FrameWidth,
-                    FrameHeight
-                ),
+                rect = frameRect,
                 alignment = SpriteAlignment.Center,
                 pivot = new Vector2(0.5f, 0.5f),
                 border = Vector4.zero,
@@ -164,7 +184,7 @@ internal static class HomeAnimationSpriteSlicer
         nameFileIdDataProvider?.SetNameFileIdPairs(nameFileIdPairs);
 
         dataProvider.Apply();
-        ApplyMaximumQualitySettings(importer);
+        ApplyOptimizedSheetSettings(importer);
         importer.SaveAndReimport();
 
         Texture2D importedTexture =
@@ -183,17 +203,18 @@ internal static class HomeAnimationSpriteSlicer
 
         Debug.Log(
             $"[HomeAnimationSpriteSlicer] Built {sheet.AssetPath} with " +
-            $"frames {sheet.FirstFrame}-{sheet.FirstFrame + FramesPerSheet - 1} " +
+            $"sequential frames {sheet.FirstFrameIndex}-" +
+            $"{sheet.FirstFrameIndex + FramesPerSheet - 1} " +
             $"at exact size {SheetWidth}x{SheetHeight}."
         );
     }
 
-    private static void ApplyMaximumQualitySettings(TextureImporter importer)
+    private static void ApplyOptimizedSheetSettings(TextureImporter importer)
     {
         importer.maxTextureSize = AndroidMaxSize;
         importer.mipmapEnabled = false;
         importer.filterMode = FilterMode.Point;
-        importer.textureCompression = TextureImporterCompression.Uncompressed;
+        importer.textureCompression = TextureImporterCompression.CompressedHQ;
         importer.compressionQuality = 100;
         importer.crunchedCompression = false;
         importer.alphaIsTransparency = true;
@@ -204,9 +225,9 @@ internal static class HomeAnimationSpriteSlicer
         androidSettings.name = "Android";
         androidSettings.overridden = true;
         androidSettings.maxTextureSize = AndroidMaxSize;
-        androidSettings.format = TextureImporterFormat.RGBA32;
+        androidSettings.format = TextureImporterFormat.ASTC_6x6;
         androidSettings.textureCompression =
-            TextureImporterCompression.Uncompressed;
+            TextureImporterCompression.CompressedHQ;
         androidSettings.compressionQuality = 100;
         androidSettings.crunchedCompression = false;
         importer.SetPlatformTextureSettings(androidSettings);
@@ -222,20 +243,37 @@ internal static class HomeAnimationSpriteSlicer
             importer.npotScale != TextureImporterNPOTScale.None ||
             importer.mipmapEnabled ||
             importer.filterMode != FilterMode.Point ||
-            importer.textureCompression != TextureImporterCompression.Uncompressed ||
+            importer.textureCompression != TextureImporterCompression.CompressedHQ ||
             importer.compressionQuality != 100 ||
             importer.crunchedCompression ||
             !androidSettings.overridden ||
             androidSettings.maxTextureSize != AndroidMaxSize ||
-            androidSettings.format != TextureImporterFormat.RGBA32 ||
-            androidSettings.textureCompression != TextureImporterCompression.Uncompressed ||
+            androidSettings.format != TextureImporterFormat.ASTC_6x6 ||
+            androidSettings.textureCompression != TextureImporterCompression.CompressedHQ ||
             androidSettings.compressionQuality != 100 ||
             androidSettings.crunchedCompression;
     }
 
+    private static bool NeedsSourcePreviewUpdate(TextureImporter importer)
+    {
+        TextureImporterPlatformSettings androidSettings =
+            importer.GetPlatformTextureSettings("Android");
+
+        return
+            importer.textureType != TextureImporterType.Default ||
+            importer.maxTextureSize != SourcePreviewMaxSize ||
+            importer.npotScale != TextureImporterNPOTScale.None ||
+            importer.mipmapEnabled ||
+            importer.filterMode != FilterMode.Bilinear ||
+            importer.textureCompression != TextureImporterCompression.Compressed ||
+            importer.compressionQuality != 50 ||
+            importer.crunchedCompression ||
+            androidSettings.overridden;
+    }
+
     private static bool HasCorrectLayout(
         SpriteRect[] spriteRects,
-        int firstFrame
+        SheetDefinition sheet
     )
     {
         if (spriteRects == null || spriteRects.Length != FramesPerSheet)
@@ -247,10 +285,10 @@ internal static class HomeAnimationSpriteSlicer
 
         for (int localIndex = 0; localIndex < FramesPerSheet; localIndex++)
         {
-            int globalIndex = firstFrame + localIndex;
             int row = localIndex / Columns;
             int column = localIndex % Columns;
-            string spriteName = $"Home_animation_{globalIndex}";
+            int globalIndex = GetGlobalFrameIndex(sheet, row, column);
+            string spriteName = $"Home_animation2_{globalIndex}";
 
             if (!spritesByName.TryGetValue(
                     spriteName,
@@ -274,15 +312,160 @@ internal static class HomeAnimationSpriteSlicer
         return true;
     }
 
+    private static int GetGlobalFrameIndex(
+        SheetDefinition sheet,
+        int row,
+        int column
+    )
+    {
+        return sheet.FirstFrameIndex + row * Columns + column;
+    }
+
+    private static void ConfigurePopupHomeAnimation()
+    {
+        Dictionary<string, Sprite> framesByName =
+            new Dictionary<string, Sprite>(Sheets.Length * FramesPerSheet);
+        foreach (SheetDefinition sheet in Sheets)
+        {
+            List<Sprite> sheetFrames = AssetDatabase
+                .LoadAllAssetsAtPath(sheet.AssetPath)
+                .OfType<Sprite>()
+                .ToList();
+
+            if (sheetFrames.Count != FramesPerSheet)
+                return;
+
+            foreach (Sprite sprite in sheetFrames)
+            {
+                if (!framesByName.TryAdd(sprite.name, sprite))
+                {
+                    Debug.LogError(
+                        $"[HomeAnimationSpriteSlicer] Duplicate frame name: " +
+                        sprite.name
+                    );
+                    return;
+                }
+            }
+        }
+
+        List<Sprite> allFrames =
+            new List<Sprite>(Sheets.Length * FramesPerSheet);
+        for (int frameIndex = 0;
+             frameIndex < Sheets.Length * FramesPerSheet;
+             frameIndex++)
+        {
+            string frameName = $"Home_animation2_{frameIndex}";
+            if (!framesByName.TryGetValue(frameName, out Sprite sprite))
+            {
+                Debug.LogError(
+                    $"[HomeAnimationSpriteSlicer] Missing frame: {frameName}"
+                );
+                return;
+            }
+
+            allFrames.Add(sprite);
+        }
+
+        GameObject root = PrefabUtility.LoadPrefabContents(PopupHomeAssetPath);
+        try
+        {
+            SpriteAnimator animator = root
+                .GetComponentsInChildren<SpriteAnimator>(true)
+                .FirstOrDefault(component => component.gameObject.name == "Image");
+
+            if (animator == null)
+            {
+                Debug.LogError(
+                    "[HomeAnimationSpriteSlicer] PopupHome animation object was not found."
+                );
+                return;
+            }
+
+            SerializedObject serializedAnimator = new SerializedObject(animator);
+            SerializedProperty frameSource =
+                serializedAnimator.FindProperty("frameSource");
+            SerializedProperty spriteSheet =
+                serializedAnimator.FindProperty("spriteSheet");
+            SerializedProperty frames = serializedAnimator.FindProperty("frames");
+            SerializedProperty generateGridFrames =
+                serializedAnimator.FindProperty("generateGridFrames");
+            SerializedProperty targetImage =
+                serializedAnimator.FindProperty("targetImage");
+            UnityEngine.UI.Image image =
+                targetImage.objectReferenceValue as UnityEngine.UI.Image;
+
+            bool isCurrent =
+                frameSource.enumValueIndex ==
+                    (int)SpriteAnimatorFrameSource.FrameByFrame &&
+                spriteSheet.objectReferenceValue == null &&
+                !generateGridFrames.boolValue &&
+                frames.arraySize == allFrames.Count &&
+                image != null &&
+                image.preserveAspect &&
+                image.rectTransform.sizeDelta ==
+                    new Vector2(FrameWidth, FrameHeight);
+
+            if (isCurrent)
+            {
+                for (int i = 0; i < allFrames.Count; i++)
+                {
+                    if (frames.GetArrayElementAtIndex(i).objectReferenceValue !=
+                        allFrames[i])
+                    {
+                        isCurrent = false;
+                        break;
+                    }
+                }
+            }
+
+            if (isCurrent)
+                return;
+
+            frameSource.enumValueIndex =
+                (int)SpriteAnimatorFrameSource.FrameByFrame;
+            spriteSheet.objectReferenceValue = null;
+            generateGridFrames.boolValue = false;
+            frames.arraySize = allFrames.Count;
+            for (int i = 0; i < allFrames.Count; i++)
+            {
+                frames.GetArrayElementAtIndex(i).objectReferenceValue =
+                    allFrames[i];
+            }
+
+            serializedAnimator.ApplyModifiedPropertiesWithoutUndo();
+
+            if (image != null)
+            {
+                image.sprite = allFrames[0];
+                image.preserveAspect = true;
+                image.rectTransform.sizeDelta =
+                    new Vector2(FrameWidth, FrameHeight);
+                EditorUtility.SetDirty(image);
+                EditorUtility.SetDirty(image.rectTransform);
+            }
+
+            EditorUtility.SetDirty(animator);
+            PrefabUtility.SaveAsPrefabAsset(root, PopupHomeAssetPath);
+            Debug.Log(
+                $"[HomeAnimationSpriteSlicer] PopupHome now uses " +
+                $"Home_animation2 with {allFrames.Count} frames."
+            );
+        }
+        finally
+        {
+            PrefabUtility.UnloadPrefabContents(root);
+        }
+    }
+
     private readonly struct SheetDefinition
     {
         public readonly string AssetPath;
-        public readonly int FirstFrame;
+        public readonly int FirstFrameIndex;
 
-        public SheetDefinition(string assetPath, int firstFrame)
+        public SheetDefinition(string assetPath, int firstFrameIndex)
         {
             AssetPath = assetPath;
-            FirstFrame = firstFrame;
+            FirstFrameIndex = firstFrameIndex;
         }
     }
 }

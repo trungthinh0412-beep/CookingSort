@@ -50,6 +50,7 @@ public class IAPController : SingletonDontDestroy<IAPController>
             _store.OnPurchaseFailed += OnPurchaseFailed; // replacement for OnPurchaseFailed
             _store.OnPurchaseDeferred += OnPurchaseDeferred;
             _store.OnPurchaseConfirmed += OnPurchaseConfirmed; // optional but useful for logging/analytics
+            _store.OnStoreConnected += OnStoreConnected;
             _store.OnStoreDisconnected += OnStoreDisconnected; // replacement for OnInitializeFailed
 
             // 3) Connect to the store
@@ -341,6 +342,11 @@ public class IAPController : SingletonDontDestroy<IAPController>
     private void OnPurchaseConfirmed(Order order)
     {
         Debug.Log($"Purchase confirmed: {order}");
+    }
+
+    private void OnStoreConnected()
+    {
+        Debug.Log("[IAP] Store connected.");
     }
 
     private void OnStoreDisconnected(StoreConnectionFailureDescription desc)
