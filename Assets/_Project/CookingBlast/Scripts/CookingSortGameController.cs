@@ -92,16 +92,18 @@ public void SetLevelDefinition(CookingBlastLevel level)
             EvaluateState();
         }
 
+        public void OnTileLaunched()
+        {
+            if (_gameEnded) return;
+            _combo++;
+            if (hud != null) hud.SetCombo(_combo, GetComboMultiplier(_combo));
+        }
+
         public void OnTileServed(FoodColor color)
         {
             if (_gameEnded) return;
             _servedTiles++;
-            _combo++;
-            if (hud != null)
-            {
-                hud.SetProgress(_servedTiles);
-                hud.SetCombo(_combo, GetComboMultiplier(_combo));
-            }
+            if (hud != null) hud.SetProgress(_servedTiles);
         }
 
         public void OnServeLoopFinished()
@@ -185,10 +187,10 @@ public void ContinueAfterWin()
 
         private float GetComboMultiplier(int combo)
         {
-            if (combo >= 180) return 3f;
-            if (combo >= 100) return 2f;
-            if (combo >= 50) return 1.5f;
-            if (combo >= 20) return 1.2f;
+            if (combo >= 300) return 3f;
+            if (combo >= 200) return 2f;
+            if (combo >= 100) return 1.5f;
+            if (combo >= 30) return 1.2f;
             return 1f;
         }
     }

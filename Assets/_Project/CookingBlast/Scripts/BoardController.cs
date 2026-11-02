@@ -7,6 +7,13 @@ namespace CookingSort2D
 {
     public class BoardController : MonoBehaviour
     {
+        private enum TileSelectionMode
+        {
+            RowByRowLeftToRight,
+            WeightedFarther
+        }
+
+        private const int DominoRowComplete = -2;
         
         [Header("Tile Prefabs By Match Type")]
         [Tooltip("Prefab list order is arbitrary. Matching uses each Tile prefab's Type; variants may share a Type.")]
@@ -21,6 +28,12 @@ namespace CookingSort2D
         [SerializeField, Range(-0.5f, 0.5f)] private float gapX = 0f;
         [Tooltip("Vertical space added to the measured sprite height. Use a negative value to overlap rows.")]
         [SerializeField, Range(-1f, 0.5f)] private float gapY = -0.28f;
+
+        [Header("Front row shadow")]
+        [Tooltip("Shadow displayed beneath the currently exposed Tile in each column.")]
+        [SerializeField] private Sprite frontRowShadowSprite;
+        [Tooltip("How far the shadow overlaps the bottom edge of its Tile.")]
+        [SerializeField, Min(0f)] private float frontRowShadowOverlap = 0.08f;
 
         [Header("Tile flow")]
         [Tooltip("Extra pause after a column finishes sliding down. Keep at 0 for an immediate drop-to-flight handoff.")]
@@ -50,6 +63,11 @@ namespace CookingSort2D
         [SerializeField, Range(0f, 0.25f)] private float dropElasticityStrength = 0.012f;
 
         [Header("Tile scanning")]
+        [Tooltip("Row By Row finishes the current front row from left to right before returning to the left side for the next row. Weighted Farther preserves the previous random distance-based behavior.")]
+        [SerializeField] private TileSelectionMode tileSelectionMode =
+            TileSelectionMode.RowByRowLeftToRight;
+        [Tooltip("Minimum delay between consecutive launches while using Domino Left To Right.")]
+        [SerializeField, Min(0f)] private float dominoLaunchInterval = 0.04f;
         [Tooltip("Starting delay between tile launches for each customer")]
         [SerializeField, Min(0f)] private float scanInterval = 0.14f;
         [Tooltip("Fastest interval for a customer after building combo")]
@@ -100,6 +118,8 @@ private readonly List<bool> _columnBusy = new List<bool>();
         private readonly Dictionary<CustomerView, int> _customerDeliveredCount = new Dictionary<CustomerView, int>();
         private readonly Dictionary<CustomerView, float> _customerNextScanAt = new Dictionary<CustomerView, float>();
         private readonly Dictionary<FoodColor, int> _typeRoundRobinCursor = new Dictionary<FoodColor, int>();
+        private float _nextDominoLaunchAt;
+        private int _dominoNextColumn;
         private CookingSortGameController _game;
         private bool _serving;
         private bool _introAnimating;
@@ -302,6 +322,8 @@ _columnBusy.Clear();
             _customerDeliveredCount.Clear();
             _customerNextScanAt.Clear();
             _typeRoundRobinCursor.Clear();
+            _nextDominoLaunchAt = 0f;
+            _dominoNextColumn = 0;
             if (tileRoot == null) return;
             for (int i = tileRoot.childCount - 1; i >= 0; i--)
                 Destroy(tileRoot.GetChild(i).gameObject);
@@ -371,22 +393,25 @@ private IEnumerator ServeRoutine(SeatBar seats)
                     });
                 }
 
-                // Tile and Cluster sources share one scheduler. Pick an Animal
-                // fairly, then prefer farther sources with a 2:1 max/min weight.
+                // Tile and Cluster sources share one scheduler. Domino mode
+                // launches one serviceable source at a time from left to right.
                 while (_serveCandidates.Count > 0)
                 {
                     CustomerView customer = null;
-                    FoodColor selectedType = default;
-                    for (int i = 0; i < _serveCandidates.Count; i++)
+                    int chosenIndex;
+                    if (tileSelectionMode == TileSelectionMode.RowByRowLeftToRight)
                     {
-                        selectedType = _serveCandidates[i].Type;
-                        customer = FindFreeCustomer(seats, selectedType);
-                        if (customer != null) break;
+                        if (Time.unscaledTime < _nextDominoLaunchAt) break;
+                        chosenIndex = FindNextDominoCandidate(seats, out customer);
+                        if (chosenIndex == DominoRowComplete)
+                        {
+                            if (!anyColumnBusy) _dominoNextColumn = 0;
+                            break;
+                        }
                     }
-                    if (customer == null) break;
-
-                    int chosenIndex = ChooseWeightedSourceIndex(selectedType, customer);
-                    if (chosenIndex < 0) break;
+                    else
+                        chosenIndex = FindWeightedServiceableCandidate(seats, out customer);
+                    if (chosenIndex < 0 || customer == null) break;
                     ServeCandidate chosen = _serveCandidates[chosenIndex];
                     _serveCandidates.RemoveAt(chosenIndex);
 
@@ -400,6 +425,7 @@ private IEnumerator ServeRoutine(SeatBar seats)
                         chosen.Cluster.InFlight++;
                         if (chosen.Cluster.View != null)
                             chosen.Cluster.View.SetClusterValue(chosen.Cluster.Remaining);
+                        if (_game != null) _game.OnTileLaunched();
                         StartCoroutine(ServeClusterUnit(chosen.Cluster, customer, seats));
                     }
                     else
@@ -410,9 +436,23 @@ private IEnumerator ServeRoutine(SeatBar seats)
                         _columnFrontRows[chosen.Column]++;
                         _columnBusy[chosen.Column] = true;
                         anyColumnBusy = true;
+                        if (_game != null) _game.OnTileLaunched();
                         StartCoroutine(ServeSingleTile(chosen.Column, chosen.Tile, customer, seats));
                     }
                     startedAny = true;
+                    if (tileSelectionMode == TileSelectionMode.RowByRowLeftToRight)
+                    {
+                        int sourceStartColumn = GetCandidateStartColumn(chosen);
+                        int sourceEndColumn = GetCandidateEndColumn(chosen);
+                        bool sourceFinished = !chosen.IsCluster ||
+                                              chosen.Cluster.Remaining <= 0;
+                        _dominoNextColumn = sourceFinished
+                            ? sourceEndColumn + 1
+                            : sourceStartColumn;
+                        _nextDominoLaunchAt = Time.unscaledTime +
+                            Mathf.Max(0f, dominoLaunchInterval);
+                        break;
+                    }
                 }
 
                 // Keep scanning while any customer is cooling down or while
@@ -429,6 +469,68 @@ private IEnumerator ServeRoutine(SeatBar seats)
 
             _serving = false;
             if (_game != null) _game.OnServeLoopFinished();
+        }
+
+        private int FindNextDominoCandidate(
+            SeatBar seats, out CustomerView customer)
+        {
+            customer = null;
+            int chosenIndex = -1;
+            int chosenColumn = int.MaxValue;
+            for (int i = 0; i < _serveCandidates.Count; i++)
+            {
+                int candidateColumn = GetCandidateStartColumn(_serveCandidates[i]);
+                if (candidateColumn < _dominoNextColumn ||
+                    candidateColumn >= chosenColumn)
+                    continue;
+                chosenIndex = i;
+                chosenColumn = candidateColumn;
+            }
+
+            if (chosenIndex < 0) return DominoRowComplete;
+
+            ServeCandidate candidate = _serveCandidates[chosenIndex];
+            if (!seats.HasCustomerForType(candidate.Type))
+            {
+                _dominoNextColumn = GetCandidateEndColumn(candidate) + 1;
+                return FindNextDominoCandidate(seats, out customer);
+            }
+
+            customer = FindFreeCustomer(seats, candidate.Type);
+            return customer != null ? chosenIndex : -1;
+        }
+
+        private static int GetCandidateStartColumn(ServeCandidate candidate)
+        {
+            return candidate != null && candidate.IsCluster &&
+                   candidate.Cluster.Data != null
+                ? candidate.Cluster.Data.anchorColumn
+                : candidate != null ? candidate.Column : int.MaxValue;
+        }
+
+        private static int GetCandidateEndColumn(ServeCandidate candidate)
+        {
+            if (candidate == null) return int.MaxValue;
+            if (!candidate.IsCluster || candidate.Cluster.Data == null)
+                return candidate.Column;
+            return candidate.Cluster.Data.anchorColumn +
+                   Mathf.Max(1, candidate.Cluster.Data.width) - 1;
+        }
+
+        private int FindWeightedServiceableCandidate(
+            SeatBar seats, out CustomerView customer)
+        {
+            customer = null;
+            FoodColor selectedType = default;
+            for (int i = 0; i < _serveCandidates.Count; i++)
+            {
+                selectedType = _serveCandidates[i].Type;
+                customer = FindFreeCustomer(seats, selectedType);
+                if (customer != null) break;
+            }
+            return customer != null
+                ? ChooseWeightedSourceIndex(selectedType, customer)
+                : -1;
         }
 
         private int ChooseWeightedSourceIndex(FoodColor type, CustomerView customer)
@@ -763,6 +865,8 @@ private IEnumerator ServeRoutine(SeatBar seats)
                 // Use the same bottom-to-top rule as regular Tiles. A footprint
                 // at a higher row must render behind rows below it instead of
                 // always being forced to the front.
+                cluster.View.SetFrontRowShadow(frontRowShadowSprite,
+                    displayRow == 0, frontRowShadowOverlap);
                 cluster.View.SetSortingOrder(10 + _maxRows - displayRow);
                 if (animate)
                 {
@@ -835,6 +939,8 @@ private void LayoutColumn(int col, bool animate, List<Coroutine> activeFalls = n
                     bottomY + displayRow * stepY - centerOffset.y,
                     0f);
                 // Bottom tiles render in front of the rows above them.
+                tile.SetFrontRowShadow(frontRowShadowSprite,
+                    displayRow == 0, frontRowShadowOverlap);
                 tile.SetSortingOrder(10 + _maxRows - displayRow);
                 if (animate)
                 {
@@ -899,6 +1005,19 @@ private CustomerView FindFreeCustomer(SeatBar seats, FoodColor color)
             seats.GetCustomersForType(color, _customerBuffer);
             if (_customerBuffer.Count == 0) return null;
 
+            if (tileSelectionMode == TileSelectionMode.RowByRowLeftToRight)
+            {
+                // The reference game finishes the earliest seated Animal of a
+                // given type before serving the next Animal of that same type.
+                for (int i = 0; i < _customerBuffer.Count; i++)
+                {
+                    CustomerView customer = _customerBuffer[i];
+                    if (!CanScheduleCustomer(seats, customer)) continue;
+                    return customer;
+                }
+                return null;
+            }
+
             _typeRoundRobinCursor.TryGetValue(color, out int cursor);
             cursor = Mathf.Abs(cursor) % _customerBuffer.Count;
             CustomerView best = null;
@@ -908,16 +1027,9 @@ private CustomerView FindFreeCustomer(SeatBar seats, FoodColor color)
             {
                 int i = (cursor + offset) % _customerBuffer.Count;
                 CustomerView customer = _customerBuffer[i];
-                if (customer == null || customer.Remaining <= 0 || !seats.CanReceiveTiles(customer))
-                    continue;
+                if (!CanScheduleCustomer(seats, customer)) continue;
 
                 _customerFlights.TryGetValue(customer, out int inFlight);
-                if (inFlight >= customer.Remaining) continue;
-
-                if (_customerNextScanAt.TryGetValue(customer, out float nextScan) &&
-                    Time.unscaledTime < nextScan)
-                    continue;
-
                 _customerDeliveredCount.TryGetValue(customer, out int delivered);
                 int score = delivered + inFlight;
                 if (score >= bestScore) continue;
@@ -928,6 +1040,19 @@ private CustomerView FindFreeCustomer(SeatBar seats, FoodColor color)
             if (bestIndex >= 0)
                 _typeRoundRobinCursor[color] = (bestIndex + 1) % _customerBuffer.Count;
             return best;
+        }
+
+        private bool CanScheduleCustomer(SeatBar seats, CustomerView customer)
+        {
+            if (customer == null || customer.Remaining <= 0 ||
+                !seats.CanReceiveTiles(customer))
+                return false;
+
+            _customerFlights.TryGetValue(customer, out int inFlight);
+            if (inFlight >= customer.Remaining) return false;
+
+            return !_customerNextScanAt.TryGetValue(customer, out float nextScan) ||
+                   Time.unscaledTime >= nextScan;
         }
 
 private IEnumerator ServeSingleTile(int col, FoodTileView tile, CustomerView customer, SeatBar seats)

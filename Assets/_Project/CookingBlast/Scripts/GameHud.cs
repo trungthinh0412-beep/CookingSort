@@ -1,3 +1,4 @@
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -15,10 +16,14 @@ namespace CookingSort2D
 
         private CookingSortGameController _game;
         private int _totalTiles;
+        private Coroutine _comboPunch;
+        private Vector3 _comboBaseScale = Vector3.one;
+        private bool _comboScaleCached;
 
         private void Awake()
         {
             AutoBind();
+            CacheComboScale();
         }
 
         public void Initialize(CookingSortGameController game, int levelNumber, int totalTiles)
@@ -26,9 +31,15 @@ namespace CookingSort2D
             _game = game;
             _totalTiles = Mathf.Max(1, totalTiles);
             AutoBind();
+            CacheComboScale();
             if (levelText != null) levelText.text = "Level\n" + levelNumber;
             if (progressFill != null) progressFill.fillAmount = 0f;
-            if (comboText != null) comboText.text = string.Empty;
+            if (comboText != null)
+            {
+                if (_comboPunch != null) StopCoroutine(_comboPunch);
+                comboText.rectTransform.localScale = _comboBaseScale;
+                comboText.text = string.Empty;
+            }
             if (overlay != null) overlay.SetActive(false);
             if (retryButton != null)
             {
@@ -48,10 +59,41 @@ namespace CookingSort2D
             if (comboText == null) return;
             if (combo <= 0)
             {
+                if (_comboPunch != null) StopCoroutine(_comboPunch);
+                comboText.rectTransform.localScale = _comboBaseScale;
                 comboText.text = string.Empty;
                 return;
             }
             comboText.text = $"Combo\n<size=120%>{combo}</size> <size=65%>x{multiplier:0.#}</size>";
+            if (_comboPunch != null) StopCoroutine(_comboPunch);
+            _comboPunch = StartCoroutine(PunchComboRoutine());
+        }
+
+        private IEnumerator PunchComboRoutine()
+        {
+            RectTransform target = comboText.rectTransform;
+            Vector3 punchScale = _comboBaseScale * 1.16f;
+            target.localScale = punchScale;
+            float elapsed = 0f;
+            const float duration = 0.09f;
+            while (elapsed < duration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                float t = Mathf.Clamp01(elapsed / duration);
+                float eased = 1f - Mathf.Pow(1f - t, 3f);
+                target.localScale = Vector3.LerpUnclamped(
+                    punchScale, _comboBaseScale, eased);
+                yield return null;
+            }
+            target.localScale = _comboBaseScale;
+            _comboPunch = null;
+        }
+
+        private void CacheComboScale()
+        {
+            if (_comboScaleCached || comboText == null) return;
+            _comboBaseScale = comboText.rectTransform.localScale;
+            _comboScaleCached = true;
         }
 
 public void ShowWin()

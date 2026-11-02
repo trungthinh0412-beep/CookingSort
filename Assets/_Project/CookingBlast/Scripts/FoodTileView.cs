@@ -13,6 +13,7 @@ namespace CookingSort2D
 
         [SerializeField] private bool usePrefabSprite = false;
 [SerializeField] private SpriteRenderer body;
+        private SpriteRenderer _frontRowShadow;
 
         [Header("Footprint Value UI")]
         [Tooltip("Create a TextMeshPro child in each 2x1/1x2/2x2 prefab and drag it here. Runtime never creates this Text automatically.")]
@@ -162,6 +163,12 @@ public void FitToCell(float targetSize)
         {
             AutoBind();
             if (body != null) body.sortingOrder = order;
+            if (_frontRowShadow != null)
+            {
+                if (body != null)
+                    _frontRowShadow.sortingLayerID = body.sortingLayerID;
+                _frontRowShadow.sortingOrder = order - 1;
+            }
             if (valueText != null)
             {
                 Renderer r = valueText.GetComponent<Renderer>();
@@ -175,6 +182,47 @@ public void FitToCell(float targetSize)
             }
         }
 
+        public void SetFrontRowShadow(Sprite sprite, bool visible, float overlap)
+        {
+            AutoBind();
+            if (!visible || sprite == null || body == null)
+            {
+                if (_frontRowShadow != null) _frontRowShadow.enabled = false;
+                return;
+            }
+
+            if (_frontRowShadow == null)
+            {
+                GameObject shadowObject = new GameObject("FrontRowShadow");
+                shadowObject.layer = gameObject.layer;
+                shadowObject.transform.SetParent(transform, false);
+                _frontRowShadow = shadowObject.AddComponent<SpriteRenderer>();
+            }
+
+            _frontRowShadow.sprite = sprite;
+            _frontRowShadow.sharedMaterial = body.sharedMaterial;
+            _frontRowShadow.color = Color.white;
+            _frontRowShadow.flipX = false;
+            _frontRowShadow.flipY = false;
+            _frontRowShadow.sortingLayerID = body.sortingLayerID;
+            _frontRowShadow.sortingOrder = body.sortingOrder - 1;
+
+            Vector3 bodyCenter = body.bounds.center;
+            Vector3 bodyBottomWorld = new Vector3(
+                bodyCenter.x, body.bounds.min.y, bodyCenter.z);
+            Vector3 localBottom = transform.InverseTransformPoint(bodyBottomWorld);
+            float localScaleX = Mathf.Max(0.0001f, Mathf.Abs(transform.lossyScale.x));
+            float visualWidth = body.bounds.size.x / localScaleX;
+            float shadowWidth = Mathf.Max(0.0001f, sprite.bounds.size.x);
+
+            _frontRowShadow.transform.localPosition = new Vector3(
+                localBottom.x, localBottom.y + Mathf.Max(0f, overlap), 0f);
+            _frontRowShadow.transform.localRotation = Quaternion.identity;
+            _frontRowShadow.transform.localScale = new Vector3(
+                visualWidth / shadowWidth, 1f, 1f);
+            _frontRowShadow.enabled = true;
+        }
+
 public void ConsumeTo(Transform target, Action onComplete)
         {
             if (!isActiveAndEnabled || target == null)
@@ -182,6 +230,7 @@ public void ConsumeTo(Transform target, Action onComplete)
                 onComplete?.Invoke();
                 return;
             }
+            if (_frontRowShadow != null) _frontRowShadow.enabled = false;
             StartCoroutine(ConsumeRoutine(target, onComplete));
         }
 
