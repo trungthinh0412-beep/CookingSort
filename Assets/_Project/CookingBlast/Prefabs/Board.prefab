@@ -152,6 +152,8 @@ MonoBehaviour:
   cellSize: 0.8
   gapX: 0
   gapY: -0.28
+  frontRowShadowSprite: {fileID: 21300000, guid: 206fe14bdb454fb4fb11370345287250, type: 3}
+  frontRowShadowOverlap: 0.08
   serveInterval: 0
   dropDuration: 0.13
   playIntroAnimation: 1
@@ -163,6 +165,8 @@ MonoBehaviour:
   introElasticityStrength: 0.055
   dropElasticityDuration: 0.06
   dropElasticityStrength: 0.012
+  tileSelectionMode: 0
+  dominoLaunchInterval: 0.08
   scanInterval: 0.14
   minimumScanInterval: 0.1
   scanAccelerationPerTile: 0.003

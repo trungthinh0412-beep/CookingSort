@@ -2025,6 +2025,13 @@ MonoBehaviour:
   progressMission: {fileID: 0}
   progressMissionUnlockLevel: 12
   helpKingButton: {fileID: 0}
+  homeSnowPrefab: {fileID: 103702, guid: efd7d86bbe3a5314c9260efa62c04121, type: 3}
+  homeSnowUiScale: 100
+  homeSnowEmissionRate: 4
+  homeSpecialSnowflakeEmissionRate: 0.15
+  homeSnowParticleSize: 0.15
+  homeSnowflakeMaterial: {fileID: 2100000, guid: a4f2c8e2e8144d45a8e90cbbac9a5f11, type: 2}
+  homeSnowflake2Material: {fileID: 2100000, guid: e886185bff410b84fa34b22a2dc8fbb7, type: 2}
   kingdomDecorTargets: []
 --- !u!114 &8093890791075755573
 MonoBehaviour:
