@@ -70,8 +70,8 @@ MonoBehaviour:
   m_Active: 1
   settings:
     resolutionScale: 1
-    maxDistance: 32
-    alphaThreshold: 0.01
+    maxDistance: 128
+    alphaThreshold: 0.95
     layerMask:
       serializedVersion: 2
       m_Bits: 4294967295
