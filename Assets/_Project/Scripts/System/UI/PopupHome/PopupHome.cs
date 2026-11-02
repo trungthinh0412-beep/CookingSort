@@ -630,7 +630,7 @@ public class PopupHome : Popup
 
     public void OnClickLeague()
     {
-        OpenPopup<PopupLeague>();
+        OpenPopup<PopupSpecials>();
     }
 
     public void OnClickCollection()

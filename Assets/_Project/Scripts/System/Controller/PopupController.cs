@@ -29,6 +29,11 @@ public class PopupController : SingletonDontDestroy<PopupController>
 
     [SerializeField] private PopupConfig popupConfig;
 
+    [Header("Main Tab Popup Fallbacks")]
+    [Tooltip("Direct references keep newly-created main tabs available even if PopupConfig was loaded before their scripts finished importing.")]
+    [SerializeField] private PopupSpecials popupSpecialsPrefab;
+    [SerializeField] private PopupCareer popupCareerPrefab;
+
 
     [Header("Development / Debug")]
     [Tooltip("Opt-in: show the floating Debug Console on startup only when Testing mode is also enabled. Off by default to keep gameplay unobstructed.")]
@@ -226,6 +231,30 @@ public class PopupController : SingletonDontDestroy<PopupController>
                 AttachLifecycleNotifier(existing);
             }
         }
+
+        // These two tabs were created after the original PopupConfig. Unity can
+        // temporarily deserialize their list entries as null while the new
+        // MonoScripts are still importing, leaving the buttons with no popup.
+        // Keep direct prefab references as a stable fallback, just like the
+        // already-working League and Collection tabs.
+        RegisterPopupPrefab(popupSpecialsPrefab, ref sortingOrder);
+        RegisterPopupPrefab(popupCareerPrefab, ref sortingOrder);
+    }
+
+    private void RegisterPopupPrefab(Popup popup, ref int sortingOrder)
+    {
+        if (popup == null)
+            return;
+
+        Type popupType = popup.GetType();
+
+        if (!_popupPrefabs.ContainsKey(popupType))
+        {
+            _popupPrefabs.Add(popupType, popup);
+            _popupSortingOrders.Add(popupType, sortingOrder);
+        }
+
+        sortingOrder++;
     }
 
     private Popup GetOrCreatePopup(Type popupType)
@@ -469,11 +498,11 @@ public class PopupController : SingletonDontDestroy<PopupController>
     {
         return
             popupType == typeof(PopupComingSoon) ||
-            popupType == typeof(PopupShop) ||
             popupType == typeof(PopupLeague) ||
-            popupType == typeof(PopupHome) ||
+            popupType == typeof(PopupSpecials) ||
+            popupType == typeof(PopupCareer) ||
             popupType == typeof(PopupCollection) ||
-            popupType == typeof(PopupKingdom);
+            popupType == typeof(PopupHome);
     }
 
     public Popup GetMainTabPopup(int index)
@@ -481,12 +510,15 @@ public class PopupController : SingletonDontDestroy<PopupController>
         switch (index)
         {
             case 0:
+                return Get<PopupLeague>();
             case 1:
-            case 3:
-            case 4:
-                return Get<PopupComingSoon>();
+                return Get<PopupSpecials>();
             case 2:
                 return Get<PopupHome>();
+            case 3:
+                return Get<PopupCareer>();
+            case 4:
+                return Get<PopupCollection>();
             default:
                 return null;
         }
@@ -494,23 +526,23 @@ public class PopupController : SingletonDontDestroy<PopupController>
 
     public int GetMainTabIndex(Popup popup)
     {
+        if (popup is PopupLeague)
+            return 0;
+
+        if (popup is PopupSpecials)
+            return 1;
+
+        if (popup is PopupCareer)
+            return 3;
+
+        if (popup is PopupCollection)
+            return 4;
+
         if (popup is PopupComingSoon)
             return comingSoonTabIndex;
 
-        if (popup is PopupShop)
-            return 0;
-
-        if (popup is PopupLeague)
-            return 1;
-
         if (popup is PopupHome)
             return 2;
-
-        if (popup is PopupCollection)
-            return 3;
-
-        if (popup is PopupKingdom)
-            return 4;
 
         return -1;
     }

@@ -1333,7 +1333,7 @@ public class BottomTabBar : MonoBehaviour
         {
             case 0:
                 PopupController.Instance
-                    .Show<PopupComingSoon>(
+                    .Show<PopupLeague>(
                         PopupAnimation.None
                     );
                 break;
@@ -1341,7 +1341,7 @@ public class BottomTabBar : MonoBehaviour
 
             case 1:
                 PopupController.Instance
-                    .Show<PopupComingSoon>(
+                    .Show<PopupSpecials>(
                         PopupAnimation.None
                     );
                 break;
@@ -1356,7 +1356,7 @@ public class BottomTabBar : MonoBehaviour
 
             case 3:
                 PopupController.Instance
-                    .Show<PopupComingSoon>(
+                    .Show<PopupCareer>(
                         PopupAnimation.None
                     );
                 break;
@@ -1364,7 +1364,7 @@ public class BottomTabBar : MonoBehaviour
 
             case 4:
                 PopupController.Instance
-                    .Show<PopupComingSoon>(
+                    .Show<PopupCollection>(
                         PopupAnimation.None
                     );
                 break;

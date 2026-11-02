@@ -1,3 +1,0 @@
-public class PopupCollection : Popup
-{
-}
