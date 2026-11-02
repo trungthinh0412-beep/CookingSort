@@ -22,7 +22,7 @@ namespace CookingSort2D
 
     public class CustomerView : MonoBehaviour, IPointerClickHandler
     {
-        [Header("Matching")]
+        [Header("Matching")]    
         [Tooltip("This Animal only eats Tiles with the same Match Type.")]
         [SerializeField] private FoodColor matchType = FoodColor.Blue;
 

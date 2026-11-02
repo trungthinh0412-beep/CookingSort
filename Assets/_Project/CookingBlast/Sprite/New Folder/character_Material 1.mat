@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: character_Material 1
-  m_Shader: {fileID: 4800000, guid: 9910ca45e2840da4b91fd5b42806dcbe, type: 3}
+  m_Shader: {fileID: 4800000, guid: 4f42432f8a119d6498b93739927dd855, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -35,15 +35,16 @@ Material:
     m_Ints: []
     m_Floats:
     - _Cutoff: 0.1
-    - _FillWidth: 4.6
+    - _FillWidth: 4
     - _GlowStrength: 0.15
-    - _GlowWidth: 8
+    - _GlowWidth: 0
     - _Opacity: 1
     - _OutlineAlpha: 1
     - _OutlineMipLevel: 0
     - _OutlineOpaqueAlpha: 1
     - _OutlineReferenceTexWidth: 1024
     - _OutlineSmoothness: 1
+    - _OutlineSoftness: 2
     - _OutlineWidth: 30
     - _Softness: 1.25
     - _StencilComp: 8
