@@ -90,6 +90,7 @@ namespace CookingSort2D
             public int InFlight;
             public bool Cleared;
             public int[] TilesBelowByColumn;
+            public int[] RemovedTilesBelowByColumn;
         }
         private sealed class ServeCandidate
         {
@@ -112,7 +113,6 @@ namespace CookingSort2D
         private readonly List<IntroBlock> _introBlocks = new List<IntroBlock>();
         private readonly Dictionary<Transform, Coroutine> _clusterMoveRoutines =
             new Dictionary<Transform, Coroutine>();
-        private readonly List<int> _columnFrontRows = new List<int>();
 private readonly List<bool> _columnBusy = new List<bool>();
         private readonly Dictionary<CustomerView, int> _customerFlights = new Dictionary<CustomerView, int>();
         private readonly Dictionary<CustomerView, int> _customerDeliveredCount = new Dictionary<CustomerView, int>();
@@ -155,6 +155,143 @@ public FoodTileView GetConfiguredTilePrefab(int index)
             }
         }
         public bool IsEmpty => RemainingTileCount == 0;
+
+        public void GetBottomTypeWeights(Dictionary<FoodColor, int> results)
+        {
+            if (results == null) return;
+            results.Clear();
+            for (int col = 0; col < _columns.Count; col++)
+            {
+                if (IsColumnBlockedByCluster(col) || _columns[col].Count == 0) continue;
+                FoodTileView tile = _columns[col][0];
+                if (tile == null) continue;
+                results.TryGetValue(tile.Type, out int count);
+                results[tile.Type] = count + 1;
+            }
+            for (int i = 0; i < _clusters.Count; i++)
+            {
+                RuntimeCluster cluster = _clusters[i];
+                if (!IsClusterExposed(cluster) || cluster.Data == null) continue;
+                results.TryGetValue(cluster.Data.color, out int count);
+                results[cluster.Data.color] = count + Mathf.Max(1, cluster.Data.width);
+            }
+        }
+
+        public void HandleTileClick(FoodTileView tile)
+        {
+            if (_game != null) _game.HandleBoosterTileClick(tile);
+        }
+
+        public bool TryTrashConnected(FoodTileView selected)
+        {
+            if (selected == null || _introAnimating) return false;
+
+            // Build the current logical board surface. A large footprint owns
+            // every cell covered by its width and height.
+            var cells = new Dictionary<Vector2Int, object>();
+            object selectedSource = null;
+            FoodColor selectedType = default;
+            for (int col = 0; col < _columns.Count; col++)
+            {
+                for (int row = 0; row < _columns[col].Count; row++)
+                {
+                    FoodTileView tile = _columns[col][row];
+                    if (tile == null) continue;
+                    cells[new Vector2Int(col, GetTileDisplayRow(col, row))] = tile;
+                    if (tile == selected)
+                    {
+                        selectedSource = tile;
+                        selectedType = tile.Type;
+                    }
+                }
+            }
+            for (int i = 0; i < _clusters.Count; i++)
+            {
+                RuntimeCluster cluster = _clusters[i];
+                if (cluster == null || cluster.Remaining <= 0 || cluster.Data == null) continue;
+                int start = Mathf.Max(0, cluster.Data.anchorColumn);
+                int end = Mathf.Min(_columns.Count, start + Mathf.Max(1, cluster.Data.width));
+                int bottom = GetClusterBottomRow(cluster);
+                for (int col = start; col < end; col++)
+                    for (int row = bottom;
+                         row < bottom + Mathf.Max(1, cluster.Data.height); row++)
+                        cells[new Vector2Int(col, row)] = cluster;
+                if (cluster.View == selected)
+                {
+                    selectedSource = cluster;
+                    selectedType = cluster.Data.color;
+                }
+            }
+            if (selectedSource == null) return false;
+
+            var cellsToVisit = new Queue<Vector2Int>();
+            var visitedCells = new HashSet<Vector2Int>();
+            var sources = new HashSet<object>();
+            foreach (KeyValuePair<Vector2Int, object> pair in cells)
+                if (ReferenceEquals(pair.Value, selectedSource)) cellsToVisit.Enqueue(pair.Key);
+
+            while (cellsToVisit.Count > 0)
+            {
+                Vector2Int cell = cellsToVisit.Dequeue();
+                if (!visitedCells.Add(cell) || !cells.TryGetValue(cell, out object source))
+                    continue;
+                FoodColor type = source is FoodTileView tile
+                    ? tile.Type : ((RuntimeCluster)source).Data.color;
+                if (type != selectedType) continue;
+                sources.Add(source);
+                cellsToVisit.Enqueue(cell + Vector2Int.left);
+                cellsToVisit.Enqueue(cell + Vector2Int.right);
+                cellsToVisit.Enqueue(cell + Vector2Int.up);
+                cellsToVisit.Enqueue(cell + Vector2Int.down);
+            }
+            if (sources.Count == 0) return false;
+
+            int removed = 0;
+            var affectedColumns = new HashSet<int>();
+            foreach (object source in sources)
+            {
+                if (source is FoodTileView tile)
+                {
+                    for (int col = 0; col < _columns.Count; col++)
+                    {
+                        int row = _columns[col].IndexOf(tile);
+                        if (row < 0) continue;
+                        RegisterRegularTileRemoved(col, row);
+                        _columns[col].RemoveAt(row);
+                        affectedColumns.Add(col);
+                        removed++;
+                        Destroy(tile.gameObject);
+                        break;
+                    }
+                }
+                else
+                {
+                    RuntimeCluster cluster = (RuntimeCluster)source;
+                    int value = Mathf.Max(0, cluster.Remaining);
+                    removed += value;
+                    cluster.Remaining = 0;
+                    cluster.Cleared = true;
+                    if (cluster.View != null) Destroy(cluster.View.gameObject);
+                    for (int col = cluster.Data.anchorColumn;
+                         col < cluster.Data.anchorColumn + cluster.Data.width; col++)
+                        if (col >= 0 && col < _columns.Count) affectedColumns.Add(col);
+                }
+            }
+
+            var falls = new List<Coroutine>();
+            foreach (int col in affectedColumns) LayoutColumn(col, true, falls);
+            LayoutClusters(true, falls);
+            StartCoroutine(FinishTrashRoutine(falls, removed, selectedType));
+            return removed > 0;
+        }
+
+        private IEnumerator FinishTrashRoutine(List<Coroutine> falls, int removed, FoodColor type)
+        {
+            if (falls != null)
+                for (int i = 0; i < falls.Count; i++)
+                    if (falls[i] != null) yield return falls[i];
+            if (_game != null) _game.OnTrashAwayFinished(removed, type);
+        }
 
         private void Awake()
         {
@@ -233,7 +370,6 @@ public void Initialize(CookingSortGameController game, CookingBlastLevel data)
                 var column = new List<FoodTileView>();
                 _columns.Add(column);
                 
-                _columnFrontRows.Add(0);
 _columnBusy.Add(false);
                 for (int row = 0; row < count; row++)
                 {
@@ -270,7 +406,8 @@ _columnBusy.Add(false);
                         Data = cluster,
                         View = view,
                         Remaining = cluster.value,
-                        TilesBelowByColumn = CountPlayableTilesBelow(data, cluster)
+                        TilesBelowByColumn = CountPlayableTilesBelow(data, cluster),
+                        RemovedTilesBelowByColumn = new int[Mathf.Max(0, cluster.width)]
                     });
                 }
             }
@@ -316,7 +453,6 @@ public void ClearBoard()
             _clusters.Clear();
             _introBlocks.Clear();
             _clusterMoveRoutines.Clear();
-            _columnFrontRows.Clear();
 _columnBusy.Clear();
             _customerFlights.Clear();
             _customerDeliveredCount.Clear();
@@ -352,8 +488,8 @@ private IEnumerator ServeRoutine(SeatBar seats)
                     bool removedMissingTile = false;
                     while (column.Count > 0 && column[0] == null)
                     {
+                        RegisterRegularTileRemoved(col, 0);
                         column.RemoveAt(0);
-                        _columnFrontRows[col]++;
                         removedMissingTile = true;
                     }
                     if (removedMissingTile)
@@ -432,8 +568,8 @@ private IEnumerator ServeRoutine(SeatBar seats)
                     {
                         List<FoodTileView> column = _columns[chosen.Column];
                         if (column.Count == 0 || column[0] != chosen.Tile) continue;
+                        RegisterRegularTileRemoved(chosen.Column, 0);
                         column.RemoveAt(0);
-                        _columnFrontRows[chosen.Column]++;
                         _columnBusy[chosen.Column] = true;
                         anyColumnBusy = true;
                         if (_game != null) _game.OnTileLaunched();
@@ -732,11 +868,11 @@ private IEnumerator ServeRoutine(SeatBar seats)
         {
             if (cluster == null || cluster.Data == null) return 0;
             int bottom = 0;
-            int endColumn = Mathf.Min(_columnFrontRows.Count,
+            int endColumn = Mathf.Min(_columns.Count,
                 cluster.Data.anchorColumn + cluster.Data.width);
             for (int col = Mathf.Max(0, cluster.Data.anchorColumn); col < endColumn; col++)
             {
-                int support = GetTilesBelow(cluster, col) - _columnFrontRows[col];
+                int support = GetRemainingTilesBelow(cluster, col);
                 for (int i = 0; i < _clusters.Count; i++)
                 {
                     RuntimeCluster lower = _clusters[i];
@@ -783,6 +919,31 @@ private IEnumerator ServeRoutine(SeatBar seats)
                 : 0;
         }
 
+        private static int GetRemainingTilesBelow(RuntimeCluster cluster, int column)
+        {
+            int original = GetTilesBelow(cluster, column);
+            if (cluster == null || cluster.Data == null ||
+                cluster.RemovedTilesBelowByColumn == null) return original;
+            int offset = column - cluster.Data.anchorColumn;
+            int removed = offset >= 0 && offset < cluster.RemovedTilesBelowByColumn.Length
+                ? cluster.RemovedTilesBelowByColumn[offset] : 0;
+            return Mathf.Max(0, original - removed);
+        }
+
+        private void RegisterRegularTileRemoved(int column, int compactRow)
+        {
+            for (int i = 0; i < _clusters.Count; i++)
+            {
+                RuntimeCluster cluster = _clusters[i];
+                if (cluster == null || cluster.Remaining <= 0 || cluster.Data == null ||
+                    cluster.RemovedTilesBelowByColumn == null) continue;
+                int offset = column - cluster.Data.anchorColumn;
+                if (offset < 0 || offset >= cluster.RemovedTilesBelowByColumn.Length) continue;
+                if (compactRow < GetRemainingTilesBelow(cluster, column))
+                    cluster.RemovedTilesBelowByColumn[offset]++;
+            }
+        }
+
         private bool IsClusterExposed(RuntimeCluster cluster)
         {
             return cluster != null && cluster.Remaining > 0 &&
@@ -791,22 +952,21 @@ private IEnumerator ServeRoutine(SeatBar seats)
 
         private bool IsColumnBlockedByCluster(int column)
         {
-            if (column < 0 || column >= _columnFrontRows.Count) return false;
+            if (column < 0 || column >= _columns.Count) return false;
             for (int i = 0; i < _clusters.Count; i++)
             {
                 RuntimeCluster cluster = _clusters[i];
                 if (cluster == null || cluster.Remaining <= 0 || cluster.Data == null) continue;
                 BoardClusterData data = cluster.Data;
                 if (column < data.anchorColumn || column >= data.anchorColumn + data.width) continue;
-                if (_columnFrontRows[column] >= GetTilesBelow(cluster, column)) return true;
+                if (GetRemainingTilesBelow(cluster, column) <= 0) return true;
             }
             return false;
         }
 
         private int GetTileDisplayRow(int column, int compactRow)
         {
-            if (column < 0 || column >= _columnFrontRows.Count) return compactRow;
-            int frontRow = _columnFrontRows[column];
+            if (column < 0 || column >= _columns.Count) return compactRow;
             int displayRow = compactRow;
             for (int i = 0; i < _clusters.Count; i++)
             {
@@ -815,7 +975,7 @@ private IEnumerator ServeRoutine(SeatBar seats)
                 BoardClusterData data = cluster.Data;
                 if (column < data.anchorColumn || column >= data.anchorColumn + data.width)
                     continue;
-                int belowCount = Mathf.Max(0, GetTilesBelow(cluster, column) - frontRow);
+                int belowCount = GetRemainingTilesBelow(cluster, column);
                 if (compactRow >= belowCount)
                 {
                     // A footprint spanning several columns rests on the tallest

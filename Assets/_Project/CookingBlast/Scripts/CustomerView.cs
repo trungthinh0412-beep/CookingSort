@@ -39,6 +39,7 @@ namespace CookingSort2D
         private bool _front;
         private bool _seated;
         private bool _seatReady;
+        private bool _boosterSelectable;
         private int _progressCapacity;
         private bool _eggHidden;
         private Sprite _animalSprite;
@@ -100,7 +101,39 @@ namespace CookingSort2D
         public void SetFront(bool front)
         {
             _front = front && !_seated;
-            if (hitbox != null) hitbox.enabled = _front;
+            if (hitbox != null) hitbox.enabled = !_seated && (_front || _boosterSelectable);
+        }
+
+        public void SetBoosterSelectable(bool selectable)
+        {
+            _boosterSelectable = selectable && !_seated;
+            if (hitbox != null) hitbox.enabled = !_seated && (_front || _boosterSelectable);
+        }
+
+        public void SetQueueLane(CustomerQueue queue, int laneIndex)
+        {
+            _queue = queue;
+            _laneIndex = laneIndex;
+        }
+
+        public void ReturnToQueue(CustomerQueue queue, int laneIndex, Transform parent)
+        {
+            if (_moveRoutine != null)
+            {
+                StopCoroutine(_moveRoutine);
+                _moveRoutine = null;
+            }
+            StopServePulse();
+            transform.SetParent(parent, true);
+            transform.localRotation = Quaternion.identity;
+            _queue = queue;
+            _laneIndex = laneIndex;
+            _seated = false;
+            _seatReady = false;
+            _front = false;
+            _boosterSelectable = false;
+            SetDemandBarVisible(false);
+            if (hitbox != null) hitbox.enabled = false;
         }
 
         public void SetSeated(float seatedScale = 1f)
@@ -113,6 +146,7 @@ namespace CookingSort2D
             _seated = true;
             _seatReady = false;
             _front = false;
+            _boosterSelectable = false;
             _queue = null;
             if (hitbox != null) hitbox.enabled = false;
             SetDemandBarVisible(false);
@@ -211,8 +245,8 @@ namespace CookingSort2D
 
         public void OnPointerClick(PointerEventData eventData)
         {
-            if (_front && !_seated && _queue != null)
-                _queue.TrySelect(this);
+            if (!_seated && _queue != null)
+                _queue.HandleCustomerClick(this);
         }
 
         /// <summary>

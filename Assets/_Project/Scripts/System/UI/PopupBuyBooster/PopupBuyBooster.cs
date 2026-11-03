@@ -88,6 +88,10 @@ public class PopupBuyBooster : Popup
             BoosterType.Lighter => "Burn every card in one tray!",
             BoosterType.ExtraTray => "Unlock an Extra Tray!",
             BoosterType.FreeMoves => "Get 5 extra moves!",
+            BoosterType.OrderBell => "Move a chosen waiting animal to the seat row!",
+            BoosterType.LineUp => "Reorder waiting animals to match the bottom food!",
+            BoosterType.Rewind => "Return the last seated animal to its queue!",
+            BoosterType.TrashAway => "Remove a connected group of matching food!",
             _ => "Get this booster!"
         };
     }
@@ -192,6 +196,18 @@ public class PopupBuyBooster : Popup
                 break;
             case BoosterType.FreeMoves:
                 Data.PlayerData.CurrentFreeMoves++;
+                break;
+            case BoosterType.OrderBell:
+                Data.PlayerData.CurrentOrderBell++;
+                break;
+            case BoosterType.LineUp:
+                Data.PlayerData.CurrentLineUp++;
+                break;
+            case BoosterType.Rewind:
+                Data.PlayerData.CurrentRewind++;
+                break;
+            case BoosterType.TrashAway:
+                Data.PlayerData.CurrentTrashAway++;
                 break;
         }
 

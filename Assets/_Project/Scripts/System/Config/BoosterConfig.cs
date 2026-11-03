@@ -37,4 +37,8 @@ public enum BoosterType
     Lighter = 5,
     ExtraTray = 6,
     FreeMoves = 7,
+    OrderBell = 8,
+    LineUp = 9,
+    Rewind = 10,
+    TrashAway = 11,
 }

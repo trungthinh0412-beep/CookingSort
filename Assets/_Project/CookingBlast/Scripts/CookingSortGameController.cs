@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -16,6 +17,12 @@ namespace CookingSort2D
         private int _combo;
         
         private CookingBlastLevelLoader _levelLoader;
+        private readonly Dictionary<FoodColor, int> _bottomTypeWeights =
+            new Dictionary<FoodColor, int>();
+        private BoosterType? _activeBooster;
+        private CustomerView _lastSeatedCustomer;
+        private int _lastSeatLane = -1;
+        private int _lastSeatRow = -1;
 
         public event System.Action LevelWon;
         public event System.Action LevelFailed;
@@ -24,6 +31,30 @@ private bool _gameEnded;
         public CookingBlastLevel LevelDefinition => levelDefinition;
         public BoardController Board => board;
         public bool GameEnded => _gameEnded;
+
+        /// <summary>
+        /// Fills a booster target row using the gameplay layout convention:
+        /// row 1 = animals assigned to SeatBar,
+        /// row 2 = front customer in every queue lane,
+        /// row 3 = second customer in every queue lane.
+        /// </summary>
+        public void FillBoosterRow(int rowNumber, List<CustomerView> results)
+        {
+            if (results == null) return;
+            results.Clear();
+
+            if (rowNumber == 1)
+            {
+                if (seatBar != null) seatBar.GetBoosterRow(results);
+                return;
+            }
+
+            if (rowNumber == 2 || rowNumber == 3)
+            {
+                if (customerQueue != null)
+                    customerQueue.GetBoosterRow(rowNumber - 2, results);
+            }
+        }
 
 private void Start()
         {
@@ -58,6 +89,9 @@ public void StartLevel(int displayLevelNumber = -1)
             _servedTiles = 0;
             _combo = 0;
             _gameEnded = false;
+            _activeBooster = null;
+            ClearRewindRecord();
+            Observer.ActiveBoosterChanged?.Invoke(null);
 
             seatBar.Initialize(this, levelDefinition.SeatCount);
             board.Initialize(this, levelDefinition);
@@ -74,14 +108,195 @@ public void SetLevelDefinition(CookingBlastLevel level)
         }
 
 
-        public bool TrySeatCustomer(CustomerView customer)
+        public bool TrySeatCustomer(CustomerView customer, int sourceLane = -1, int sourceRow = -1)
         {
             if (_gameEnded || customer == null || seatBar == null || board == null) return false;
             if (board.IsIntroAnimating) return false;
             if (!seatBar.TrySeat(customer)) return false;
 
+            _lastSeatedCustomer = customer;
+            _lastSeatLane = sourceLane;
+            _lastSeatRow = sourceRow;
+
             EvaluateState();
             return true;
+        }
+
+        public bool TryUseBooster(BoosterType type)
+        {
+            if (!CanUseBoosters()) return false;
+            if (GetBoosterAmount(type) <= 0)
+            {
+                Notify("No booster left.");
+                return false;
+            }
+
+            switch (type)
+            {
+                case BoosterType.OrderBell:
+                    if (seatBar == null || seatBar.IsFull)
+                    {
+                        Notify("The seat row is full.");
+                        return false;
+                    }
+                    SetActiveBooster(type);
+                    Notify("Choose an animal from row 2 or below.");
+                    return true;
+
+                case BoosterType.LineUp:
+                    board.GetBottomTypeWeights(_bottomTypeWeights);
+                    if (customerQueue == null ||
+                        !customerQueue.ShuffleWaitingCustomers(_bottomTypeWeights))
+                    {
+                        Notify("Not enough waiting animals to line up.");
+                        return false;
+                    }
+                    CompleteBooster(type);
+                    return true;
+
+                case BoosterType.Rewind:
+                    return TryRewind();
+
+                case BoosterType.TrashAway:
+                    SetActiveBooster(type);
+                    Notify("Choose a connected food group on the board.");
+                    return true;
+            }
+            return false;
+        }
+
+        public bool HandleBoosterCustomerClick(CustomerView customer)
+        {
+            if (_activeBooster != BoosterType.OrderBell) return false;
+            if (!CanUseBoosters() || customerQueue == null ||
+                !customerQueue.TryPromoteWithOrderBell(customer))
+            {
+                Notify("That animal cannot move to the seat row now.");
+                return true;
+            }
+            CompleteBooster(BoosterType.OrderBell);
+            return true;
+        }
+
+        public bool HandleBoosterTileClick(FoodTileView tile)
+        {
+            if (_activeBooster != BoosterType.TrashAway) return false;
+            if (!CanUseBoosters() || board == null || !board.TryTrashConnected(tile))
+            {
+                Notify("Choose a connected food group on the board.");
+                return true;
+            }
+            CompleteBooster(BoosterType.TrashAway);
+            return true;
+        }
+
+        public void CancelActiveBooster()
+        {
+            SetActiveBooster(null);
+        }
+
+        private bool TryRewind()
+        {
+            if (_lastSeatedCustomer == null || _lastSeatLane < 0 ||
+                seatBar == null || seatBar.OccupiedCount < 2)
+            {
+                Notify("Rewind needs at least 2 seated animals and a previous move.");
+                return false;
+            }
+            if (board != null && board.HasTileInFlight(_lastSeatedCustomer))
+            {
+                Notify("Wait for the flying food before rewinding.");
+                return false;
+            }
+            CustomerView customer = _lastSeatedCustomer;
+            if (!seatBar.TryDetachForRewind(customer) || customerQueue == null ||
+                !customerQueue.RestoreCustomer(customer, _lastSeatLane, _lastSeatRow))
+            {
+                Notify("The previous animal can no longer be rewound.");
+                return false;
+            }
+            CompleteBooster(BoosterType.Rewind);
+            EvaluateState();
+            return true;
+        }
+
+        private bool CanUseBoosters()
+        {
+            if (_gameEnded || board == null || seatBar == null || customerQueue == null)
+                return false;
+            return true;
+        }
+
+        private void CompleteBooster(BoosterType type)
+        {
+            ConsumeBooster(type);
+            SetActiveBooster(null);
+            // Any booster use breaks the normal placement history. Rewind itself
+            // also consumes the one move it restored.
+            ClearRewindRecord();
+        }
+
+        private void SetActiveBooster(BoosterType? type)
+        {
+            if (customerQueue != null)
+                customerQueue.SetOrderBellSelection(type == BoosterType.OrderBell);
+            _activeBooster = type;
+            Observer.ActiveBoosterChanged?.Invoke(type);
+        }
+
+        private void ClearRewindRecord()
+        {
+            _lastSeatedCustomer = null;
+            _lastSeatLane = -1;
+            _lastSeatRow = -1;
+        }
+
+        private static int GetBoosterAmount(BoosterType type)
+        {
+            if (Data.PlayerData == null) return 0;
+            return type switch
+            {
+                BoosterType.OrderBell => Data.PlayerData.CurrentOrderBell,
+                BoosterType.LineUp => Data.PlayerData.CurrentLineUp,
+                BoosterType.Rewind => Data.PlayerData.CurrentRewind,
+                BoosterType.TrashAway => Data.PlayerData.CurrentTrashAway,
+                _ => 0
+            };
+        }
+
+        private static void ConsumeBooster(BoosterType type)
+        {
+            if (Data.PlayerData == null) return;
+            switch (type)
+            {
+                case BoosterType.OrderBell:
+                    Data.PlayerData.CurrentOrderBell--;
+                    break;
+                case BoosterType.LineUp:
+                    Data.PlayerData.CurrentLineUp--;
+                    break;
+                case BoosterType.Rewind:
+                    Data.PlayerData.CurrentRewind--;
+                    break;
+                case BoosterType.TrashAway:
+                    Data.PlayerData.CurrentTrashAway--;
+                    break;
+            }
+            Data.SaveData();
+        }
+
+        private static void Notify(string message)
+        {
+            Observer.Notify?.Invoke(message, Vector3.zero);
+        }
+
+        public void OnTrashAwayFinished(int removedTiles, FoodColor type)
+        {
+            if (_gameEnded || removedTiles <= 0) return;
+            _servedTiles += removedTiles;
+            if (hud != null) hud.SetProgress(_servedTiles);
+            if (board != null && seatBar != null) board.BeginServeLoop(seatBar);
+            EvaluateState();
         }
 
         public void OnCustomerSeatFlightFinished()

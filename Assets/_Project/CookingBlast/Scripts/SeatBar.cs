@@ -60,6 +60,23 @@ namespace CookingSort2D
             }
         }
 
+        /// <summary>
+        /// Appends seated animals from left to right. This is booster row 1.
+        /// Animals that are still flying to a seat are included because they
+        /// already belong to that seat.
+        /// </summary>
+        public void GetBoosterRow(List<CustomerView> results)
+        {
+            if (results == null) return;
+            results.Clear();
+            for (int i = 0; i < _slots.Count; i++)
+            {
+                SeatSlotView slot = _slots[i];
+                if (slot == null || !slot.gameObject.activeSelf || slot.IsEmpty) continue;
+                if (slot.Occupant != null) results.Add(slot.Occupant);
+            }
+        }
+
         private void Awake()
         {
             CacheSlots();
@@ -159,6 +176,20 @@ public void GetCustomersForType(FoodColor type, List<CustomerView> results)
                 StartCoroutine(LeaveRoutine(customer));
                 return;
             }
+        }
+
+        public bool TryDetachForRewind(CustomerView customer)
+        {
+            if (customer == null || !customer.IsSeatReady || IsMergingCustomer(customer))
+                return false;
+            for (int i = 0; i < _slots.Count; i++)
+            {
+                SeatSlotView slot = _slots[i];
+                if (slot.Occupant != customer) continue;
+                slot.Release();
+                return true;
+            }
+            return false;
         }
 
 public void ClearAllImmediate()

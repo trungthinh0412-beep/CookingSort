@@ -2,10 +2,11 @@ using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace CookingSort2D
 {
-    public class FoodTileView : MonoBehaviour
+    public class FoodTileView : MonoBehaviour, IPointerClickHandler
     {
         [Header("Matching")]
         [Tooltip("This Tile can only be eaten by an Animal with the same Match Type.")]
@@ -69,6 +70,12 @@ namespace CookingSort2D
         private void Awake()
         {
             AutoBind();
+        }
+
+        public void OnPointerClick(PointerEventData eventData)
+        {
+            BoardController board = GetComponentInParent<BoardController>();
+            if (board != null) board.HandleTileClick(this);
         }
 
 public void Setup(FoodColor color)
