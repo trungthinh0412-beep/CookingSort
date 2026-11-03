@@ -30,11 +30,10 @@ public static void RebuildGameplay()
         CreateSeatBarPrefab(slotPrefab);
         CreateQueuePrefab(customerPrefab, queueSlotPrefab);
         CreateBoardPrefab(tilePrefab);
-        GameObject hudPrefab = CreateHudPrefab();
         GameObject gameRootPrefab = CreateGameRootPrefab();
 
         CookingBlastPrefabSetup.SetupLevelSystem();
-        CreateGameplayScene(hudPrefab, gameRootPrefab);
+        CreateGameplayScene(gameRootPrefab);
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
         Debug.Log("[CookingBlast] Rebuilt gameplay with the dedicated CookingBlastLevelLoader. Levels are loaded from Addressables at runtime.");
@@ -159,53 +158,6 @@ private static GameObject CreateQueuePrefab(GameObject customerPrefab, GameObjec
         return SavePrefab(root, PrefabFolder + "/Board.prefab");
     }
 
-    private static GameObject CreateHudPrefab()
-    {
-        GameObject root = new GameObject("GameHud", typeof(RectTransform), typeof(GameHud));
-        RectTransform rr = root.GetComponent<RectTransform>();
-        rr.anchorMin = Vector2.zero;
-        rr.anchorMax = Vector2.one;
-        rr.offsetMin = rr.offsetMax = Vector2.zero;
-
-        GameObject levelBadge = CreateUIImageObject("LevelBadge", root.transform, new Vector2(78, 72), new Color32(74, 152, 226, 255));
-        SetAnchor(levelBadge.GetComponent<RectTransform>(), new Vector2(0, 1), new Vector2(58, -50));
-        TextMeshProUGUI levelText = CreateUIText("LevelText", levelBadge.transform, "Level\n1", 19, TextAlignmentOptions.Center, Color.white);
-        Stretch(levelText.rectTransform, 4f);
-
-        GameObject progressBg = CreateUIImageObject("ProgressBG", root.transform, new Vector2(380, 34), new Color32(56, 80, 108, 220));
-        SetAnchor(progressBg.GetComponent<RectTransform>(), new Vector2(0.5f, 1), new Vector2(55, -46));
-        GameObject fill = CreateUIImageObject("ProgressFill", progressBg.transform, Vector2.zero, new Color32(255, 201, 47, 255));
-        RectTransform fr = fill.GetComponent<RectTransform>();
-        fr.anchorMin = Vector2.zero;
-        fr.anchorMax = Vector2.one;
-        fr.offsetMin = new Vector2(4, 4);
-        fr.offsetMax = new Vector2(-4, -4);
-        Image fi = fill.GetComponent<Image>();
-        fi.type = Image.Type.Filled;
-        fi.fillMethod = Image.FillMethod.Horizontal;
-        fi.fillOrigin = 0;
-        fi.fillAmount = 0f;
-
-        TextMeshProUGUI combo = CreateUIText("ComboText", root.transform, "Combo\n0 x1", 20, TextAlignmentOptions.Center, new Color32(241, 85, 42, 255));
-        RectTransform cr = combo.rectTransform;
-        cr.sizeDelta = new Vector2(120, 90);
-        SetAnchor(cr, new Vector2(1, 1), new Vector2(-62, -82));
-
-        GameObject overlay = CreateUIImageObject("Overlay", root.transform, Vector2.zero, new Color32(20, 24, 35, 210));
-        Stretch(overlay.GetComponent<RectTransform>(), 0f);
-        TextMeshProUGUI result = CreateUIText("ResultText", overlay.transform, "Excellent!", 34, TextAlignmentOptions.Center, Color.white);
-        result.rectTransform.sizeDelta = new Vector2(480, 260);
-        SetAnchor(result.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0, 70));
-        GameObject retry = CreateUIImageObject("RetryButton", overlay.transform, new Vector2(230, 76), new Color32(85, 195, 55, 255));
-        retry.AddComponent<Button>();
-        SetAnchor(retry.GetComponent<RectTransform>(), new Vector2(0.5f, 0.5f), new Vector2(0, -125));
-        TextMeshProUGUI retryText = CreateUIText("RetryText", retry.transform, "Try Again", 26, TextAlignmentOptions.Center, Color.white);
-        Stretch(retryText.rectTransform, 2f);
-        overlay.SetActive(false);
-
-        return SavePrefab(root, PrefabFolder + "/GameHud.prefab");
-    }
-
     private static GameObject CreateGameRootPrefab()
     {
         GameObject root = new GameObject("GameplayRoot", typeof(CookingSortGameController));
@@ -216,7 +168,7 @@ private static GameObject CreateQueuePrefab(GameObject customerPrefab, GameObjec
 
 
 
-private static void CreateGameplayScene(GameObject hudPrefab, GameObject gameRootPrefab)
+private static void CreateGameplayScene(GameObject gameRootPrefab)
     {
         Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
         scene.name = "CookingBlastGameplay";
@@ -235,20 +187,6 @@ private static void CreateGameplayScene(GameObject hudPrefab, GameObject gameRoo
         if (inputType != null) eventSystem.AddComponent(inputType);
         else eventSystem.AddComponent<StandaloneInputModule>();
 
-        GameObject canvasGo = new GameObject("HUD Canvas", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
-        Canvas canvas = canvasGo.GetComponent<Canvas>();
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        CanvasScaler scaler = canvasGo.GetComponent<CanvasScaler>();
-        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(580, 1280);
-        scaler.matchWidthOrHeight = 1f;
-
-        GameObject hudGo = (GameObject)PrefabUtility.InstantiatePrefab(hudPrefab, canvasGo.transform);
-        RectTransform hr = hudGo.GetComponent<RectTransform>();
-        hr.anchorMin = Vector2.zero;
-        hr.anchorMax = Vector2.one;
-        hr.offsetMin = hr.offsetMax = Vector2.zero;
-
         GameObject gameRoot = (GameObject)PrefabUtility.InstantiatePrefab(gameRootPrefab);
         CookingSortGameController game = gameRoot.GetComponent<CookingSortGameController>();
         CookingBlastLevelLoader loader = gameRoot.GetComponent<CookingBlastLevelLoader>();
@@ -259,7 +197,6 @@ private static void CreateGameplayScene(GameObject hudPrefab, GameObject gameRoo
 
         CookingBlastLevelConfig config = AssetDatabase.LoadAssetAtPath<CookingBlastLevelConfig>(CookingBlastPrefabSetup.ConfigPath);
         SerializedObject gameSo = new SerializedObject(game);
-        gameSo.FindProperty("hud").objectReferenceValue = hudGo.GetComponent<GameHud>();
         gameSo.FindProperty("board").objectReferenceValue = null;
         gameSo.FindProperty("seatBar").objectReferenceValue = null;
         gameSo.FindProperty("customerQueue").objectReferenceValue = null;

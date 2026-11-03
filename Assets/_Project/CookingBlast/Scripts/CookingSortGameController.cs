@@ -9,7 +9,7 @@ namespace CookingSort2D
         [SerializeField] private BoardController board;
         [SerializeField] private SeatBar seatBar;
         [SerializeField] private CustomerQueue customerQueue;
-        [SerializeField] private GameHud hud;
+        private PopupInGame hud;
         [SerializeField] private CookingBlastLevel levelDefinition;
 
         private int _servedTiles;
@@ -62,10 +62,17 @@ public void StartLevel(int displayLevelNumber = -1)
             seatBar.Initialize(this, levelDefinition.SeatCount);
             board.Initialize(this, levelDefinition);
             customerQueue.Initialize(this, levelDefinition);
-            int shownLevel = displayLevelNumber > 0 ? displayLevelNumber : levelDefinition.LevelNumber;
-            if (hud != null) hud.Initialize(this, shownLevel, levelDefinition.TotalTileCount);
+            int shownLevel = displayLevelNumber > 0
+                ? displayLevelNumber
+                : levelDefinition.LevelNumber;
             if (PopupController.Instance != null)
+            {
+                hud = PopupController.Instance.Get<PopupInGame>() as PopupInGame;
                 PopupController.Instance.Show<PopupInGame>(PopupAnimation.None);
+            }
+
+            if (hud != null)
+                hud.Initialize(this, shownLevel, levelDefinition.TotalTileCount);
         }
 
 public void SetLevelDefinition(CookingBlastLevel level)
