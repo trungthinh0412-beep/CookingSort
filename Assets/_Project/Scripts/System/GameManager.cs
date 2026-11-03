@@ -29,6 +29,8 @@ public partial class GameManager : SingletonDontDestroy<GameManager>
 
     public void ReturnHome(bool playHomeEntrance = false)
     {
+        Time.timeScale = 1f;
+
         if (TransitionManager.Instance != null)
         {
             TransitionManager.Instance.ResetImmediately();

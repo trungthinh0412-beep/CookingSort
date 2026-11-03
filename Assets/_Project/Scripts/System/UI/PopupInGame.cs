@@ -7,7 +7,7 @@ using UnityEngine.UI;
 public class PopupInGame : Popup
 {
     [Header("Pause Menu")]
-    [SerializeField] private IngamePauseMenu pauseMenu;
+    [SerializeField] private InGamePauseMenu pauseMenu;
 
     [Header("Cooking Blast HUD")]
     [SerializeField] private TextMeshProUGUI levelText;
@@ -246,6 +246,8 @@ public class PopupInGame : Popup
         if (levelText == null)
         {
             Transform target = hudRoot.Find("LevelBadge/LevelText");
+            if (target == null)
+                target = hudRoot.Find("ProgressBG/LevelText");
             if (target != null) levelText = target.GetComponent<TextMeshProUGUI>();
         }
 
