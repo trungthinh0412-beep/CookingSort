@@ -22,7 +22,10 @@ namespace CookingSort2D
 
         [Header("Queue Game Feel")]
         [SerializeField, Min(0.01f)] private float frontRowScale = 1.1f;
+        [Tooltip("Scale of the first row behind the selectable waiting row.")]
         [SerializeField, Min(0.01f)] private float backRowsScale = 0.9f;
+        [Tooltip("Scale of the second and all deeper rows, so they remain readable without competing with the active row.")]
+        [SerializeField, Min(0.01f)] private float farBackRowsScale = 0.74f;
         [SerializeField, Min(0.01f)] private float pushDuration = 0.2f;
         [SerializeField, Range(0f, 0.3f)] private float pushScalePunch = 0.08f;
 
@@ -304,7 +307,9 @@ private void RefreshLane(int laneIndex, bool animate)
                 CustomerView view = lane[row];
                 if (view == null) continue;
                 Vector3 target = slotPosition + new Vector3(0f, -row * rowSpacing, 0f);
-                float rowScale = row == 0 ? frontRowScale : backRowsScale;
+                float rowScale = row == 0
+                    ? frontRowScale
+                    : row == 1 ? backRowsScale : farBackRowsScale;
                 Vector3 targetScale = Vector3.one * rowScale;
                 if (animate)
                     view.AnimateTo(target, targetScale, pushDuration, pushScalePunch);

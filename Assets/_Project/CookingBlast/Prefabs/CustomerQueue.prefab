@@ -74,9 +74,10 @@ MonoBehaviour:
   slotSpacing: 1.6
   customersRoot: {fileID: 8800161071531819008}
   laneSpacing: 1.6
-  rowSpacing: 1.6
+  rowSpacing: 1.35
   frontRowScale: 1
-  backRowsScale: 0.9
+  backRowsScale: 0.86
+  farBackRowsScale: 0.74
   pushDuration: 0.2
   pushScalePunch: 0.08
 --- !u!212 &1009386618176987760

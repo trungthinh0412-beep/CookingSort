@@ -578,7 +578,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7439857103381221433, guid: 8147caf80ce89bc4e9d3242b87a7206c, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -3.83
+      value: -3.55
       objectReference: {fileID: 0}
     - target: {fileID: 7439857103381221433, guid: 8147caf80ce89bc4e9d3242b87a7206c, type: 3}
       propertyPath: m_LocalPosition.z
@@ -656,7 +656,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CookingSort2D.ScreenRatioScaler
   target: {fileID: 7011488722959360824}
   referenceResolution: {x: 1080, y: 1920}
-  scaleAtReference: {x: 0.95, y: 0.88, z: 1}
+  scaleAtReference: {x: 0.98, y: 0.93, z: 1}
   scaleMode: 0
 --- !u!114 &8981271963874292691 stripped
 MonoBehaviour:
@@ -719,7 +719,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5380776936890600063, guid: f201b155fbb1e9c4188c61844a4cfb4c, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -2.5
+      value: -1.55
       objectReference: {fileID: 0}
     - target: {fileID: 5380776936890600063, guid: f201b155fbb1e9c4188c61844a4cfb4c, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -800,7 +800,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 106260037732843506, guid: 2e9dbd52803e0fa47aaac8a7821cca4a, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -4.62
+      value: -5.04
       objectReference: {fileID: 0}
     - target: {fileID: 106260037732843506, guid: 2e9dbd52803e0fa47aaac8a7821cca4a, type: 3}
       propertyPath: m_LocalPosition.z
@@ -833,6 +833,10 @@ PrefabInstance:
     - target: {fileID: 106260037732843506, guid: 2e9dbd52803e0fa47aaac8a7821cca4a, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 929653076989301250, guid: 2e9dbd52803e0fa47aaac8a7821cca4a, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.6
       objectReference: {fileID: 0}
     - target: {fileID: 3551811937446575304, guid: 2e9dbd52803e0fa47aaac8a7821cca4a, type: 3}
       propertyPath: m_Name

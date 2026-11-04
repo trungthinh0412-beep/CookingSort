@@ -156,7 +156,7 @@ public class PopupInGame : Popup
 
     public void OnClickSetting()
     {
-        if (pauseMenu != null) pauseMenu.Open();
+        if (pauseMenu != null) pauseMenu.Toggle();
     }
 
     public void OnClickOrderBell() => UseBooster(BoosterType.OrderBell);

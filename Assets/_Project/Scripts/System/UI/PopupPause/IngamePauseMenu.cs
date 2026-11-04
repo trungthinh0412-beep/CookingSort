@@ -43,20 +43,21 @@ public class InGamePauseMenu : MonoBehaviour
     [SerializeField] private float dominoDelay = 0.03f;
     [SerializeField] private float revealDuration = 0.05f;
 
+    [Header("Reference Slide Animation")]
+    [SerializeField] private float slideDistance = 190f;
+
+    [Range(0f, 3f)]
+    [SerializeField] private float slideOvershoot = 1.35f;
+
     [Header("Close Animation")]
     [SerializeField] private float closeMoveDuration = 0.12f;
     [SerializeField] private float closeDominoDelay = 0.018f;
-    [SerializeField] private float closeRotationAngle = 10f;
 
     [Range(0f, 1.5f)]
     [SerializeField] private float closeJoltStrength = 0.65f;
 
-    [Range(0f, 0.9f)]
-    [SerializeField] private float closeFadeStart = 0.35f;
-
     [Header("Button Overshoot")]
     [SerializeField] private float overshootDistance = 55f;
-    [SerializeField] private float bounceBackDuration = 0.18f;
     [SerializeField] private float startScale = 0.35f;
     [SerializeField] private float overshootScale = 1.2f;
     [SerializeField] private float rotationBounceAngle = 20f;
@@ -137,23 +138,20 @@ public class InGamePauseMenu : MonoBehaviour
         if (!_isOpen)
             return;
 
-        if (cancelButton != null &&
-            _cancelPositionCached)
-        {
-            cancelButton.anchoredPosition = _collapsedPosition;
-            cancelButton.localScale = Vector3.one;
-            cancelButton.localRotation = _cancelRotation;
-        }
-
         if (_buttonsAnimating)
             return;
 
-        for (int i = 0; i < pauseButtons.Count; i++)
+        List<int> animationOrder =
+            GetAnimationOrder(false);
+
+        for (int orderIndex = 0;
+             orderIndex < animationOrder.Count;
+             orderIndex++)
         {
+            int i = animationOrder[orderIndex];
             RectTransform button = pauseButtons[i];
 
-            if (button == null ||
-                button == cancelButton)
+            if (button == null)
                 continue;
 
             button.anchoredPosition = _targetPositions[i];
@@ -184,6 +182,18 @@ public class InGamePauseMenu : MonoBehaviour
         }
     }
 
+    private void EnsureTargetPositions()
+    {
+        if (_targetPositions.Count == pauseButtons.Count)
+        {
+            return;
+        }
+
+        // PopupInGame can call CloseImmediate from its OnInstantiate before
+        // this component's Awake has populated the cached layout positions.
+        CacheTargetPositions();
+    }
+
     public void Toggle()
     {
         if (_isOpen)
@@ -201,6 +211,22 @@ public class InGamePauseMenu : MonoBehaviour
         if (_isOpen)
             return;
 
+        // A rapid close -> open can interrupt the close coroutine while the
+        // buttons are between their layout and hidden positions. Never use
+        // that in-between state as a new layout target.
+        bool interruptedAnimation =
+            _menuCoroutine != null ||
+            _buttonsAnimating;
+
+        StopCurrentAnimation();
+
+        // When idle, the buttons have already been restored to the authored
+        // PauseMenuRoot layout, so it is safe to read Inspector changes.
+        if (!interruptedAnimation)
+        {
+            CacheTargetPositions();
+        }
+
         _isOpen = true;
 
         Time.timeScale = 0f;
@@ -208,9 +234,7 @@ public class InGamePauseMenu : MonoBehaviour
         ShowDarkBackground();
 
         RefreshUIOrder();
-        ShowCancelButton();
-
-        StopCurrentAnimation();
+        PrepareReferenceMenu();
 
         _menuCoroutine =
             StartCoroutine(
@@ -304,7 +328,12 @@ public class InGamePauseMenu : MonoBehaviour
 
         if (cancelButton != null)
         {
-            cancelButton.SetAsLastSibling();
+            cancelButton.gameObject.SetActive(false);
+        }
+
+        if (settingButton != null)
+        {
+            settingButton.SetAsLastSibling();
         }
     }
 
@@ -312,9 +341,6 @@ public class InGamePauseMenu : MonoBehaviour
     {
         List<int> animationOrder =
             GetAnimationOrder(false);
-
-        Vector2 collapsedCenter =
-            GetCollapsedCenter();
 
         for (int orderIndex = 0;
              orderIndex < animationOrder.Count;
@@ -331,16 +357,17 @@ public class InGamePauseMenu : MonoBehaviour
 
             DisableScaleEffect(button);
             button.gameObject.SetActive(true);
+            // Restore the authored PauseMenuRoot position before hiding.
+            // The next opening captures this exact value again.
+            button.anchoredPosition =
+                _targetPositions[i];
+            button.localScale = Vector3.one;
+            button.localRotation = Quaternion.identity;
+
             SetButtonCanvasState(
                 button,
                 0f,
                 false
-            );
-            SetButtonAnimationState(
-                button,
-                collapsedCenter,
-                startScale,
-                0f
             );
         }
 
@@ -351,15 +378,11 @@ public class InGamePauseMenu : MonoBehaviour
         float moveTime =
             Mathf.Max(0.01f, moveDuration);
 
-        float bounceTime =
-            Mathf.Max(0.01f, bounceBackDuration);
-
         float delay =
             Mathf.Max(0f, dominoDelay);
 
         float totalDuration =
             moveTime +
-            bounceTime +
             delay * Mathf.Max(
                 0,
                 animationOrder.Count - 1
@@ -390,6 +413,12 @@ public class InGamePauseMenu : MonoBehaviour
                 if (button == null)
                     continue;
 
+                float t =
+                    Mathf.Clamp01(
+                        localTime /
+                        moveTime
+                    );
+
                 float revealT =
                     Mathf.Clamp01(
                         localTime /
@@ -412,14 +441,15 @@ public class InGamePauseMenu : MonoBehaviour
                     false
                 );
 
-                ApplyOpenAnimationFrame(
-                    button,
-                    collapsedCenter,
-                    _targetPositions[i],
-                    localTime,
-                    moveTime,
-                    bounceTime
-                );
+                button.anchoredPosition =
+                    Vector2.LerpUnclamped(
+                        GetHiddenPosition(i),
+                        _targetPositions[i],
+                        EaseOutBack(t)
+                    );
+
+                button.localScale = Vector3.one;
+                button.localRotation = Quaternion.identity;
             }
 
             yield return null;
@@ -727,61 +757,34 @@ public class InGamePauseMenu : MonoBehaviour
         List<int> animationOrder =
             GetAnimationOrder(true);
 
-        List<RectTransform> buttons =
-            new List<RectTransform>();
-
-        List<Vector2> startCenters =
-            new List<Vector2>();
-
-        List<Vector2> startScales =
-            new List<Vector2>();
-
-        List<float> startRotations =
-            new List<float>();
-
-        List<float> startAlphas =
-            new List<float>();
-
         float closeDuration =
             Mathf.Max(0.01f, closeMoveDuration);
 
         float closeDelay =
             Mathf.Max(0f, closeDominoDelay);
 
-        Vector2 targetCenter =
-            GetCollapsedCenter();
+        List<Vector2> startPositions =
+            new List<Vector2>();
+
+        List<float> startAlphas =
+            new List<float>();
 
         for (int orderIndex = 0;
              orderIndex < animationOrder.Count;
              orderIndex++)
         {
-            int i = animationOrder[orderIndex];
-
             RectTransform button =
-                pauseButtons[i];
-
-            if (button == null ||
-                button == cancelButton)
-                continue;
+                pauseButtons[
+                    animationOrder[orderIndex]
+                ];
 
             CanvasGroup canvasGroup =
                 GetButtonCanvasGroup(button);
 
-            buttons.Add(button);
-            startCenters.Add(
-                GetButtonCenter(button)
-            );
-            startScales.Add(
-                new Vector2(
-                    button.localScale.x,
-                    button.localScale.y
-                )
-            );
-            startRotations.Add(
-                Mathf.DeltaAngle(
-                    0f,
-                    button.localEulerAngles.z
-                )
+            startPositions.Add(
+                button != null
+                    ? button.anchoredPosition
+                    : Vector2.zero
             );
             startAlphas.Add(
                 canvasGroup != null
@@ -794,16 +797,8 @@ public class InGamePauseMenu : MonoBehaviour
             closeDuration +
             closeDelay * Mathf.Max(
                 0,
-                buttons.Count - 1
+                animationOrder.Count - 1
             );
-
-        CanvasGroup cancelCanvasGroup =
-            GetButtonCanvasGroup(cancelButton);
-
-        float cancelStartAlpha =
-            cancelCanvasGroup != null
-                ? cancelCanvasGroup.alpha
-                : 1f;
 
         _buttonsAnimating = true;
 
@@ -813,14 +808,24 @@ public class InGamePauseMenu : MonoBehaviour
         {
             elapsed += Time.unscaledDeltaTime;
 
-            for (int i = 0;
-                 i < buttons.Count;
-                 i++)
+            for (int orderIndex = 0;
+                 orderIndex < animationOrder.Count;
+                 orderIndex++)
             {
                 float localTime =
-                    elapsed - i * closeDelay;
+                    elapsed -
+                    orderIndex * closeDelay;
 
                 if (localTime < 0f)
+                    continue;
+
+                int i =
+                    animationOrder[orderIndex];
+
+                RectTransform button =
+                    pauseButtons[i];
+
+                if (button == null)
                     continue;
 
                 float t =
@@ -830,100 +835,60 @@ public class InGamePauseMenu : MonoBehaviour
                     );
 
                 float moveT =
-                    EaseInOutBackSoft(t);
+                    EaseInCubic(t);
 
-                float rotationWave =
-                    Mathf.Sin(t * Mathf.PI);
-
-                rotationWave *=
-                    rotationWave;
-
-                float fadeT =
-                    Mathf.InverseLerp(
-                        closeFadeStart,
-                        1f,
-                        t
+                button.anchoredPosition =
+                    Vector2.LerpUnclamped(
+                        startPositions[orderIndex],
+                        GetHiddenPosition(i),
+                        moveT
                     );
 
-                fadeT =
-                    EaseInOutCubic(fadeT);
-
-                SetButtonAnimationState(
-                    buttons[i],
-                    Vector2.LerpUnclamped(
-                        startCenters[i],
-                        targetCenter,
-                        moveT
-                    ),
-                    Vector2.LerpUnclamped(
-                        startScales[i],
-                        Vector2.one * startScale,
-                        moveT
-                    ),
-                    Mathf.LerpUnclamped(
-                        startRotations[i],
-                        0f,
-                        moveT
-                    ) +
-                    closeRotationAngle *
-                    rotationWave
-                );
+                button.localScale = Vector3.one;
+                button.localRotation = Quaternion.identity;
 
                 SetButtonCanvasState(
-                    buttons[i],
+                    button,
                     Mathf.Lerp(
-                        startAlphas[i],
+                        startAlphas[orderIndex],
                         0f,
-                        fadeT
+                        EaseInCubic(t)
                     ),
                     false
                 );
             }
 
-            float cancelT =
-                EaseInOutCubic(
-                    Mathf.Clamp01(
-                        elapsed /
-                        totalDuration
-                    )
-                );
-
-            SetButtonCanvasState(
-                cancelButton,
-                Mathf.Lerp(
-                    cancelStartAlpha,
-                    0f,
-                    cancelT
-                ),
-                false
-            );
-
             yield return null;
         }
 
-        for (int i = 0;
-             i < buttons.Count;
-             i++)
+        for (int orderIndex = 0;
+             orderIndex < animationOrder.Count;
+             orderIndex++)
         {
-            SetButtonAnimationState(
-                buttons[i],
-                targetCenter,
-                startScale,
-                0f
-            );
+            int i = animationOrder[orderIndex];
+            RectTransform button = pauseButtons[i];
+
+            if (button == null)
+                continue;
+
+            // Keep the RectTransform at its authored layout position while
+            // inactive. Only the active animation may place it off-screen.
+            button.anchoredPosition =
+                _targetPositions[i];
+            button.localScale = Vector3.one;
+            button.localRotation = Quaternion.identity;
 
             SetButtonCanvasState(
-                buttons[i],
+                button,
                 0f,
                 false
             );
-        }
 
-        SetButtonCanvasState(
-            cancelButton,
-            0f,
-            false
-        );
+            // The child Image owns the CustomButton raycast. Deactivating
+            // the whole action button guarantees that no invisible Exit
+            // button can intercept the next Btn_setting press.
+            button.gameObject.SetActive(false);
+        }
 
         ApplyGameTimeScale();
 
@@ -944,10 +909,32 @@ public class InGamePauseMenu : MonoBehaviour
     {
         List<int> order = new List<int>();
 
-        for (int i = 0; i < pauseButtons.Count; i++)
+        AddButtonIndex(
+            order,
+            GetButtonContaining(timeScaleIcon)
+        );
+        AddButtonIndex(
+            order,
+            GetButtonContaining(vibrationIcon)
+        );
+        AddButtonIndex(
+            order,
+            GetButtonContaining(soundIcon)
+        );
+        AddButtonIndex(
+            order,
+            GetButtonContaining(musicIcon)
+        );
+
+        for (int i = 0;
+             i < pauseButtons.Count;
+             i++)
         {
-            if (pauseButtons[i] == null ||
-                pauseButtons[i] == cancelButton)
+            RectTransform button =
+                pauseButtons[i];
+
+            if (!IsReferenceMenuButton(button) ||
+                order.Contains(i))
                 continue;
 
             order.Add(i);
@@ -959,6 +946,55 @@ public class InGamePauseMenu : MonoBehaviour
         }
 
         return order;
+    }
+
+    private void AddButtonIndex(
+        List<int> order,
+        RectTransform button
+    )
+    {
+        if (button == null)
+            return;
+
+        int index = pauseButtons.IndexOf(button);
+
+        if (index >= 0 &&
+            !order.Contains(index))
+        {
+            order.Add(index);
+        }
+    }
+
+    private bool IsReferenceMenuButton(
+        RectTransform button
+    )
+    {
+        return button != null &&
+               button != cancelButton;
+    }
+
+    private RectTransform GetButtonContaining(
+        Image icon
+    )
+    {
+        if (icon == null)
+            return null;
+
+        for (int i = 0;
+             i < pauseButtons.Count;
+             i++)
+        {
+            RectTransform button =
+                pauseButtons[i];
+
+            if (button != null &&
+                icon.transform.IsChildOf(button))
+            {
+                return button;
+            }
+        }
+
+        return null;
     }
 
     private float GetBounceRotation(float t)
@@ -1010,6 +1046,93 @@ public class InGamePauseMenu : MonoBehaviour
         return -(
             Mathf.Cos(Mathf.PI * t) - 1f
         ) / 2f;
+    }
+
+    private void PrepareReferenceMenu()
+    {
+        if (cancelButton != null)
+        {
+            DisableScaleEffect(cancelButton);
+            cancelButton.gameObject.SetActive(false);
+        }
+
+        // _targetPositions is captured directly from the buttons under
+        // PauseMenuRoot in Awake. Do not align, offset, or sort them here:
+        // the layout authored in PopupInGame is the final on-screen layout.
+
+        if (settingButton != null)
+        {
+            settingButton.gameObject.SetActive(true);
+            settingButton.localScale = Vector3.one;
+            settingButton.localRotation = Quaternion.identity;
+            settingButton.SetAsLastSibling();
+        }
+    }
+
+    private void ArrangeReferenceTargets()
+    {
+        List<int> order =
+            GetAnimationOrder(false);
+
+        List<Vector2> targetSlots =
+            new List<Vector2>();
+
+        for (int i = 0;
+             i < order.Count;
+             i++)
+        {
+            targetSlots.Add(
+                _targetPositions[order[i]]
+            );
+        }
+
+        targetSlots.Sort(
+            (left, right) =>
+                left.y.CompareTo(right.y)
+        );
+
+        for (int i = 0;
+             i < order.Count;
+             i++)
+        {
+            _targetPositions[order[i]] =
+                targetSlots[i];
+        }
+    }
+
+    private Vector2 GetHiddenPosition(
+        int buttonIndex
+    )
+    {
+        if (buttonIndex < 0 ||
+            buttonIndex >= _targetPositions.Count)
+            return Vector2.right * slideDistance;
+
+        return _targetPositions[buttonIndex] +
+               Vector2.right *
+               Mathf.Max(0f, slideDistance);
+    }
+
+    private float EaseOutBack(float t)
+    {
+        t = Mathf.Clamp01(t);
+
+        float overshoot =
+            Mathf.Max(0f, slideOvershoot);
+
+        float shiftedT = t - 1f;
+
+        return 1f +
+               (overshoot + 1f) *
+               shiftedT * shiftedT * shiftedT +
+               overshoot *
+               shiftedT * shiftedT;
+    }
+
+    private float EaseInCubic(float t)
+    {
+        t = Mathf.Clamp01(t);
+        return t * t * t;
     }
 
     private void ShowCancelButton()
@@ -1344,6 +1467,8 @@ public class InGamePauseMenu : MonoBehaviour
     {
         _isOpen = false;
 
+        EnsureTargetPositions();
+
         if (darkBackgroundCanvasGroup != null)
         {
             darkBackgroundCanvasGroup.alpha =
@@ -1371,8 +1496,7 @@ public class InGamePauseMenu : MonoBehaviour
             RectTransform button =
                 pauseButtons[i];
 
-            if (button == null ||
-                button == cancelButton)
+            if (!IsReferenceMenuButton(button))
                 continue;
 
             button.localScale =
@@ -1381,17 +1505,19 @@ public class InGamePauseMenu : MonoBehaviour
             button.localRotation =
                 Quaternion.identity;
 
+            // HideInstant may run while an animation is interrupted. Put the
+            // transform back on the PauseMenuRoot layout before deactivating.
             button.anchoredPosition =
-                GetCollapsedPosition();
-
-            button.gameObject
-                .SetActive(true);
+                _targetPositions[i];
 
             SetButtonCanvasState(
                 button,
                 0f,
                 false
             );
+
+            button.gameObject
+                .SetActive(false);
         }
     }
 
@@ -1469,15 +1595,23 @@ public class InGamePauseMenu : MonoBehaviour
 
     public void OnClickExit()
     {
-        CloseImmediately();
-
-        if (PopupController.Instance != null)
+        if (PopupController.Instance == null)
         {
-            PopupController.Instance.HideAll();
-            PopupController.Instance.Show<PopupHome>(PopupAnimation.None);
+            return;
         }
 
-        SceneManager.LoadScene("GameplayScene");
+        PopupQuit popupQuit =
+            PopupController.Instance.Get<PopupQuit>() as PopupQuit;
+
+        if (popupQuit == null)
+        {
+            return;
+        }
+
+        popupQuit.SetPauseMenu(this);
+        PopupController.Instance.Show<PopupQuit>(
+            PopupAnimation.ScaleFade
+        );
     }
 
     private void ApplyGameTimeScale()
