@@ -41,11 +41,32 @@ private readonly List<List<CustomerView>> _lanes = new List<List<CustomerView>>(
             }
         }
 
+        /// <summary>
+        /// Appends one queue row from left to right across all lanes.
+        /// queueRowIndex 0 is booster row 2; index 1 is booster row 3.
+        /// </summary>
+        public void GetBoosterRow(int queueRowIndex, List<CustomerView> results)
+        {
+            if (results == null) return;
+            results.Clear();
+            if (queueRowIndex < 0) return;
+
+            for (int lane = 0; lane < _lanes.Count; lane++)
+            {
+                List<CustomerView> customers = _lanes[lane];
+                if (customers == null || queueRowIndex >= customers.Count) continue;
+                CustomerView customer = customers[queueRowIndex];
+                if (customer != null) results.Add(customer);
+            }
+        }
+
 private void Awake()
         {
             AutoBindRoots();
             CacheSlots();
         }
+
+
 
 public CustomerView GetAnimalPrefab(FoodColor type)
         {
@@ -55,6 +76,21 @@ public CustomerView GetAnimalPrefab(FoodColor type)
                         return animalPrefabsByType[i];
             return customerPrefab != null && customerPrefab.Type == type ? customerPrefab : null;
         }
+
+public CustomerView GetAnimalPrefab(CustomerOrderData order)
+        {
+            if (order == null) return null;
+            CustomerView overridePrefab = order.animalPrefab;
+            if (overridePrefab != null && overridePrefab.Type == order.color &&
+                animalPrefabsByType != null)
+            {
+                for (int i = 0; i < animalPrefabsByType.Length; i++)
+                    if (animalPrefabsByType[i] == overridePrefab) return overridePrefab;
+            }
+            return GetAnimalPrefab(order.color);
+        }
+
+
 
         public int ConfiguredAnimalPrefabCount =>
             animalPrefabsByType != null ? animalPrefabsByType.Length : 0;
@@ -94,7 +130,7 @@ public void Initialize(CookingSortGameController game, CookingBlastLevel data)
                 {
                     CustomerOrderData order = laneData.frontToBack[row];
                     if (order == null) continue;
-                    CustomerView animalPrefab = GetAnimalPrefab(order.color);
+                    CustomerView animalPrefab = GetAnimalPrefab(order);
                     if (animalPrefab == null)
                     {
                         Debug.LogError("[CookingBlast] Missing Animal prefab for " +
@@ -118,10 +154,111 @@ public void Initialize(CookingSortGameController game, CookingBlastLevel data)
             List<CustomerView> lane = _lanes[laneIndex];
             if (lane.Count == 0 || lane[0] != customer) return;
             if (customer.RevealEgg()) return;
-            if (!_game.TrySeatCustomer(customer)) return;
+            if (!_game.TrySeatCustomer(customer, laneIndex, 0)) return;
 
             lane.RemoveAt(0);
             RefreshLane(laneIndex, true);
+        }
+
+        public void HandleCustomerClick(CustomerView customer)
+        {
+            if (customer == null || _game == null) return;
+            if (_game.HandleBoosterCustomerClick(customer)) return;
+            TrySelect(customer);
+        }
+
+        public bool TryPromoteWithOrderBell(CustomerView customer)
+        {
+            if (customer == null || _game == null) return false;
+            for (int lane = 0; lane < _lanes.Count; lane++)
+            {
+                int row = _lanes[lane].IndexOf(customer);
+                // Queue row 0 is gameplay row 2, so every waiting animal is valid.
+                if (row < 0) continue;
+                if (!_game.TrySeatCustomer(customer, lane, row)) return false;
+                _lanes[lane].RemoveAt(row);
+                RefreshLane(lane, true);
+                return true;
+            }
+            return false;
+        }
+
+        public bool RestoreCustomer(CustomerView customer, int laneIndex, int rowIndex)
+        {
+            if (customer == null || customersRoot == null || _lanes.Count == 0) return false;
+            laneIndex = Mathf.Clamp(laneIndex, 0, _lanes.Count - 1);
+            List<CustomerView> lane = _lanes[laneIndex];
+            rowIndex = Mathf.Clamp(rowIndex, 0, lane.Count);
+            customer.ReturnToQueue(this, laneIndex, customersRoot);
+            lane.Insert(rowIndex, customer);
+            RefreshLane(laneIndex, true);
+            return true;
+        }
+
+        public bool ShuffleWaitingCustomers(Dictionary<FoodColor, int> bottomTypeWeights)
+        {
+            var customers = new List<CustomerView>();
+            var laneCounts = new List<int>(_lanes.Count);
+            for (int lane = 0; lane < _lanes.Count; lane++)
+            {
+                laneCounts.Add(_lanes[lane].Count);
+                customers.AddRange(_lanes[lane]);
+            }
+            if (customers.Count < 2) return false;
+
+            // Shuffle everyone first. Then promote at most ONE animal for each
+            // type exposed at the bottom; duplicate animals of that type stay
+            // in the random remainder instead of filling the whole front row.
+            for (int i = customers.Count - 1; i > 0; i--)
+            {
+                int swap = Random.Range(0, i + 1);
+                CustomerView temp = customers[i];
+                customers[i] = customers[swap];
+                customers[swap] = temp;
+            }
+
+            var prioritized = new List<CustomerView>();
+            var remainder = new List<CustomerView>();
+            var prioritizedTypes = new HashSet<FoodColor>();
+            for (int i = 0; i < customers.Count; i++)
+            {
+                CustomerView customer = customers[i];
+                bool exposed = customer != null && bottomTypeWeights != null &&
+                               bottomTypeWeights.ContainsKey(customer.Type);
+                if (exposed && prioritizedTypes.Add(customer.Type))
+                    prioritized.Add(customer);
+                else
+                    remainder.Add(customer);
+            }
+            customers.Clear();
+            customers.AddRange(prioritized);
+            customers.AddRange(remainder);
+
+            for (int lane = 0; lane < _lanes.Count; lane++) _lanes[lane].Clear();
+            int cursor = 0;
+            int maxRows = 0;
+            for (int lane = 0; lane < laneCounts.Count; lane++)
+                maxRows = Mathf.Max(maxRows, laneCounts[lane]);
+            for (int row = 0; row < maxRows; row++)
+            {
+                for (int lane = 0; lane < _lanes.Count; lane++)
+                {
+                    if (row >= laneCounts[lane] || cursor >= customers.Count) continue;
+                    CustomerView customer = customers[cursor++];
+                    _lanes[lane].Add(customer);
+                    if (customer != null) customer.SetQueueLane(this, lane);
+                }
+            }
+            for (int lane = 0; lane < _lanes.Count; lane++) RefreshLane(lane, true);
+            return true;
+        }
+
+        public void SetOrderBellSelection(bool active)
+        {
+            for (int lane = 0; lane < _lanes.Count; lane++)
+                for (int row = 0; row < _lanes[lane].Count; row++)
+                    if (_lanes[lane][row] != null)
+                        _lanes[lane][row].SetBoosterSelectable(active);
         }
 
         public bool SelectFrontOfLane(int laneIndex)

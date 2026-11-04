@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Coffee.UIExtensions;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -12,6 +13,7 @@ public class PopupHome : Popup
     private const string LeftButtonGroupPath = "Container/Group_btn_Left";
     private const string HelpKingButtonName = "Btn_Help King";
     private const string RelicHuntButtonName = "Btn_Relic_Hunt";
+    private const string HomeSnowObjectName = "HomeSnowFX";
 
     [SerializeField] private GameObject btnRemoveAds;
     [SerializeField] private GameObject btnBoartRace;
@@ -28,7 +30,17 @@ public class PopupHome : Popup
     [SerializeField, Min(1)] private int progressMissionUnlockLevel = 12;
     [SerializeField] private CustomButton helpKingButton;
 
+    [Header("Home snow")]
+    [SerializeField] private GameObject homeSnowPrefab;
+    [SerializeField, Min(1f)] private float homeSnowUiScale = 100f;
+    [SerializeField, Min(0f)] private float homeSnowEmissionRate = 4f;
+    [SerializeField, Min(0f)] private float homeSpecialSnowflakeEmissionRate = 0.15f;
+    [SerializeField, Min(0.01f)] private float homeSnowParticleSize = 0.15f;
+    [SerializeField] private Material homeSnowflakeMaterial;
+    [SerializeField] private Material homeSnowflake2Material;
+
     private HomeEntranceAnimator homeEntranceAnimator;
+    private UIParticle homeSnowParticle;
     
 
     public RectTransform HomeBackground => homebackground;
@@ -148,6 +160,7 @@ public class PopupHome : Popup
     protected override void OnInstantiate()
     {
         base.OnInstantiate();
+        EnsureHomeSnow();
         ApplySideButtonGroupVisibility();
 
         homeEntranceAnimator = GetComponent<HomeEntranceAnimator>();
@@ -195,6 +208,142 @@ public class PopupHome : Popup
                 playButton.Click.RemoveListener(OnClickBooster);
                 playButton.Click.AddListener(OnClickBooster);
             }
+        }
+    }
+
+    private void EnsureHomeSnow()
+    {
+        if (homeSnowPrefab == null)
+            return;
+
+        Transform existingSnow = transform.Find(HomeSnowObjectName);
+
+        if (existingSnow != null)
+        {
+            homeSnowParticle = existingSnow.GetComponent<UIParticle>();
+            return;
+        }
+
+        GameObject snowObject = new GameObject(
+            HomeSnowObjectName,
+            typeof(RectTransform),
+            typeof(UIParticle)
+        );
+
+        snowObject.layer = gameObject.layer;
+
+        RectTransform snowRect = snowObject.GetComponent<RectTransform>();
+        snowRect.SetParent(transform, false);
+        snowRect.anchorMin = Vector2.zero;
+        snowRect.anchorMax = Vector2.one;
+        snowRect.anchoredPosition = Vector2.zero;
+        snowRect.sizeDelta = Vector2.zero;
+
+        int snowSiblingIndex = homebackground != null
+            ? homebackground.GetSiblingIndex() + 1
+            : 0;
+        snowRect.SetSiblingIndex(snowSiblingIndex);
+
+        homeSnowParticle = snowObject.GetComponent<UIParticle>();
+        homeSnowParticle.scale = Mathf.Max(1f, homeSnowUiScale);
+        homeSnowParticle.autoScalingMode = UIParticle.AutoScalingMode.Transform;
+        homeSnowParticle.SetParticleSystemPrefab(homeSnowPrefab);
+        AddOccasionalSnowflakeSystems();
+
+        ConfigureHomeSnow(snowRect.rect);
+    }
+
+    private void AddOccasionalSnowflakeSystems()
+    {
+        if (homeSnowParticle == null || homeSnowParticle.particles.Count == 0)
+            return;
+
+        ParticleSystem source = homeSnowParticle.particles[0];
+        AddOccasionalSnowflakeSystem(
+            source,
+            homeSnowflakeMaterial,
+            "HomeSnowflake"
+        );
+        AddOccasionalSnowflakeSystem(
+            source,
+            homeSnowflake2Material,
+            "HomeSnowflake2"
+        );
+
+        homeSnowParticle.RefreshParticles();
+    }
+
+    private void AddOccasionalSnowflakeSystem(
+        ParticleSystem source,
+        Material material,
+        string systemName)
+    {
+        if (source == null || material == null)
+            return;
+
+        GameObject variantObject = Instantiate(
+            source.gameObject,
+            source.transform.parent,
+            false
+        );
+        variantObject.name = systemName;
+        variantObject.layer = gameObject.layer;
+
+        ParticleSystemRenderer variantRenderer =
+            variantObject.GetComponent<ParticleSystemRenderer>();
+
+        if (variantRenderer != null)
+            variantRenderer.sharedMaterial = material;
+    }
+
+    private void ConfigureHomeSnow(Rect homeRect)
+    {
+        if (homeSnowParticle == null)
+            return;
+
+        float uiScale = Mathf.Max(1f, homeSnowUiScale);
+        float emitterWidth = homeRect.width / uiScale + 2f;
+        float emitterY = homeRect.height * 0.5f / uiScale + 1f;
+        float fullScreenTravelDistance = homeRect.height / uiScale + 2f;
+
+        foreach (ParticleSystem snowSystem in homeSnowParticle.particles)
+        {
+            if (snowSystem == null)
+                continue;
+
+            snowSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            snowSystem.gameObject.layer = gameObject.layer;
+            snowSystem.transform.localPosition = new Vector3(0f, emitterY, 0f);
+
+            ParticleSystem.MainModule main = snowSystem.main;
+            main.prewarm = true;
+
+            float fallSpeed = Mathf.Max(
+                0.1f,
+                Mathf.Abs(main.startSpeed.constant)
+            );
+            float requiredLifetime = fullScreenTravelDistance / fallSpeed;
+            main.startLifetime = new ParticleSystem.MinMaxCurve(
+                requiredLifetime + 0.5f,
+                requiredLifetime + 1.5f
+            );
+            main.startSize = new ParticleSystem.MinMaxCurve(
+                homeSnowParticleSize * 0.8f,
+                homeSnowParticleSize * 1.1f
+            );
+
+            ParticleSystem.EmissionModule emission = snowSystem.emission;
+            emission.rateOverTime =
+                snowSystem.name.StartsWith("HomeSnowflake", StringComparison.Ordinal)
+                    ? homeSpecialSnowflakeEmissionRate
+                    : homeSnowEmissionRate;
+
+            ParticleSystem.ShapeModule shape = snowSystem.shape;
+            Vector3 shapeScale = shape.scale;
+            shapeScale.x = Mathf.Max(1f, emitterWidth);
+            shape.scale = shapeScale;
+
+            snowSystem.Play(true);
         }
     }
 
@@ -481,7 +630,7 @@ public class PopupHome : Popup
 
     public void OnClickLeague()
     {
-        OpenPopup<PopupLeague>();
+        OpenPopup<PopupSpecials>();
     }
 
     public void OnClickCollection()

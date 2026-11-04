@@ -1,10 +1,12 @@
 using System;
 using System.Collections;
+using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace CookingSort2D
 {
-    public class FoodTileView : MonoBehaviour
+    public class FoodTileView : MonoBehaviour, IPointerClickHandler
     {
         [Header("Matching")]
         [Tooltip("This Tile can only be eaten by an Animal with the same Match Type.")]
@@ -12,7 +14,11 @@ namespace CookingSort2D
 
         [SerializeField] private bool usePrefabSprite = false;
 [SerializeField] private SpriteRenderer body;
-        [SerializeField] private TextMesh symbol;
+        private SpriteRenderer _frontRowShadow;
+
+        [Header("Footprint Value UI")]
+        [Tooltip("Create a TextMeshPro child in each 2x1/1x2/2x2 prefab and drag it here. Runtime never creates this Text automatically.")]
+        [SerializeField] private TMP_Text valueText;
 
         [Header("Board Footprint")]
         [Tooltip("Number of logical Board cells occupied horizontally when placed from the Level Editor.")]
@@ -66,6 +72,12 @@ namespace CookingSort2D
             AutoBind();
         }
 
+        public void OnPointerClick(PointerEventData eventData)
+        {
+            BoardController board = GetComponentInParent<BoardController>();
+            if (board != null) board.HandleTileClick(this);
+        }
+
 public void Setup(FoodColor color)
         {
             AutoBind();
@@ -75,9 +87,10 @@ public void Setup(FoodColor color)
                     : usePrefabSprite ? Color.white : CookingSortPalette.Get(color);
             // Regular 1x1 tiles are artwork-only, without letters or numbers.
             // Footprints bigger than 1x1 explicitly enable their value label.
-            if (symbol != null)
+            if (valueText != null)
             {
-                symbol.text = string.Empty;
+                valueText.text = string.Empty;
+                valueText.gameObject.SetActive(false);
             }
         }
 
@@ -92,19 +105,12 @@ public void SetupCluster(FoodColor color, int value, int width, int height)
             if (width <= 1 && height <= 1)
                 return;
 
-            if (symbol == null)
+            if (valueText == null)
             {
-                GameObject label = new GameObject("ClusterValue");
-                label.transform.SetParent(transform, false);
-                symbol = label.AddComponent<TextMesh>();
-                symbol.anchor = TextAnchor.MiddleCenter;
-                symbol.alignment = TextAlignment.Center;
-                symbol.fontSize = 72;
-                symbol.characterSize = 0.06f;
-                symbol.fontStyle = FontStyle.Bold;
+                Debug.LogWarning($"[CookingBlast] Footprint prefab '{name}' has no Value Text assigned.", this);
+                return;
             }
-            symbol.transform.localPosition = new Vector3(0f, 0f, -0.05f);
-            symbol.transform.localScale = Vector3.one;
+            valueText.gameObject.SetActive(true);
             SetClusterValue(value);
         }
 
@@ -144,9 +150,8 @@ private void StretchFootprintVisual(int width, int height)
 
         public void SetClusterValue(int value)
         {
-            if (symbol == null) return;
-            symbol.text = Mathf.Max(0, value).ToString();
-            symbol.color = Color.white;
+            if (valueText == null) return;
+            valueText.text = Mathf.Max(0, value).ToString();
         }
 
 public void FitToCell(float targetSize)
@@ -165,11 +170,64 @@ public void FitToCell(float targetSize)
         {
             AutoBind();
             if (body != null) body.sortingOrder = order;
-            if (symbol != null)
+            if (_frontRowShadow != null)
             {
-                MeshRenderer r = symbol.GetComponent<MeshRenderer>();
-                if (r != null) r.sortingOrder = order + 1;
+                if (body != null)
+                    _frontRowShadow.sortingLayerID = body.sortingLayerID;
+                _frontRowShadow.sortingOrder = order - 1;
             }
+            if (valueText != null)
+            {
+                Renderer r = valueText.GetComponent<Renderer>();
+                if (r != null) r.sortingOrder = order + 1;
+                Canvas canvas = valueText.GetComponentInParent<Canvas>();
+                if (canvas != null)
+                {
+                    canvas.overrideSorting = true;
+                    canvas.sortingOrder = order + 1;
+                }
+            }
+        }
+
+        public void SetFrontRowShadow(Sprite sprite, bool visible, float overlap)
+        {
+            AutoBind();
+            if (!visible || sprite == null || body == null)
+            {
+                if (_frontRowShadow != null) _frontRowShadow.enabled = false;
+                return;
+            }
+
+            if (_frontRowShadow == null)
+            {
+                GameObject shadowObject = new GameObject("FrontRowShadow");
+                shadowObject.layer = gameObject.layer;
+                shadowObject.transform.SetParent(transform, false);
+                _frontRowShadow = shadowObject.AddComponent<SpriteRenderer>();
+            }
+
+            _frontRowShadow.sprite = sprite;
+            _frontRowShadow.sharedMaterial = body.sharedMaterial;
+            _frontRowShadow.color = Color.white;
+            _frontRowShadow.flipX = false;
+            _frontRowShadow.flipY = false;
+            _frontRowShadow.sortingLayerID = body.sortingLayerID;
+            _frontRowShadow.sortingOrder = body.sortingOrder - 1;
+
+            Vector3 bodyCenter = body.bounds.center;
+            Vector3 bodyBottomWorld = new Vector3(
+                bodyCenter.x, body.bounds.min.y, bodyCenter.z);
+            Vector3 localBottom = transform.InverseTransformPoint(bodyBottomWorld);
+            float localScaleX = Mathf.Max(0.0001f, Mathf.Abs(transform.lossyScale.x));
+            float visualWidth = body.bounds.size.x / localScaleX;
+            float shadowWidth = Mathf.Max(0.0001f, sprite.bounds.size.x);
+
+            _frontRowShadow.transform.localPosition = new Vector3(
+                localBottom.x, localBottom.y + Mathf.Max(0f, overlap), 0f);
+            _frontRowShadow.transform.localRotation = Quaternion.identity;
+            _frontRowShadow.transform.localScale = new Vector3(
+                visualWidth / shadowWidth, 1f, 1f);
+            _frontRowShadow.enabled = true;
         }
 
 public void ConsumeTo(Transform target, Action onComplete)
@@ -179,6 +237,7 @@ public void ConsumeTo(Transform target, Action onComplete)
                 onComplete?.Invoke();
                 return;
             }
+            if (_frontRowShadow != null) _frontRowShadow.enabled = false;
             StartCoroutine(ConsumeRoutine(target, onComplete));
         }
 
@@ -221,11 +280,6 @@ private IEnumerator ConsumeRoutine(Transform target, Action onComplete)
         private void AutoBind()
         {
             if (body == null) body = GetComponent<SpriteRenderer>();
-            if (symbol == null)
-            {
-                Transform t = transform.Find("Symbol");
-                if (t != null) symbol = t.GetComponent<TextMesh>();
-            }
         }
     }
 }

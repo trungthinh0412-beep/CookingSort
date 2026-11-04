@@ -247,15 +247,15 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1149096209492963561}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -0.000061035156}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0, y: 0, z: -0.000030517578}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 8721002957770195226}
+  m_Father: {fileID: 4541012637537594925}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -5.4277, y: -782.16}
+  m_AnchoredPosition: {x: -2.7138329, y: -0.5800171}
   m_SizeDelta: {x: 853.7097, y: 122.32}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4212529559283286735
@@ -286,7 +286,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Tap to continued
+  m_text: 'Replay
+
+'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 6d1505f7492dcf542abb09e316e02886, type: 2}
   m_sharedMaterial: {fileID: 6947035531298493992, guid: 6d1505f7492dcf542abb09e316e02886, type: 2}
@@ -602,7 +604,7 @@ RectTransform:
   m_GameObject: {fileID: 3163045934955445169}
   m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0, z: -0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8721002957770195226}
@@ -5326,7 +5328,6 @@ RectTransform:
   - {fileID: 2136965422013621475}
   - {fileID: 3163045934955729167}
   - {fileID: 4541012637537594925}
-  - {fileID: 3579971811575357529}
   m_Father: {fileID: 7370416450938019889}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -5368,8 +5369,9 @@ GameObject:
   - component: {fileID: 4541012637537594925}
   - component: {fileID: 4747280600538260255}
   - component: {fileID: 5540686377650387664}
+  - component: {fileID: 318723551088353715}
   m_Layer: 5
-  m_Name: Image
+  m_Name: Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5386,7 +5388,8 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 2, y: 2, z: 2}
   m_ConstrainProportionsScale: 1
-  m_Children: []
+  m_Children:
+  - {fileID: 3579971811575357529}
   m_Father: {fileID: 8721002957770195226}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -5432,6 +5435,58 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &318723551088353715
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4609525533746424548}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05e5d2e9cb943e54f841c49227a507d7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CustomButton
+  interactable: 1
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  disableType: 0
+  disableColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
+  normalSprite: {fileID: 0}
+  disableSprite: {fileID: 0}
+  normalMaterial: {fileID: 0}
+  disableMaterial: {fileID: 0}
+  changeColorTexts: []
+  normalTextColor: {r: 1, g: 1, b: 1, a: 1}
+  disableTextColor: {r: 1, g: 1, b: 1, a: 1}
+  changeColorTexts2: []
+  normalTextColor2: {r: 1, g: 1, b: 1, a: 1}
+  disableTextColor2: {r: 1, g: 1, b: 1, a: 1}
+  useFadeColorMotion: 1
+  affectSelf: 0
+  fadeDuration: 0.1
+  pressColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
+  useScaleMotion: 1
+  scaleDuration: 0.2
+  scalePercent: 0.95
+  scaleEase: 0
+  ignoreTimeScale: 0
+  useHoldPress: 0
+  holdDuration: 0.5
+  enablePressContent: 
+  disablePressContent: 
+  buttonPressState: 0
+  m_OnClick:
+    m_PersistentCalls:
+      m_Calls: []
+  m_OnHold:
+    m_PersistentCalls:
+      m_Calls: []
+  m_OnMouseUp:
+    m_PersistentCalls:
+      m_Calls: []
+  m_OnPointerDown:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &5489148110521580800
 GameObject:
   m_ObjectHideFlags: 0
@@ -5623,15 +5678,7 @@ MonoBehaviour:
   delayDuration: 0
   showEase: 0
   hideEase: 0
-  sequenceShowObjects: []
-  listFx:
-  - {fileID: 3163045934941497311}
-  - {fileID: 0}
-  - {fileID: 0}
-  kingWinAnimation: {fileID: 6003249241235006109}
-  kingWinSpriteAnimator: {fileID: 0}
-  kingScaleDuration: 0.3
-  goodJobDelay: 4
+  replayButton: {fileID: 318723551088353715}
 --- !u!1001 &8341109460589664259
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5812,6 +5859,10 @@ PrefabInstance:
       propertyPath: m_ConstrainProportionsScale
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 5110384975677417128, guid: f09ad2ca4a95a1e4fb458f0434e2562a, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 5302619332311202122, guid: f09ad2ca4a95a1e4fb458f0434e2562a, type: 3}
       propertyPath: m_SizeDelta.x
       value: 248
@@ -5884,7 +5935,8 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 5.1501
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 2540367157823477786, guid: f09ad2ca4a95a1e4fb458f0434e2562a, type: 3}
     m_RemovedGameObjects:
     - {fileID: 2430375496092677306, guid: f09ad2ca4a95a1e4fb458f0434e2562a, type: 3}
     - {fileID: 2956628934846390081, guid: f09ad2ca4a95a1e4fb458f0434e2562a, type: 3}

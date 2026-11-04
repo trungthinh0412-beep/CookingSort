@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -28,7 +28,19 @@ public class PopupController : SingletonDontDestroy<PopupController>
     [SerializeField] private NotifyTagItem notifyTagItemPrefab;
 
     [SerializeField] private PopupConfig popupConfig;
+
+    [Header("Main Tab Popup Fallbacks")]
+    [Tooltip("Direct references keep newly-created main tabs available even if PopupConfig was loaded before their scripts finished importing.")]
+    [SerializeField] private PopupSpecials popupSpecialsPrefab;
+    [SerializeField] private PopupCareer popupCareerPrefab;
+
+
+    [Header("Development / Debug")]
+    [Tooltip("Opt-in: show the floating Debug Console on startup only when Testing mode is also enabled. Off by default to keep gameplay unobstructed.")]
+    [SerializeField] private bool showDebugConsoleOnStart = false;
     [SerializeField] private GameConfig gameConfig;
+
+    private PopupDebugConsole _debugConsoleInstance;
 
 
     // ============================================================
@@ -108,7 +120,9 @@ public class PopupController : SingletonDontDestroy<PopupController>
             blockUI2.SetBlockUIState(false);
         }
 
-        if (gameConfig != null &&
+        // Do not overlay the game with the Debug Console just because
+        // GameConfig.isTesting is enabled. It must be explicitly opted in.
+        if (showDebugConsoleOnStart && gameConfig != null &&
             gameConfig.isTesting)
         {
             InitializeDebugConsole();
@@ -217,6 +231,30 @@ public class PopupController : SingletonDontDestroy<PopupController>
                 AttachLifecycleNotifier(existing);
             }
         }
+
+        // These two tabs were created after the original PopupConfig. Unity can
+        // temporarily deserialize their list entries as null while the new
+        // MonoScripts are still importing, leaving the buttons with no popup.
+        // Keep direct prefab references as a stable fallback, just like the
+        // already-working League and Collection tabs.
+        RegisterPopupPrefab(popupSpecialsPrefab, ref sortingOrder);
+        RegisterPopupPrefab(popupCareerPrefab, ref sortingOrder);
+    }
+
+    private void RegisterPopupPrefab(Popup popup, ref int sortingOrder)
+    {
+        if (popup == null)
+            return;
+
+        Type popupType = popup.GetType();
+
+        if (!_popupPrefabs.ContainsKey(popupType))
+        {
+            _popupPrefabs.Add(popupType, popup);
+            _popupSortingOrders.Add(popupType, sortingOrder);
+        }
+
+        sortingOrder++;
     }
 
     private Popup GetOrCreatePopup(Type popupType)
@@ -394,6 +432,20 @@ public class PopupController : SingletonDontDestroy<PopupController>
         GameObject go =
             bottomBarInstance.gameObject;
 
+        // HomeEntranceAnimator temporarily disables this CanvasGroup while
+        // moving between Home and Kingdom. If that transition is cancelled
+        // or its popup is disabled, the persistent BottomBar can stay visible
+        // with input still locked. Showing the bar must always restore input.
+        if (visible)
+        {
+            CanvasGroup inputGroup = go.GetComponent<CanvasGroup>();
+            if (inputGroup != null)
+            {
+                inputGroup.interactable = true;
+                inputGroup.blocksRaycasts = true;
+            }
+        }
+
         if (go.activeSelf == visible)
         {
             if (visible)
@@ -434,14 +486,23 @@ public class PopupController : SingletonDontDestroy<PopupController>
     // 5 MAIN POPUPS
     // ============================================================
 
+    private int comingSoonTabIndex = 0;
+
+    public void SetComingSoonTabIndex(int index)
+    {
+        if (index == 0 || index == 1 || index == 3 || index == 4)
+            comingSoonTabIndex = index;
+    }
+
     private bool IsMainBottomBarPopup(Type popupType)
     {
         return
-            popupType == typeof(PopupShop) ||
+            popupType == typeof(PopupComingSoon) ||
             popupType == typeof(PopupLeague) ||
-            popupType == typeof(PopupHome) ||
+            popupType == typeof(PopupSpecials) ||
+            popupType == typeof(PopupCareer) ||
             popupType == typeof(PopupCollection) ||
-            popupType == typeof(PopupKingdom);
+            popupType == typeof(PopupHome);
     }
 
     public Popup GetMainTabPopup(int index)
@@ -449,15 +510,15 @@ public class PopupController : SingletonDontDestroy<PopupController>
         switch (index)
         {
             case 0:
-                return Get<PopupShop>();
-            case 1:
                 return Get<PopupLeague>();
+            case 1:
+                return Get<PopupSpecials>();
             case 2:
                 return Get<PopupHome>();
             case 3:
-                return Get<PopupCollection>();
+                return Get<PopupCareer>();
             case 4:
-                return Get<PopupKingdom>();
+                return Get<PopupCollection>();
             default:
                 return null;
         }
@@ -465,20 +526,23 @@ public class PopupController : SingletonDontDestroy<PopupController>
 
     public int GetMainTabIndex(Popup popup)
     {
-        if (popup is PopupShop)
+        if (popup is PopupLeague)
             return 0;
 
-        if (popup is PopupLeague)
+        if (popup is PopupSpecials)
             return 1;
+
+        if (popup is PopupCareer)
+            return 3;
+
+        if (popup is PopupCollection)
+            return 4;
+
+        if (popup is PopupComingSoon)
+            return comingSoonTabIndex;
 
         if (popup is PopupHome)
             return 2;
-
-        if (popup is PopupCollection)
-            return 3;
-
-        if (popup is PopupKingdom)
-            return 4;
 
         return -1;
     }
@@ -1011,6 +1075,14 @@ public class PopupController : SingletonDontDestroy<PopupController>
 
     public void InitializeDebugConsole()
     {
+        if (_debugConsoleInstance != null)
+        {
+            if (!_debugConsoleInstance.gameObject.activeSelf)
+                _debugConsoleInstance.Show(PopupAnimation.None);
+
+            return;
+        }
+
         if (popupConfig == null ||
             popupConfig.popupDebugConsole == null ||
             canvasTransform == null)
@@ -1018,18 +1090,16 @@ public class PopupController : SingletonDontDestroy<PopupController>
             return;
         }
 
-        PopupDebugConsole popupDebugConsole =
+        _debugConsoleInstance =
             Instantiate(
                 popupConfig.popupDebugConsole,
                 canvasTransform
             );
 
-        popupDebugConsole.Canvas.sortingOrder =
-            999;
+        if (_debugConsoleInstance.Canvas != null)
+            _debugConsoleInstance.Canvas.sortingOrder = 999;
 
-        popupDebugConsole.Show(
-            PopupAnimation.None
-        );
+        _debugConsoleInstance.Show(PopupAnimation.None);
     }
 
 

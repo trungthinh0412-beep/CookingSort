@@ -11,6 +11,8 @@ namespace CookingSort2D
     {
         [Tooltip("Short squash before the animal is thrown upwards.")]
         [Min(0f)] public float launchDuration = 0.04f;
+        [Tooltip("Amount of squash while preparing to leave the queue. Lower values make the take-off feel softer without changing flight time.")]
+        [Range(0f, 0.35f)] public float launchSquash = 0.035f;
         [Tooltip("Time for the impact squash and small landing rebound.")]
         [Min(0f)] public float landingDuration = 0.14f;
         [Range(0f, 35f)] public float tiltDegrees = 18f;
@@ -20,7 +22,7 @@ namespace CookingSort2D
 
     public class CustomerView : MonoBehaviour, IPointerClickHandler
     {
-        [Header("Matching")]
+        [Header("Matching")]    
         [Tooltip("This Animal only eats Tiles with the same Match Type.")]
         [SerializeField] private FoodColor matchType = FoodColor.Blue;
 
@@ -37,6 +39,7 @@ namespace CookingSort2D
         private bool _front;
         private bool _seated;
         private bool _seatReady;
+        private bool _boosterSelectable;
         private int _progressCapacity;
         private bool _eggHidden;
         private Sprite _animalSprite;
@@ -55,6 +58,7 @@ namespace CookingSort2D
         public bool IsSeated => _seated;
         public bool IsSeatReady => _seated && _seatReady;
         public bool IsFront => _front;
+        public bool HasMerged { get; private set; }
         public bool IsEggHidden => _eggHidden;
         public int Demand => Mathf.Max(1, demand);
 
@@ -64,6 +68,7 @@ namespace CookingSort2D
             _laneIndex = laneIndex;
             _seated = false;
             _seatReady = false;
+            HasMerged = false;
             _animalSprite = body != null ? body.sprite : null;
             _spriteAnimator = GetComponent<SpriteAnimator>();
             Sprite mysterySprite = eggSprite != null
@@ -96,7 +101,39 @@ namespace CookingSort2D
         public void SetFront(bool front)
         {
             _front = front && !_seated;
-            if (hitbox != null) hitbox.enabled = _front;
+            if (hitbox != null) hitbox.enabled = !_seated && (_front || _boosterSelectable);
+        }
+
+        public void SetBoosterSelectable(bool selectable)
+        {
+            _boosterSelectable = selectable && !_seated;
+            if (hitbox != null) hitbox.enabled = !_seated && (_front || _boosterSelectable);
+        }
+
+        public void SetQueueLane(CustomerQueue queue, int laneIndex)
+        {
+            _queue = queue;
+            _laneIndex = laneIndex;
+        }
+
+        public void ReturnToQueue(CustomerQueue queue, int laneIndex, Transform parent)
+        {
+            if (_moveRoutine != null)
+            {
+                StopCoroutine(_moveRoutine);
+                _moveRoutine = null;
+            }
+            StopServePulse();
+            transform.SetParent(parent, true);
+            transform.localRotation = Quaternion.identity;
+            _queue = queue;
+            _laneIndex = laneIndex;
+            _seated = false;
+            _seatReady = false;
+            _front = false;
+            _boosterSelectable = false;
+            SetDemandBarVisible(false);
+            if (hitbox != null) hitbox.enabled = false;
         }
 
         public void SetSeated(float seatedScale = 1f)
@@ -109,6 +146,7 @@ namespace CookingSort2D
             _seated = true;
             _seatReady = false;
             _front = false;
+            _boosterSelectable = false;
             _queue = null;
             if (hitbox != null) hitbox.enabled = false;
             SetDemandBarVisible(false);
@@ -207,8 +245,8 @@ namespace CookingSort2D
 
         public void OnPointerClick(PointerEventData eventData)
         {
-            if (_front && !_seated && _queue != null)
-                _queue.TrySelect(this);
+            if (!_seated && _queue != null)
+                _queue.HandleCustomerClick(this);
         }
 
         /// <summary>
@@ -329,7 +367,8 @@ namespace CookingSort2D
             while (elapsed < launchDuration)
             {
                 float t = Mathf.Clamp01(elapsed / launchDuration);
-                float squash = Mathf.Sin(t * Mathf.PI) * landingSquash * 0.55f;
+                float squash = Mathf.Sin(t * Mathf.PI) *
+                    Mathf.Clamp(feel.launchSquash, 0f, 0.35f);
                 transform.localScale = Vector3.Scale(startScale,
                     new Vector3(1f + squash, 1f - squash, 1f));
                 elapsed += Time.unscaledDeltaTime;
@@ -425,6 +464,7 @@ namespace CookingSort2D
         {
             Remaining = Mathf.Max(0, remaining);
             _progressCapacity = Mathf.Max(Remaining, progressCapacity, 1);
+            HasMerged = true;
             RefreshCount();
             RefreshDemandFill();
         }

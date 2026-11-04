@@ -17,6 +17,10 @@ public partial class PlayerData
     [SerializeField] private int currentKingCard;
     [SerializeField] private int currentExtraTray = 3;
     [SerializeField] private int currentFreeMoves = 3;
+    [SerializeField] private int currentOrderBell = 3;
+    [SerializeField] private int currentLineUp = 3;
+    [SerializeField] private int currentRewind = 3;
+    [SerializeField] private int currentTrashAway = 3;
     [SerializeField, JsonProperty("stackCardExpiryPoint")]
     private string stackCardExpiryPoint = string.Empty;
     [SerializeField, JsonProperty("upgradeCardExpiryPoint")]
@@ -212,6 +216,46 @@ public partial class PlayerData
         {
             currentFreeMoves = Mathf.Max(0, value);
             Observer.UseBooster?.Invoke(BoosterType.FreeMoves);
+        }
+    }
+
+    public int CurrentOrderBell
+    {
+        get => currentOrderBell;
+        set
+        {
+            currentOrderBell = Mathf.Max(0, value);
+            Observer.UseBooster?.Invoke(BoosterType.OrderBell);
+        }
+    }
+
+    public int CurrentLineUp
+    {
+        get => currentLineUp;
+        set
+        {
+            currentLineUp = Mathf.Max(0, value);
+            Observer.UseBooster?.Invoke(BoosterType.LineUp);
+        }
+    }
+
+    public int CurrentRewind
+    {
+        get => currentRewind;
+        set
+        {
+            currentRewind = Mathf.Max(0, value);
+            Observer.UseBooster?.Invoke(BoosterType.Rewind);
+        }
+    }
+
+    public int CurrentTrashAway
+    {
+        get => currentTrashAway;
+        set
+        {
+            currentTrashAway = Mathf.Max(0, value);
+            Observer.UseBooster?.Invoke(BoosterType.TrashAway);
         }
     }
 }

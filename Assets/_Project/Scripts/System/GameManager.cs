@@ -29,6 +29,8 @@ public partial class GameManager : SingletonDontDestroy<GameManager>
 
     public void ReturnHome(bool playHomeEntrance = false)
     {
+        Time.timeScale = 1f;
+
         if (TransitionManager.Instance != null)
         {
             TransitionManager.Instance.ResetImmediately();
@@ -37,7 +39,6 @@ public partial class GameManager : SingletonDontDestroy<GameManager>
         if (PopupController.Instance != null)
         {
             PopupController.Instance.HideAll();
-            PopupController.Instance.Show<PopupBackground>();
             PopupController.Instance.Show<PopupHome>();
         }
     }

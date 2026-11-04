@@ -23,7 +23,11 @@ internal sealed class CookingBlastBoardPanel
     [SerializeField] private int priorityGroupSize = 3;
     [SerializeField] private int animalOrderLayout;
     
-    [SerializeField] private int organicStrength = 72;
+    
+    [SerializeField] private bool generateSpecialTiles;
+    [SerializeField] private System.Collections.Generic.List<CookingBlastSpecialTileCount> specialTileCounts =
+        new System.Collections.Generic.List<CookingBlastSpecialTileCount>();
+[SerializeField] private int organicStrength = 72;
 [SerializeField] private bool priorityInterleave = true;
     private string fillStatus;
     private MessageType fillStatusType;
@@ -102,15 +106,14 @@ internal void Draw(CookingBlastLevel level, ref FoodColor brush, ref int columns
                     cluster40PresetMode = false;
                     cluster40Mode = false;
                 }
-                GUILayout.Label("Footprint placement clears regular Tiles automatically.",
+                GUILayout.Label("Click to replace all covered Tiles (including footprints).",
                     EditorStyles.miniLabel);
             }
             
             if (cluster40PresetMode)
             {
                 EditorGUILayout.HelpBox(
-                    "Click a cell to use it as the bottom-left corner of a 2 x 2 Cluster with value 40. " +
-                    "The current Brush color is used. Click an existing footprint to remove it.",
+                    "Click any cell to place a 2x2 Cluster (value 40), automatically replacing covered Tiles and old footprints. Shift+click an existing footprint to erase it.",
                     MessageType.Info);
             }
             else if (cluster40Mode)
@@ -121,7 +124,7 @@ internal void Draw(CookingBlastLevel level, ref FoodColor brush, ref int columns
                 int footprintValue = footprintPrefab != null ? footprintPrefab.FootprintValue : 1;
                 EditorGUILayout.HelpBox(
                     footprintPrefab != null
-                        ? $"{footprintPrefab.name}: {footprintWidth} x {footprintHeight} cells, value {footprintValue}. Click its bottom-left cell to place; regular Tiles underneath are replaced automatically. Existing footprints remain protected. Click an existing footprint to remove it. Value = servings."
+                        ? $"{footprintPrefab.name}: {footprintWidth} x {footprintHeight} cells, value {footprintValue}. Click any cell as the bottom-left anchor. Covered Tiles and overlapping footprints are cleared automatically; Shift+click an old footprint to erase it. Sprite preview uses the prefab's native proportions (no stretching). Value = servings."
                         : $"{brush} has no Tile prefab assigned on this Level's Board.",
                     footprintPrefab != null ? MessageType.Info : MessageType.Warning);
             }
@@ -348,24 +351,16 @@ internal void Draw(CookingBlastLevel level, ref FoodColor brush, ref int columns
                 Rect inset = new Rect(clusterRect.x + 2, clusterRect.y + 2,
                     clusterRect.width - 4, clusterRect.height - 4);
                 FoodTileView clusterPrefab = level.Board != null
-                    ? level.Board.GetTilePrefab(cluster.color, cluster.width,
-                        cluster.height, cluster.value) : null;
+                    ? level.Board.GetClusterPrefab(cluster) : null;
                 SpriteRenderer clusterRenderer = clusterPrefab != null
                     ? clusterPrefab.GetComponentInChildren<SpriteRenderer>(true) : null;
                 Sprite clusterSprite = clusterRenderer != null
                     ? clusterRenderer.sprite : null;
-                if (clusterSprite != null && clusterSprite.texture != null)
-                {
-                    EditorGUI.DrawRect(inset, new Color(.12f, .14f, .18f));
-                    Rect source = clusterSprite.rect;
-                    Rect uv = new Rect(source.x / clusterSprite.texture.width,
-                        source.y / clusterSprite.texture.height,
-                        source.width / clusterSprite.texture.width,
-                        source.height / clusterSprite.texture.height);
-                    GUI.DrawTextureWithTexCoords(inset, clusterSprite.texture, uv, true);
-                }
-                else
+                EditorGUI.DrawRect(inset, new Color(.12f, .14f, .18f));
+                if (clusterSprite == null || clusterSprite.texture == null)
                     EditorGUI.DrawRect(inset, CookingSortPalette.Get(cluster.color));
+                else
+                    DrawClusterSpriteAtPrefabSize(inset, size, clusterPrefab, clusterSprite);
                 if (cluster.width > 1 || cluster.height > 1)
                 {
                     var clusterStyle = new GUIStyle(EditorStyles.boldLabel)
@@ -386,12 +381,42 @@ internal void Draw(CookingBlastLevel level, ref FoodColor brush, ref int columns
                 else if ((cluster40PresetMode || cluster40Mode) &&
                          ev.type == EventType.MouseDown && ev.button == 0)
                 {
-                    CookingBlastLevelEditing.RemoveClusterAt(level,
-                        cluster.anchorColumn, cluster.anchorRow);
-                    fillStatus = "Removed footprint Tile. Ctrl+Z to undo.";
-                    fillStatusType = MessageType.Info;
+                    if (ev.shift)
+                    {
+                        CookingBlastLevelEditing.RemoveClusterAt(level,
+                            cluster.anchorColumn, cluster.anchorRow);
+                        fillStatus = "Removed footprint Tile. Ctrl+Z to undo.";
+                        fillStatusType = MessageType.Info;
+                    }
+                    else
+                    {
+                        // Use the actual clicked cell as the new anchor, even
+                        // when the mouse is inside an existing multi-cell Tile.
+                        int clickedColumn = Mathf.FloorToInt(
+                            (ev.mousePosition.x - area.x - 26f) / size);
+                        int clickedRow = rows - 1 - Mathf.FloorToInt(
+                            (ev.mousePosition.y - area.y - 4f) / size);
+                        clickedColumn = Mathf.Clamp(clickedColumn, 0, columns - 1);
+                        clickedRow = Mathf.Clamp(clickedRow, 0, rows - 1);
+                        if (cluster40PresetMode)
+                            CookingBlastLevelEditing.AddCluster(level, clickedColumn,
+                                clickedRow, brush, 2, 2, 40, out fillStatus);
+                        else
+                        {
+                            FoodTileView prefab = ResolveFootprintPrefab(level, brush);
+                            if (prefab == null)
+                                fillStatus = $"No Tile prefab is assigned for {brush}.";
+                            else
+                                CookingBlastLevelEditing.AddCluster(level, clickedColumn,
+                                    clickedRow, brush, prefab.FootprintWidth,
+                                    prefab.FootprintHeight, prefab.FootprintValue,
+                                    out fillStatus);
+                        }
+                        fillStatusType = fillStatus.StartsWith("Placed") ?
+                            MessageType.Info : MessageType.Warning;
+                    }
                     ev.Use();
-                    break;
+                    GUIUtility.ExitGUI();
                 }
             }
         }
@@ -400,6 +425,57 @@ internal void Draw(CookingBlastLevel level, ref FoodColor brush, ref int columns
         for (int c=0;c<columns;c++)
             GUI.Label(new Rect(area.x+26+c*size,area.y+rows*size+5,size,20), (c+1).ToString(),EditorStyles.centeredGreyMiniLabel);
     }
+
+private static void DrawClusterSpriteAtPrefabSize(
+        Rect footprintRect, float cellPixelSize, FoodTileView prefab, Sprite sprite)
+    {
+        // The logical footprint remains 2x1, 1x2, 2x2 etc., but the artwork
+        // gets the prefab's native authored proportions. No DrawTexture
+        // stretching to the footprint rectangle.
+        if (prefab == null || sprite == null || sprite.texture == null) return;
+
+        float baseWidth = 0f, baseHeight = 0f;
+        foreach (FoodTileView candidate in
+                 CookingBlastTileSpriteEditorPreview.GetConfiguredTilePrefabs())
+        {
+            if (candidate == null || candidate.Type != prefab.Type ||
+                candidate.FootprintWidth != 1 || candidate.FootprintHeight != 1)
+                continue;
+            SpriteRenderer reference = candidate.GetComponentInChildren<SpriteRenderer>(true);
+            if (reference == null || reference.sprite == null) continue;
+            baseWidth = reference.sprite.bounds.size.x *
+                Mathf.Abs(reference.transform.lossyScale.x);
+            baseHeight = reference.sprite.bounds.size.y *
+                Mathf.Abs(reference.transform.lossyScale.y);
+            break;
+        }
+
+        // Fallback when there is no 1x1 variant of this match type.
+        if (baseWidth <= .0001f || baseHeight <= .0001f)
+        {
+            baseWidth = sprite.bounds.size.x;
+            baseHeight = sprite.bounds.size.y;
+        }
+        float pixelsPerWorld = Mathf.Min(
+            (cellPixelSize - 4f) / baseWidth,
+            (cellPixelSize - 4f) / baseHeight);
+        SpriteRenderer renderer = prefab.GetComponentInChildren<SpriteRenderer>(true);
+        float scaleX = renderer != null
+            ? Mathf.Abs(renderer.transform.lossyScale.x) : 1f;
+        float scaleY = renderer != null
+            ? Mathf.Abs(renderer.transform.lossyScale.y) : 1f;
+        float width = sprite.bounds.size.x * pixelsPerWorld * scaleX;
+        float height = sprite.bounds.size.y * pixelsPerWorld * scaleY;
+        Rect nativeSize = new Rect(
+            footprintRect.center.x - width * .5f,
+            footprintRect.center.y - height * .5f, width, height);
+        Rect source = sprite.rect;
+        Rect uv = new Rect(
+            source.x / sprite.texture.width, source.y / sprite.texture.height,
+            source.width / sprite.texture.width, source.height / sprite.texture.height);
+        GUI.DrawTextureWithTexCoords(nativeSize, sprite.texture, uv, true);
+    }
+
 
     internal void EndStroke()
     {
@@ -707,8 +783,13 @@ private void DrawBoardFillButton(CookingBlastLevel level, ref int seed)
                         ? "Controls the size and dispersion of randomized color regions."
                         : "Controls variation in each vertical/horizontal color group around Tiles Per Turn."),
                 organicStrength, 0, 100);
-
-            using (new EditorGUI.DisabledScope(!ready))
+            generateSpecialTiles = EditorGUILayout.ToggleLeft(
+                new GUIContent("Generate Special Tiles (2x1, 1x2, 2x2...)",
+                    "Only affects Fill Tile. Off = regular 1x1; On = use special Tile prefabs where demand and space allow."),
+                generateSpecialTiles);
+            if (generateSpecialTiles)
+                DrawSpecialTileQuantities(level);
+            using (new EditorGUI.DisabledScope(generateSpecialTiles ? demand <= 0 : !ready))
             {
                 if (GUILayout.Button(new GUIContent("Fill Tile",
                     "Fill the board using the Customer priority above; Ctrl+Z can undo."),
@@ -721,7 +802,11 @@ private void DrawBoardFillButton(CookingBlastLevel level, ref int seed)
                     Undo.SetCurrentGroupName("Auto Fill Cooking Blast Tiles");
                     string message;
                     bool success;
-                    if (animalOrderLayout == 0)
+                    if (generateSpecialTiles)
+                        success = CookingBlastExactSpecialTileGenerator.Generate(
+                            level, seed, animalOrderLayout, specialTileCounts,
+                            out message);
+                    else if (animalOrderLayout == 0)
                         success = CookingBlastLevelEditing.TryAutoFillOrganicByCustomerOrder(
                             level, priorityGroupSize, seed, organicStrength,
                             out message);
@@ -737,7 +822,11 @@ private void DrawBoardFillButton(CookingBlastLevel level, ref int seed)
                 }
             }
 
-            if (!ready)
+            if (generateSpecialTiles)
+                EditorGUILayout.LabelField(
+                    "Special footprints use actual Value. Fill Tile keeps Animal Queue unchanged.",
+                    EditorStyles.miniLabel);
+            else if (!ready)
                 EditorGUILayout.HelpBox(
                     "Tile count: " + level.TotalTileCount + "  |  Customer demand: " + demand +
                     ". These must match before filling.", MessageType.Warning);
@@ -748,5 +837,104 @@ private void DrawBoardFillButton(CookingBlastLevel level, ref int seed)
             if (!string.IsNullOrEmpty(fillStatus))
                 EditorGUILayout.HelpBox(fillStatus, fillStatusType);
         }
+    }
+
+
+private void DrawSpecialTileQuantities(CookingBlastLevel level)
+    {
+        if (level == null || level.Board == null) return;
+        var available = new System.Collections.Generic.List<FoodTileView>();
+        for (int i = 0; i < level.Board.ConfiguredTilePrefabCount; i++)
+        {
+            FoodTileView prefab = level.Board.GetConfiguredTilePrefab(i);
+            if (prefab != null && (prefab.FootprintWidth != 1 ||
+                prefab.FootprintHeight != 1) && !available.Contains(prefab))
+                available.Add(prefab);
+        }
+
+        specialTileCounts.RemoveAll(item => item == null || item.prefab == null ||
+            !available.Contains(item.prefab));
+        foreach (FoodTileView prefab in available)
+        {
+            if (specialTileCounts.Exists(item => item.prefab == prefab)) continue;
+            specialTileCounts.Add(new CookingBlastSpecialTileCount { prefab = prefab });
+        }
+        EditorGUILayout.LabelField("SPECIAL TILE QUANTITIES", EditorStyles.miniBoldLabel);
+        if (available.Count == 0)
+        {
+            EditorGUILayout.HelpBox("No footprint Tile prefabs (other than 1x1) configured in Board.",
+                MessageType.Warning);
+            return;
+        }
+
+        int totalPhysical = 0, totalValue = 0, count = 0;
+        var perType = new System.Collections.Generic.Dictionary<FoodColor, int>();
+        foreach (CookingBlastSpecialTileCount item in specialTileCounts)
+        {
+            FoodTileView prefab = item.prefab;
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                SpriteRenderer renderer = prefab.GetComponentInChildren<SpriteRenderer>(true);
+                Sprite sprite = renderer != null ? renderer.sprite : null;
+                Rect iconRect = GUILayoutUtility.GetRect(35f, 35f, GUILayout.Width(35f));
+                if (sprite != null && sprite.texture != null)
+                {
+                    Rect source = sprite.rect;
+                    Rect uv = new Rect(source.x / sprite.texture.width,
+                        source.y / sprite.texture.height,
+                        source.width / sprite.texture.width,
+                        source.height / sprite.texture.height);
+                    float scale = Mathf.Min(iconRect.width / source.width,
+                        iconRect.height / source.height);
+                    Rect dest = new Rect(iconRect.center.x - source.width * scale * .5f,
+                        iconRect.center.y - source.height * scale * .5f,
+                        source.width * scale, source.height * scale);
+                    GUI.DrawTextureWithTexCoords(dest, sprite.texture, uv, true);
+                }
+                else EditorGUI.DrawRect(iconRect, CookingSortPalette.Get(prefab.Type));
+
+                using (new EditorGUILayout.VerticalScope())
+                {
+                    EditorGUILayout.LabelField(prefab.name + "  [" + prefab.Type + "]",
+                        EditorStyles.miniBoldLabel);
+                    EditorGUILayout.LabelField(prefab.FootprintWidth + "x" +
+                        prefab.FootprintHeight + "   Value " + prefab.FootprintValue,
+                        EditorStyles.miniLabel);
+                }
+                item.quantity = Mathf.Max(0,
+                    EditorGUILayout.IntField(item.quantity, GUILayout.Width(65)));
+            }
+            if (item.quantity <= 0) continue;
+            count += item.quantity;
+            totalValue += item.quantity * prefab.FootprintValue;
+            totalPhysical += item.quantity * prefab.FootprintWidth * prefab.FootprintHeight;
+            if (!perType.ContainsKey(prefab.Type)) perType[prefab.Type] = 0;
+            perType[prefab.Type] += item.quantity * prefab.FootprintValue;
+        }
+
+        var demands = CookingBlastLevelEditing.DemandCounts(level);
+        int demandTotal = 0;
+        foreach (int value in demands.Values) demandTotal += value;
+        int totalRequiredCells = demandTotal - totalValue + totalPhysical;
+        int cols = Mathf.Max(1, level.BoardColumns.Count);
+        int targetRows = Mathf.CeilToInt(Mathf.Max(1, totalRequiredCells) / (float)cols);
+        EditorGUILayout.LabelField(
+            count + " special prefabs  |  " + totalValue + " Value / " +
+            totalPhysical + " occupied cells", EditorStyles.miniLabel);
+        EditorGUILayout.LabelField(
+            "Required Board: " + Mathf.Max(1, totalRequiredCells) +
+            " cells  |  approx. " + cols + " x " + targetRows,
+            EditorStyles.miniLabel);
+        foreach (var pair in perType)
+        {
+            int demand = demands.TryGetValue(pair.Key, out int number) ? number : 0;
+            if (pair.Value > demand)
+                EditorGUILayout.HelpBox(pair.Key + ": selected special Value " +
+                    pair.Value + " exceeds Animal Demand " + demand + ".",
+                    MessageType.Warning);
+        }
+        EditorGUILayout.LabelField(
+            "Counts are exact. Fill Tile resizes Board automatically; Animal Queue stays unchanged.",
+            EditorStyles.wordWrappedMiniLabel);
     }
 }

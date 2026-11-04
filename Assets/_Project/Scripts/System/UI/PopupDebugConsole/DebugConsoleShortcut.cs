@@ -1,28 +1,32 @@
-using UnityEngine;
-using Lean.Touch;
-using UnityEngine.Events;
-using UnityEngine.EventSystems;
 using System.Collections.Generic;
+using Lean.Touch;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.Events;
 
 public class DebugConsoleShortcut : MonoBehaviour
 {
-    [SerializeField] private UnityEvent action; // Exposed in Inspector
+    [SerializeField] private UnityEvent action;
 
     private RectTransform _rectTransform;
     private Canvas _canvas;
     private Vector2 _fingerDownPos;
     private bool _isOverThisObject;
-    private const float TapThreshold = 10f; // Distance threshold to detect a tap
+    private int _activeFingerIndex = int.MinValue;
 
-    private void Start()
+    private const float TapThreshold = 10f;
+
+    private void Awake()
     {
         _rectTransform = GetComponent<RectTransform>();
-        _canvas = GetComponentInParent<Canvas>(); // Ensure we have the correct canvas
+        _canvas = GetComponentInParent<Canvas>();
     }
 
-    // **Check if Finger is Over THIS GameObject**
     private bool IsFingerOverThisObject(LeanFinger finger)
     {
+        if (finger == null || EventSystem.current == null)
+            return false;
+
         PointerEventData pointerData = new PointerEventData(EventSystem.current)
         {
             position = finger.ScreenPosition
@@ -31,63 +35,58 @@ public class DebugConsoleShortcut : MonoBehaviour
         List<RaycastResult> results = new List<RaycastResult>();
         EventSystem.current.RaycastAll(pointerData, results);
 
-        foreach (var hit in results)
+        foreach (RaycastResult hit in results)
         {
-            if (hit.gameObject == gameObject) // Check if hit is THIS object
-            {
+            Transform hitTransform = hit.gameObject.transform;
+            if (hitTransform == transform || hitTransform.IsChildOf(transform))
                 return true;
-            }
         }
+
         return false;
     }
 
-    // Called when a finger begins touching
-    public void OnFingerDown(LeanFinger finger)
+    private void OnFingerDown(LeanFinger finger)
     {
-        if (IsFingerOverThisObject(finger)) // Check if tap started on this object
-        {
-            _isOverThisObject = true;
-            _fingerDownPos = finger.ScreenPosition;
-        }
-        else
-        {
-            _isOverThisObject = false; // Ignore if tap started elsewhere
-        }
+        if (_isOverThisObject || !IsFingerOverThisObject(finger))
+            return;
+
+        _isOverThisObject = true;
+        _activeFingerIndex = finger.Index;
+        _fingerDownPos = finger.ScreenPosition;
     }
 
-    // Called when a finger is released
-    public void OnFingerUp(LeanFinger finger)
+    private void OnFingerUp(LeanFinger finger)
     {
-        if (!_isOverThisObject) return; // Ignore if tap started elsewhere
+        if (!_isOverThisObject || finger == null ||
+            finger.Index != _activeFingerIndex)
+            return;
 
         float distance = Vector2.Distance(_fingerDownPos, finger.ScreenPosition);
-
-        if (distance < TapThreshold) // Small movement = Tap
-        {
-            Debug.Log("✅ Tap on DebugConsoleShortcut - Invoking Action!");
+        if (distance < TapThreshold)
             action?.Invoke();
-        }
-        else
-        {
-            Debug.Log("❌ Drag detected, no action triggered.");
-        }
 
-        _isOverThisObject = false;
+        ResetFinger();
     }
 
-    // Called when a finger is dragged
-    public void OnFingerDrag(LeanFinger finger)
+    private void OnFingerDrag(LeanFinger finger)
     {
-        // Move object when dragging
-        if (_isOverThisObject)
-        {
-            Vector2 delta = finger.ScreenDelta / _canvas.scaleFactor;
-            if (finger.Index == LeanTouch.HOVER_FINGER_INDEX)
-            {
-                delta *= 0.6f;
-            }
-            _rectTransform.anchoredPosition += delta;
-        }
+        if (!_isOverThisObject || finger == null ||
+            finger.Index != _activeFingerIndex ||
+            _rectTransform == null || _canvas == null)
+            return;
+
+        float scaleFactor = Mathf.Max(_canvas.scaleFactor, 0.0001f);
+        Vector2 delta = finger.ScreenDelta / scaleFactor;
+        if (finger.Index == LeanTouch.HOVER_FINGER_INDEX)
+            delta *= 0.6f;
+
+        _rectTransform.anchoredPosition += delta;
+    }
+
+    private void ResetFinger()
+    {
+        _isOverThisObject = false;
+        _activeFingerIndex = int.MinValue;
     }
 
     private void OnEnable()
@@ -102,5 +101,6 @@ public class DebugConsoleShortcut : MonoBehaviour
         LeanTouch.OnFingerDown -= OnFingerDown;
         LeanTouch.OnFingerUp -= OnFingerUp;
         LeanTouch.OnFingerUpdate -= OnFingerDrag;
+        ResetFinger();
     }
 }

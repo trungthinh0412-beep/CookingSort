@@ -78,10 +78,6 @@ internal static bool AddCluster(CookingBlastLevel level, int anchorColumn,
             message = $"The {width} x {height} footprint does not fit in the board columns.";
             return false;
         }
-
-        int replacedTiles = 0;
-        // Validate the entire footprint BEFORE making any change. Regular
-        // tiles can be replaced automatically; an existing footprint cannot.
         for (int column = anchorColumn; column < anchorColumn + width; column++)
         {
             BoardColumnData data = level.BoardColumns[column];
@@ -91,19 +87,50 @@ internal static bool AddCluster(CookingBlastLevel level, int anchorColumn,
                 message = $"The {width} x {height} footprint does not fit in the board rows.";
                 return false;
             }
-            for (int row = anchorRow; row < anchorRow + height; row++)
-            {
-                if (level.IsClusterCell(column, row, out _))
-                {
-                    message = "The footprint overlaps another footprint. Remove that footprint first.";
-                    return false;
-                }
-                if (data.bottomToTop[row] != FoodColor.Neutral)
-                    replacedTiles++;
-            }
         }
 
-        Undo.RecordObject(level, "Place Cooking Blast footprint Tile");
+        // A click replaces every Tile it covers, including a multi-cell Tile.
+        // Remove an overlapping old footprint AS A WHOLE, so no orphaned cells
+        // or partial cluster data remain outside the newly placed footprint.
+        var overlapped = new List<BoardClusterData>();
+        if (level.BoardClusters != null)
+            foreach (BoardClusterData existing in level.BoardClusters)
+            {
+                if (existing == null) continue;
+                if (anchorColumn < existing.anchorColumn + existing.width &&
+                    anchorColumn + width > existing.anchorColumn &&
+                    anchorRow < existing.anchorRow + existing.height &&
+                    anchorRow + height > existing.anchorRow)
+                    overlapped.Add(existing);
+            }
+
+        int replacedRegular = 0;
+        for (int column = anchorColumn; column < anchorColumn + width; column++)
+        for (int row = anchorRow; row < anchorRow + height; row++)
+        {
+            if (level.IsClusterCell(column, row, out _)) continue;
+            if (level.BoardColumns[column].bottomToTop[row] != FoodColor.Neutral)
+                replacedRegular++;
+        }
+
+        Undo.RecordObject(level, "Replace Cooking Blast footprint Tile");
+        foreach (BoardClusterData old in overlapped)
+            level.BoardClusters.Remove(old);
+
+        // Fully clear old footprints first. Parts outside the new footprint
+        // become empty (Neutral); inside it they will be claimed below.
+        foreach (BoardClusterData old in overlapped)
+        for (int column = old.anchorColumn; column < old.anchorColumn + old.width; column++)
+        for (int row = old.anchorRow; row < old.anchorRow + old.height; row++)
+        {
+            if (column < 0 || column >= level.BoardColumns.Count) continue;
+            BoardColumnData data = level.BoardColumns[column];
+            if (data == null || data.bottomToTop == null ||
+                row < 0 || row >= data.bottomToTop.Count ||
+                level.IsClusterCell(column, row, out _)) continue;
+            data.bottomToTop[row] = FoodColor.Neutral;
+        }
+
         level.BoardClusters.Add(new BoardClusterData
         {
             color = color,
@@ -114,17 +141,14 @@ internal static bool AddCluster(CookingBlastLevel level, int anchorColumn,
             height = height
         });
 
-        // These logical cells now belong to ONE footprint prefab. Gameplay
-        // skips them as individual tiles because IsClusterCell returns true.
         for (int column = anchorColumn; column < anchorColumn + width; column++)
         for (int row = anchorRow; row < anchorRow + height; row++)
             level.BoardColumns[column].bottomToTop[row] = color;
 
         Dirty(level);
-        message = $"Placed {width} x {height} {color} footprint (value {value}). " +
-                  $"Automatically replaced {replacedTiles} regular Tile(s).";
-        if (replacedTiles > 0)
-            message += " Check Animal demand after replacing Tiles.";
+        message = $"Placed {width} x {height} {color} Tile (value {value}). " +
+                  $"Cleared {replacedRegular} regular Tile(s) and " +
+                  $"{overlapped.Count} overlapping footprint(s).";
         return true;
     }
 
@@ -350,7 +374,7 @@ internal static bool TryAutoFillByCustomerOrder(CookingBlastLevel level, int clu
                     message = "Lane " + (lane + 1) + " has an invalid Customer.";
                     return false;
                 }
-                required += level.GetCustomerDemand(customer.color);
+                required += level.GetCustomerDemand(customer);
             }
             orders.Add(laneOrders);
         }
@@ -368,7 +392,7 @@ internal static bool TryAutoFillByCustomerOrder(CookingBlastLevel level, int clu
         var orderIndex = new int[lanes];
         var remaining = new int[lanes];
         for (int lane = 0; lane < lanes; lane++)
-            remaining[lane] = level.GetCustomerDemand(orders[lane][0].color);
+            remaining[lane] = level.GetCustomerDemand(orders[lane][0]);
 
         var result = new List<FoodColor>(slots);
         int cursor = 0;
@@ -412,8 +436,7 @@ internal static bool TryAutoFillByCustomerOrder(CookingBlastLevel level, int clu
                 {
                     orderIndex[lane]++;
                     if (orderIndex[lane] < orders[lane].Count)
-                        remaining[lane] = level.GetCustomerDemand(
-                            orders[lane][orderIndex[lane]].color);
+                        remaining[lane] = level.GetCustomerDemand(orders[lane][orderIndex[lane]]);
                 }
                 cursor = (lane + 1) % lanes;
                 found = true;
@@ -500,7 +523,7 @@ internal static bool TryAutoFillByPriority(CookingBlastLevel level,
                 return false;
             }
             all.Add(customer);
-            totalDemand += level.GetCustomerDemand(customer.color);
+            totalDemand += level.GetCustomerDemand(customer);
         }
 
         int customerTotal = 0;
@@ -523,7 +546,7 @@ internal static bool TryAutoFillByPriority(CookingBlastLevel level,
         var result = new List<FoodColor>(totalDemand);
         int[] remaining = new int[all.Count];
         for (int i = 0; i < all.Count; i++)
-            remaining[i] = level.GetCustomerDemand(all[i].color);
+            remaining[i] = level.GetCustomerDemand(all[i]);
 
         tilesPerTurn = Mathf.Clamp(tilesPerTurn, 1, 32);
         if (!interleave)
@@ -686,7 +709,7 @@ internal static bool TryAutoFillOrganicByPriority(
                 colors.Add(order.color);
                 quantities.Add(0);
             }
-            quantities[colorIndex] += level.GetCustomerDemand(order.color);
+            quantities[colorIndex] += level.GetCustomerDemand(order);
         }
 
         var random = new System.Random(seed);
@@ -1094,7 +1117,9 @@ private static int ColorPlacementWeight(CookingBlastLevel level, Dictionary<Food
                 int index = list.arraySize++;
                 var order = list.GetArrayElementAtIndex(index);
                 order.FindPropertyRelative("color").enumValueIndex = (int)pair.Key;
-                order.FindPropertyRelative("demand").intValue = animalDemand;
+                
+                order.FindPropertyRelative("animalPrefab").objectReferenceValue = null;
+order.FindPropertyRelative("demand").intValue = animalDemand;
                 remaining -= animalDemand;
                 lane++;
             }
@@ -1319,7 +1344,7 @@ internal static bool TryGenerateExactCustomerCount(
             {
                 if (order == null) continue;
                 if (!result.ContainsKey(order.color)) result[order.color] = 0;
-                result[order.color] += level.GetCustomerDemand(order.color);
+                result[order.color] += level.GetCustomerDemand(order);
             }
         }
         return result;
@@ -1335,7 +1360,7 @@ internal static bool TryGenerateExactCustomerCount(
             foreach (CustomerOrderData order in lane.frontToBack)
             {
                 if (order == null) continue;
-                int animalDemand = level.GetCustomerDemand(order.color);
+                int animalDemand = level.GetCustomerDemand(order);
                 if (order.demand == animalDemand) continue;
                 order.demand = animalDemand;
                 changed = true;

@@ -15,7 +15,11 @@ PrefabInstance:
     - target: {fileID: 935351445869505619, guid: 0d5fef164a3bcaf4e9b560e3a662ab4e, type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: -7912278767988868583, guid: 80bafab31b72256419a7fad659ad2e72, type: 3}
+      objectReference: {fileID: 0}
+    - target: {fileID: 935351445869505619, guid: 0d5fef164a3bcaf4e9b560e3a662ab4e, type: 3}
+      propertyPath: m_WasSpriteAssigned
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5542376764456775770, guid: 0d5fef164a3bcaf4e9b560e3a662ab4e, type: 3}
       propertyPath: m_SpriteTilingProperty.border.w
       value: 0

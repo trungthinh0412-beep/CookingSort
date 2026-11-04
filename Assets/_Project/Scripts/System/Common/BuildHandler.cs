@@ -27,7 +27,10 @@ public class BuildHandler : ResourceHandler
     protected override GameObject Bar => buildBar;
 
     protected override int Cache { get; set; }
-    protected override int CurrentValue => Data.PlayerData.CurrentStar;
+    protected override int CurrentValue =>
+        Data.PlayerData != null
+            ? Data.PlayerData.CurrentStar
+            : 0;
 
     protected override void Awake()
     {

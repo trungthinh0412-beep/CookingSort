@@ -17,8 +17,8 @@ Shader "Hidden/CookingBlast/Spine Silhouette Distance"
         float _Step;
         float4 Seed(v2f_img i):SV_Target
         {
-            float a = tex2D(_MainTex, i.uv).a;
-            return a >= _AlphaThreshold ? float4(i.uv, a, 1) : float4(0,0,0,0);
+            float4 mask = tex2D(_MainTex, i.uv);
+            return mask.a >= _AlphaThreshold ? float4(i.uv, mask.r, 1) : float4(0,0,0,0);
         }
         float4 Jump(v2f_img i):SV_Target
         {

@@ -100,13 +100,16 @@ public class LoadingController : MonoBehaviour
                     $"{percentage}%";
             }
         )
-        .OnComplete(() =>
-        {
-            progress.fillAmount = 1f;
-            txtFill.text = "100%";
+        .OnComplete(
+            () =>
+            {
+                progress.fillAmount = 1f;
+                txtFill.text = "100%";
 
-            StartSceneTransition();
-        });
+                StartSceneTransition();
+            },
+            warnIfTargetDestroyed: false
+        );
     }
 
     private string GetNextScene()

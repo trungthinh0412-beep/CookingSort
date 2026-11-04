@@ -19,6 +19,7 @@ Shader "CookingBlast/Spine/Silhouette Outline"
         Blend One OneMinusSrcAlpha
         Pass
         {
+            Name "SilhouetteOutline"
             CGPROGRAM
             #pragma target 3.0
             #pragma vertex vert

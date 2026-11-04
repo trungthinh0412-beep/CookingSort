@@ -25,9 +25,10 @@ public class DebugLogPanelItem : ConsolePanelItem
 
     void OnDisable()
     {
-        ClearContent();
-        // Unsubscribe when the object is destroyed
+        // Unsubscribe first so cleanup warnings cannot recursively create new
+        // log rows while this panel is being disabled.
         Application.logMessageReceived -= HandleLog;
+        ClearContent();
     }
 
     private void HandleLog(string condition, string stacktrace, LogType type)
@@ -78,12 +79,16 @@ public class DebugLogPanelItem : ConsolePanelItem
 
     private void ClearContent()
     {
-        _logItems.Clear();
-        var children = content.childCount;
-        for (int i = children - 1; i >= 0; i--)
+        // Only rows created through LeanPool may be returned to LeanPool. The
+        // content transform can also contain editor-authored template objects.
+        for (int i = _logItems.Count - 1; i >= 0; i--)
         {
-            LeanPool.Despawn(content.GetChild(i));
+            LogItem logItem = _logItems[i];
+            if (logItem != null)
+                LeanPool.Despawn(logItem);
         }
+
+        _logItems.Clear();
     }
 
     public void OnClickClearContent()
