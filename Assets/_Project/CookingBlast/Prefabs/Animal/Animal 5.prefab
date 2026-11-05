@@ -8,6 +8,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 109221893651962916, guid: 0d5fef164a3bcaf4e9b560e3a662ab4e, type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 881334079911708789, guid: 0d5fef164a3bcaf4e9b560e3a662ab4e, type: 3}
       propertyPath: m_Name
       value: Animal 5
@@ -43,6 +47,10 @@ PrefabInstance:
     - target: {fileID: 5542376764456775770, guid: 0d5fef164a3bcaf4e9b560e3a662ab4e, type: 3}
       propertyPath: m_SpriteTilingProperty.oldSize.y
       value: 1.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 5561817376120413650, guid: 0d5fef164a3bcaf4e9b560e3a662ab4e, type: 3}
+      propertyPath: initialSkinName
+      value: Purple_20
       objectReference: {fileID: 0}
     - target: {fileID: 6715858668188795811, guid: 0d5fef164a3bcaf4e9b560e3a662ab4e, type: 3}
       propertyPath: matchType
@@ -115,7 +123,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SpriteAnimator
   targetType: 1
   targetImage: {fileID: 0}
-  targetRenderer: {fileID: 1405656748083027765}
+  targetRenderer: {fileID: 0}
   frameSource: 1
   spriteSheet: {fileID: 0}
   frames: []
@@ -405,8 +413,3 @@ MonoBehaviour:
   startDelay: 0
   useLoopDelay: 0
   loopDelay: 0
---- !u!212 &1405656748083027765 stripped
-SpriteRenderer:
-  m_CorrespondingSourceObject: {fileID: 935351445869505619, guid: 0d5fef164a3bcaf4e9b560e3a662ab4e, type: 3}
-  m_PrefabInstance: {fileID: 2268385337890681702}
-  m_PrefabAsset: {fileID: 0}

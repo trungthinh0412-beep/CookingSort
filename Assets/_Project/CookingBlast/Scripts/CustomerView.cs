@@ -1,4 +1,5 @@
 using System.Collections;
+using Spine.Unity;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -26,8 +27,18 @@ namespace CookingSort2D
         [Tooltip("This Animal only eats Tiles with the same Match Type.")]
         [SerializeField] private FoodColor matchType = FoodColor.Blue;
 
-        [SerializeField] private SpriteRenderer body;
-        [SerializeField] private Sprite eggSprite;
+        [SerializeField] private SkeletonAnimation body;
+        [Header("Spine Animations")]
+        [SerializeField, SpineAnimation(dataField: nameof(body))]
+        private string queueAnimation;
+        [SerializeField, SpineAnimation(dataField: nameof(body))]
+        private string advanceTransitionAnimation;
+        [SerializeField, SpineAnimation(dataField: nameof(body))]
+        private string advanceAnimation;
+        [SerializeField, SpineAnimation(dataField: nameof(body))]
+        private string flyAnimation;
+        [SerializeField, SpineAnimation(dataField: nameof(body))]
+        private string seatAnimation;
         [SerializeField] private TextMeshProUGUI count;
         [SerializeField] private Image countBadge;
         [SerializeField] private Collider2D hitbox;
@@ -41,14 +52,10 @@ namespace CookingSort2D
         private bool _seatReady;
         private bool _boosterSelectable;
         private int _progressCapacity;
-        private bool _eggHidden;
-        private Sprite _animalSprite;
-        private SpriteAnimator _spriteAnimator;
-        private bool _resumeAnimatorAfterEgg;
-
         private Coroutine _pulseRoutine;
         private Vector3 _seatedBaseScale = Vector3.one;
         private Coroutine _moveRoutine;
+        private bool _queueTransitionPlaying;
 
         // FoodColor is the legacy serialized name. Runtime matching is by Type.
         public FoodColor Type => matchType;
@@ -59,7 +66,6 @@ namespace CookingSort2D
         public bool IsSeatReady => _seated && _seatReady;
         public bool IsFront => _front;
         public bool HasMerged { get; private set; }
-        public bool IsEggHidden => _eggHidden;
         public int Demand => Mathf.Max(1, demand);
 
         public void BindQueue(CustomerQueue queue, int laneIndex, CustomerOrderData order)
@@ -69,25 +75,8 @@ namespace CookingSort2D
             _seated = false;
             _seatReady = false;
             HasMerged = false;
-            _animalSprite = body != null ? body.sprite : null;
-            _spriteAnimator = GetComponent<SpriteAnimator>();
-            Sprite mysterySprite = eggSprite != null
-                ? eggSprite
-                : queue != null ? queue.EggSprite : null;
-            _eggHidden = order != null && order.isEgg && queue != null &&
-                         mysterySprite != null;
-            _resumeAnimatorAfterEgg = _eggHidden && _spriteAnimator != null &&
-                                      _spriteAnimator.enabled;
-            if (_eggHidden)
-            {
-                // Animal variants animate this same SpriteRenderer every frame.
-                // Pause that writer before applying the Egg sprite, otherwise
-                // it immediately replaces EGG_Mystic with an animal frame.
-                if (_resumeAnimatorAfterEgg)
-                    _spriteAnimator.enabled = false;
-                if (body != null)
-                    body.sprite = mysterySprite;
-            }
+            if (body != null) body.gameObject.SetActive(true);
+            PlayAnimation(queueAnimation, true);
             Remaining = Demand;
             _progressCapacity = Demand;
             RefreshVisual();
@@ -102,6 +91,8 @@ namespace CookingSort2D
         {
             _front = front && !_seated;
             if (hitbox != null) hitbox.enabled = !_seated && (_front || _boosterSelectable);
+            if (!_queueTransitionPlaying && !_seated)
+                PlayAnimation(_front ? advanceAnimation : queueAnimation, true);
         }
 
         public void SetBoosterSelectable(bool selectable)
@@ -132,8 +123,10 @@ namespace CookingSort2D
             _seatReady = false;
             _front = false;
             _boosterSelectable = false;
+            _queueTransitionPlaying = false;
             SetDemandBarVisible(false);
             if (hitbox != null) hitbox.enabled = false;
+            PlayAnimation(queueAnimation, true);
         }
 
         public void SetSeated(float seatedScale = 1f)
@@ -147,6 +140,7 @@ namespace CookingSort2D
             _seatReady = false;
             _front = false;
             _boosterSelectable = false;
+            _queueTransitionPlaying = false;
             _queue = null;
             if (hitbox != null) hitbox.enabled = false;
             SetDemandBarVisible(false);
@@ -197,13 +191,18 @@ namespace CookingSort2D
             Vector3 localPosition,
             Vector3 localScale,
             float duration = 0.16f,
-            float scalePunch = 0f)
+            float scalePunch = 0f,
+            bool playAdvanceTransition = false)
         {
             // A customer already moved into a seat must never receive queue movement again.
             if (_seated) return;
             if (_moveRoutine != null) StopCoroutine(_moveRoutine);
+            _queueTransitionPlaying = playAdvanceTransition;
+            if (playAdvanceTransition)
+                PlayAnimation(advanceTransitionAnimation, false);
             _moveRoutine = StartCoroutine(
-                MoveRoutine(localPosition, localScale, duration, scalePunch));
+                MoveRoutine(localPosition, localScale, duration, scalePunch,
+                    playAdvanceTransition));
         }
 
         public void AnimateToSeat(
@@ -215,10 +214,12 @@ namespace CookingSort2D
             int settledSortingOrder = 230)
         {
             if (_moveRoutine != null) StopCoroutine(_moveRoutine);
+            _queueTransitionPlaying = false;
             _seatReady = false;
             // The demand bar belongs to the seated state: reveal it as soon as
             // the animal leaves CustomerQueue and starts its curved seat flight.
             SetDemandBarVisible(true);
+            PlayAnimation(flyAnimation, false);
             _moveRoutine = StartCoroutine(SeatMoveRoutine(
                 localPosition,
                 _seatedBaseScale,
@@ -231,7 +232,8 @@ namespace CookingSort2D
 
         public void SetSortingOrder(int baseOrder)
         {
-            if (body != null) body.sortingOrder = baseOrder;
+            if (body != null && body.TryGetComponent(out MeshRenderer bodyRenderer))
+                bodyRenderer.sortingOrder = baseOrder;
 
             Canvas uiCanvas = countBadge != null
                 ? countBadge.canvas
@@ -247,24 +249,6 @@ namespace CookingSort2D
         {
             if (!_seated && _queue != null)
                 _queue.HandleCustomerClick(this);
-        }
-
-        /// <summary>
-        /// Reveals the configured animal without selecting it. The first click
-        /// opens the Egg; a later click follows the normal seat flow.
-        /// </summary>
-        public bool RevealEgg()
-        {
-            if (!_eggHidden) return false;
-            _eggHidden = false;
-            if (body != null && _animalSprite != null)
-                body.sprite = _animalSprite;
-            if (_resumeAnimatorAfterEgg && _spriteAnimator != null)
-            {
-                _spriteAnimator.enabled = true;
-                _resumeAnimatorAfterEgg = false;
-            }
-            return true;
         }
 
         private void RefreshVisual()
@@ -300,7 +284,8 @@ namespace CookingSort2D
             Vector3 target,
             Vector3 targetScale,
             float duration,
-            float scalePunch)
+            float scalePunch,
+            bool finishAdvanceTransition)
         {
             Vector3 start = transform.localPosition;
             Vector3 startScale = transform.localScale;
@@ -320,7 +305,10 @@ namespace CookingSort2D
             {
                 transform.localPosition = target;
                 transform.localScale = targetScale;
+                if (finishAdvanceTransition)
+                    PlayAnimation(advanceAnimation, true);
             }
+            _queueTransitionPlaying = false;
             _moveRoutine = null;
         }
 
@@ -457,7 +445,24 @@ namespace CookingSort2D
             transform.localRotation = Quaternion.identity;
             SetSortingOrder(settledSortingOrder);
             _seatReady = true;
+            PlayAnimation(seatAnimation, true);
             _moveRoutine = null;
+        }
+
+        private void PlayAnimation(string animationName, bool loop)
+        {
+            if (body == null || string.IsNullOrEmpty(animationName))
+                return;
+
+            Spine.Animation animation = body.SkeletonDataAsset
+                .GetSkeletonData(true)
+                .FindAnimation(animationName);
+            if (animation == null) return;
+
+            body.AnimationState.SetAnimation(
+                0,
+                animation,
+                loop);
         }
 
         public void SetMergedRemaining(int remaining, int progressCapacity)

@@ -12,7 +12,6 @@ namespace CookingSort2D
         [FormerlySerializedAs("animalPrefabsByColor")]
         [SerializeField] private CustomerView[] animalPrefabsByType = new CustomerView[10];
 [SerializeField] private CustomerView customerPrefab;
-        [SerializeField] private Sprite eggSprite;
         
         [SerializeField] private Transform slotsRoot;
         [SerializeField] private float slotSpacing = 1.05f;
@@ -98,8 +97,6 @@ public CustomerView GetAnimalPrefab(CustomerOrderData order)
         public int ConfiguredAnimalPrefabCount =>
             animalPrefabsByType != null ? animalPrefabsByType.Length : 0;
 
-        public Sprite EggSprite => eggSprite;
-
         /// <summary>Returns only the Animal explicitly stored in the list; never uses AnimalBase.</summary>
 public CustomerView GetConfiguredAnimalPrefab(int index)
         {
@@ -156,7 +153,6 @@ public void Initialize(CookingSortGameController game, CookingBlastLevel data)
             if (laneIndex < 0) return;
             List<CustomerView> lane = _lanes[laneIndex];
             if (lane.Count == 0 || lane[0] != customer) return;
-            if (customer.RevealEgg()) return;
             if (!_game.TrySeatCustomer(customer, laneIndex, 0)) return;
 
             lane.RemoveAt(0);
@@ -312,7 +308,12 @@ private void RefreshLane(int laneIndex, bool animate)
                     : row == 1 ? backRowsScale : farBackRowsScale;
                 Vector3 targetScale = Vector3.one * rowScale;
                 if (animate)
-                    view.AnimateTo(target, targetScale, pushDuration, pushScalePunch);
+                    view.AnimateTo(
+                        target,
+                        targetScale,
+                        pushDuration,
+                        pushScalePunch,
+                        row == 0 && !view.IsFront);
                 else
                 {
                     view.transform.localPosition = target;
