@@ -1356,6 +1356,12 @@ public bool HasTileInFlight(CustomerView customer)
             return customer != null && _customerFlights.TryGetValue(customer, out int flights) && flights > 0;
         }
 
+        public int GetTileInFlightCount(CustomerView customer)
+        {
+            return customer != null && _customerFlights.TryGetValue(customer, out int flights)
+                ? flights : 0;
+        }
+
 
 private IEnumerator WaitForColumnFall(int col)
         {

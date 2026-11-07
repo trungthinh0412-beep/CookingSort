@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -6,6 +7,7 @@ namespace CookingSort2D
 {
     public class CookingSortGameController : MonoBehaviour
     {
+        private int _pendingTrashDemand;
         [Header("Scene pieces")]
         [SerializeField] private BoardController board;
         [SerializeField] private SeatBar seatBar;
@@ -300,15 +302,31 @@ public void SetLevelDefinition(CookingBlastLevel level)
         public void OnTrashAwayFinished(int removedTiles, FoodColor type)
         {
             if (_gameEnded || removedTiles <= 0) return;
+            _pendingTrashDemand++;
+            StartCoroutine(AdjustTrashDemand(removedTiles, type));
             _servedTiles += removedTiles;
             if (hud != null) hud.SetProgress(_servedTiles);
             if (board != null && seatBar != null) board.BeginServeLoop(seatBar);
             EvaluateState();
         }
 
+        private IEnumerator AdjustTrashDemand(int amount, FoodColor type)
+        {
+            if (customerQueue != null) amount = customerQueue.ReduceDemandFromBack(type, amount);
+            while (amount > 0 && seatBar != null && (seatBar.IsMerging || seatBar.IsSeating))
+                yield return null;
+            if (amount > 0 && seatBar != null)
+                amount = seatBar.ReduceDemandForTrash(type, amount, board);
+            if (amount > 0)
+                Debug.LogWarning($"[TrashAway] No matching unreserved demand for {amount} units of {type}.", this);
+            _pendingTrashDemand--;
+            EvaluateState();
+        }
+
         public void OnCustomerSeatFlightFinished()
         {
             if (_gameEnded || board == null || seatBar == null) return;
+            if (_pendingTrashDemand > 0) return;
             if (!seatBar.IsMerging)
                 board.BeginServeLoop(seatBar);
             EvaluateState();

@@ -173,6 +173,7 @@ namespace CookingSort2D
         {
             _boosterSelectable = selectable && !_seated;
             if (hitbox != null) hitbox.enabled = !_seated && (_front || _boosterSelectable);
+            RefreshWhiteOutline();
         }
 
         private void RefreshWhiteOutline()
@@ -181,7 +182,7 @@ namespace CookingSort2D
             if (blackOutline != null)
                 blackOutline.SetActive(!flyingToSeat && !_mergeOutlineHidden);
             if (whiteOutline != null)
-                whiteOutline.SetActive(_front && !_seated && !flyingToSeat);
+                whiteOutline.SetActive((_front || _boosterSelectable) && !_seated && !flyingToSeat);
         }
 
         public void SetQueueLane(CustomerQueue queue, int laneIndex)
@@ -639,6 +640,16 @@ namespace CookingSort2D
             HasMerged = true;
             RefreshCount();
             RefreshDemandFill();
+        }
+
+        public int ReduceDemand(int amount, int reserved = 0)
+        {
+            int reduced = Mathf.Min(Mathf.Max(0, amount),
+                Mathf.Max(0, Remaining - Mathf.Max(0, reserved)));
+            Remaining -= reduced;
+            RefreshCount();
+            RefreshDemandFill();
+            return reduced;
         }
     }
 }

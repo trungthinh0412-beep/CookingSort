@@ -192,6 +192,20 @@ public void GetCustomersForType(FoodColor type, List<CustomerView> results)
             return false;
         }
 
+        public int ReduceDemandForTrash(FoodColor type, int amount, BoardController board)
+        {
+            foreach (var slot in _slots)
+            {
+                var customer = slot.Occupant;
+                if (amount <= 0) break;
+                if (customer == null || customer.Type != type) continue;
+                amount -= customer.ReduceDemand(amount,
+                    board != null ? board.GetTileInFlightCount(customer) : 0);
+                if (customer.Remaining == 0) CompleteCustomer(customer);
+            }
+            return amount;
+        }
+
 public void ClearAllImmediate()
         {
             StopAllCoroutines();

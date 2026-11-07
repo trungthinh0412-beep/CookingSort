@@ -32,6 +32,7 @@ namespace CookingSort2D
         private readonly List<CustomerQueueSlotView> _slots = new List<CustomerQueueSlotView>();
 private readonly List<List<CustomerView>> _lanes = new List<List<CustomerView>>();
         private CookingSortGameController _game;
+        private bool _orderBellSelection;
 
         public bool HasWaitingCustomers
         {
@@ -254,10 +255,15 @@ public void Initialize(CookingSortGameController game, CookingBlastLevel data)
 
         public void SetOrderBellSelection(bool active)
         {
+            if (_orderBellSelection == active) return;
+            _orderBellSelection = active;
             for (int lane = 0; lane < _lanes.Count; lane++)
+            {
                 for (int row = 0; row < _lanes[lane].Count; row++)
                     if (_lanes[lane][row] != null)
                         _lanes[lane][row].SetBoosterSelectable(active);
+                RefreshLane(lane, true);
+            }
         }
 
         public bool SelectFrontOfLane(int laneIndex)
@@ -268,8 +274,31 @@ public void Initialize(CookingSortGameController game, CookingBlastLevel data)
             return front != null && front.IsSeated;
         }
 
+        public int ReduceDemandFromBack(FoodColor type, int amount)
+        {
+            int deepest = 0;
+            foreach (var lane in _lanes) deepest = Mathf.Max(deepest, lane.Count);
+            var changedLanes = new HashSet<int>();
+            for (int row = deepest - 1; row >= 0 && amount > 0; row--)
+                for (int lane = 0; lane < _lanes.Count && amount > 0; lane++)
+                {
+                    if (row >= _lanes[lane].Count) continue;
+                    var customer = _lanes[lane][row];
+                    if (customer == null || customer.Type != type) continue;
+                    amount -= customer.ReduceDemand(amount);
+                    if (customer.Remaining > 0) continue;
+                    _lanes[lane].RemoveAt(row);
+                    customer.gameObject.SetActive(false);
+                    Destroy(customer.gameObject);
+                    changedLanes.Add(lane);
+                }
+            foreach (int lane in changedLanes) RefreshLane(lane, true);
+            return amount;
+        }
+
         public void ClearCustomers()
         {
+            _orderBellSelection = false;
             _lanes.Clear();
             if (customersRoot == null) return;
             for (int i = customersRoot.childCount - 1; i >= 0; i--)
@@ -303,7 +332,7 @@ private void RefreshLane(int laneIndex, bool animate)
                 CustomerView view = lane[row];
                 if (view == null) continue;
                 Vector3 target = slotPosition + new Vector3(0f, -row * rowSpacing, 0f);
-                float rowScale = row == 0
+                float rowScale = row == 0 || _orderBellSelection
                     ? frontRowScale
                     : row == 1 ? backRowsScale : farBackRowsScale;
                 Vector3 targetScale = Vector3.one * rowScale;
