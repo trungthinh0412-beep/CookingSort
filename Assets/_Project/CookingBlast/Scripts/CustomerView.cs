@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using Spine.Unity;
 using TMPro;
 using UnityEngine;
@@ -37,9 +38,15 @@ namespace CookingSort2D
         [SerializeField, SpineAnimation(dataField: nameof(body))]
         private string queueAnimation;
         [SerializeField, SpineAnimation(dataField: nameof(body))]
+        private string queueAnimation2;
+        [SerializeField, SpineAnimation(dataField: nameof(body))]
         private string advanceTransitionAnimation;
         [SerializeField, SpineAnimation(dataField: nameof(body))]
         private string advanceAnimation;
+        [SerializeField, SpineAnimation(dataField: nameof(body))]
+        private string advanceAnimation2;
+        [Tooltip("Random seconds spent in animation 1 before playing animation 2, independently per animal.")]
+        [SerializeField] private Vector2 animation2DelayRange = new Vector2(2f, 6f);
         [SerializeField, SpineAnimation(dataField: nameof(body))]
         private string flyAnimation;
         [SerializeField, SpineAnimation(dataField: nameof(body))]
@@ -58,6 +65,64 @@ namespace CookingSort2D
         private bool _boosterSelectable;
         private int _progressCapacity;
         private Coroutine _pulseRoutine;
+        private Coroutine _animationSequence;
+        private static readonly List<CustomerView> Animation2Waiting = new List<CustomerView>();
+        private static readonly HashSet<CustomerView> Animation2Playing = new HashSet<CustomerView>();
+        private static float _nextAnimation2Start;
+        private float _animation2CooldownUntil;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetAnimation2Coordinator()
+        {
+            Animation2Waiting.Clear();
+            Animation2Playing.Clear();
+            _nextAnimation2Start = 0f;
+        }
+
+        private void OnDisable()
+        {
+            StopAnimationSequence();
+        }
+
+        private void ReleaseAnimation2()
+        {
+            Animation2Waiting.Remove(this);
+            if (Animation2Playing.Remove(this))
+                _animation2CooldownUntil = Time.time + Random.Range(5f, 10f);
+        }
+
+        private bool TryStartAnimation2()
+        {
+            if (!Animation2Waiting.Contains(this)) Animation2Waiting.Add(this);
+            if (Time.timeScale <= 0f || Time.time < _nextAnimation2Start ||
+                Animation2Playing.Count >= 2) return false;
+
+            float totalWeight = 0f;
+            foreach (var customer in Animation2Waiting)
+                if (customer != null && customer.isActiveAndEnabled &&
+                    Time.time >= customer._animation2CooldownUntil)
+                    totalWeight += customer._front ? 3f : 1f;
+            if (totalWeight <= 0f) return false;
+
+            float pick = Random.Range(0f, totalWeight);
+            CustomerView selected = null;
+            foreach (var customer in Animation2Waiting)
+            {
+                if (customer == null || !customer.isActiveAndEnabled ||
+                    Time.time < customer._animation2CooldownUntil) continue;
+                pick -= customer._front ? 3f : 1f;
+                selected = customer;
+                if (pick <= 0f) break;
+            }
+            if (selected == null) return false;
+            // Grant centrally, so update order cannot make the first animal win every turn.
+            Animation2Waiting.Remove(selected);
+            Animation2Playing.Add(selected);
+            _nextAnimation2Start = Time.time + Random.Range(0.8f, 1.5f);
+            return selected == this;
+        }
+        private string _sequenceFirst;
+        private string _sequenceSecond;
         private bool _mergeOutlineHidden;
         private Vector3 _seatedBaseScale = Vector3.one;
         private Coroutine _moveRoutine;
@@ -82,7 +147,7 @@ namespace CookingSort2D
             _seatReady = false;
             HasMerged = false;
             if (body != null) body.gameObject.SetActive(true);
-            PlayAnimation(queueAnimation, true);
+            PlayAnimationSequence(queueAnimation, queueAnimation2);
             Remaining = Demand;
             _progressCapacity = Demand;
             RefreshVisual();
@@ -99,7 +164,9 @@ namespace CookingSort2D
             RefreshWhiteOutline();
             if (hitbox != null) hitbox.enabled = !_seated && (_front || _boosterSelectable);
             if (!_queueTransitionPlaying && !_seated)
-                PlayAnimation(_front ? advanceAnimation : queueAnimation, true);
+                PlayAnimationSequence(
+                    _front ? advanceAnimation : queueAnimation,
+                    _front ? advanceAnimation2 : queueAnimation2);
         }
 
         public void SetBoosterSelectable(bool selectable)
@@ -143,7 +210,7 @@ namespace CookingSort2D
             SetDemandBarVisible(false);
             RefreshWhiteOutline();
             if (hitbox != null) hitbox.enabled = false;
-            PlayAnimation(queueAnimation, true);
+            PlayAnimationSequence(queueAnimation, queueAnimation2);
         }
 
         public void SetSeated(float seatedScale = 1f)
@@ -334,7 +401,7 @@ namespace CookingSort2D
                 transform.localPosition = target;
                 transform.localScale = targetScale;
                 if (finishAdvanceTransition)
-                    PlayAnimation(advanceAnimation, true);
+                    PlayAnimationSequence(advanceAnimation, advanceAnimation2);
             }
             _queueTransitionPlaying = false;
             _moveRoutine = null;
@@ -480,6 +547,7 @@ namespace CookingSort2D
 
         private void PlayAnimation(string animationName, bool loop)
         {
+            StopAnimationSequence();
             if (body == null || string.IsNullOrEmpty(animationName))
                 return;
 
@@ -492,6 +560,76 @@ namespace CookingSort2D
                 0,
                 animation,
                 loop);
+        }
+
+        private void StopAnimationSequence()
+        {
+            ReleaseAnimation2();
+            if (_animationSequence != null) StopCoroutine(_animationSequence);
+            _animationSequence = null;
+            _sequenceFirst = null;
+            _sequenceSecond = null;
+        }
+
+        private void PlayAnimationSequence(string firstName, string secondName)
+        {
+            if (_animationSequence != null && _sequenceFirst == firstName &&
+                _sequenceSecond == secondName) return;
+            StopAnimationSequence();
+            if (body == null || body.SkeletonDataAsset == null) return;
+            body.Initialize(false);
+            var data = body.SkeletonDataAsset.GetSkeletonData(true);
+            if (data == null) return;
+            var first = string.IsNullOrEmpty(firstName) ? null : data.FindAnimation(firstName);
+            var second = string.IsNullOrEmpty(secondName) ? null : data.FindAnimation(secondName);
+            if (first == null || second == null)
+            {
+                var available = first ?? second;
+                if (available != null) body.AnimationState.SetAnimation(0, available, true);
+                return;
+            }
+            _sequenceFirst = firstName;
+            _sequenceSecond = secondName;
+            _animationSequence = StartCoroutine(AnimationSequenceRoutine(first, second));
+        }
+
+        private IEnumerator AnimationSequenceRoutine(Spine.Animation first, Spine.Animation second)
+        {
+            while (body != null)
+            {
+                var idle = body.AnimationState.SetAnimation(0, first, true);
+                float minimum = Mathf.Max(0.1f, animation2DelayRange.x);
+                float maximum = Mathf.Max(minimum, animation2DelayRange.y);
+                float remaining = Random.Range(minimum, maximum);
+                while (remaining > 0f && body != null &&
+                       body.AnimationState.GetCurrent(0) == idle)
+                {
+                    yield return null;
+                    remaining -= Time.deltaTime;
+                }
+                if (body == null || body.AnimationState.GetCurrent(0) != idle) break;
+                while (!Animation2Playing.Contains(this))
+                {
+                    TryStartAnimation2();
+                    if (Animation2Playing.Contains(this)) break;
+                    yield return null;
+                    if (body == null || body.AnimationState.GetCurrent(0) != idle)
+                    {
+                        ReleaseAnimation2();
+                        _animationSequence = null;
+                        yield break;
+                    }
+                }
+                var entry = body.AnimationState.SetAnimation(0, second, false);
+                // Wait on Spine playback rather than wall time, respecting animation speed.
+                do { yield return null; }
+                while (body != null && body.AnimationState.GetCurrent(0) == entry &&
+                       !entry.IsComplete);
+                ReleaseAnimation2();
+                if (body == null || body.AnimationState.GetCurrent(0) != entry) break;
+            }
+            ReleaseAnimation2();
+            _animationSequence = null;
         }
 
         public void SetMergedRemaining(int remaining, int progressCapacity)

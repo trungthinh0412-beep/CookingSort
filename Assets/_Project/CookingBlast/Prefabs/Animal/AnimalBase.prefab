@@ -416,8 +416,11 @@ MonoBehaviour:
   blackOutline: {fileID: 691029093406513804}
   whiteOutline: {fileID: 7480031103622195898}
   queueAnimation: waiting_0
+  queueAnimation2: waiting_1
   advanceTransitionAnimation: idle to waiting
   advanceAnimation: idle_0
+  advanceAnimation2: idle_2
+  animation2DelayRange: {x: 10, y: 15}
   flyAnimation: turn back
   seatAnimation: eat
   count: {fileID: 2282990251111241162}
