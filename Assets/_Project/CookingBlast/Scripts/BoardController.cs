@@ -43,6 +43,8 @@ namespace CookingSort2D
         [Header("Level intro")]
         [Tooltip("Drop the Board into place in alternating left-to-right / right-to-left rows when a level starts.")]
         [SerializeField] private bool playIntroAnimation = true;
+        [Tooltip("Only this many rows from the bottom play the level intro. Higher rows start in place.")]
+        [SerializeField, Min(1)] private int introAnimatedRows = 18;
         [Tooltip("How far above the highest Board row each block starts.")]
         [SerializeField, Min(0f)] private float introDropHeight = 4f;
         [Tooltip("Seconds each block takes to reach its authored Board position.")]
@@ -763,6 +765,12 @@ private IEnumerator ServeRoutine(SeatBar seats)
             if (_introBlocks.Count == 0) return;
 
             int firstRow = bottomRow;
+            int rowLimit = firstRow + Mathf.Max(1, introAnimatedRows);
+            _introBlocks.RemoveAll(block => block.Row >= rowLimit);
+            highestTargetY = float.MinValue;
+            for (int i = 0; i < _introBlocks.Count; i++)
+                highestTargetY = Mathf.Max(highestTargetY, _introBlocks[i].Target.y);
+            if (_introBlocks.Count == 0) return;
             _introBlocks.Sort((a, b) =>
             {
                 // Build the Board upward: the bottom row lands first, while

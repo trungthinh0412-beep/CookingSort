@@ -269,6 +269,8 @@ private IEnumerator LeaveRoutine(CustomerView customer)
 
 private void FinishMerge()
         {
+            foreach (CustomerView customer in _mergingCustomers)
+                if (customer != null) customer.FinishMergeVisual();
             _mergingCustomers.Clear();
             _activeMergeReceiver = null;
             _mergeInProgress = false;

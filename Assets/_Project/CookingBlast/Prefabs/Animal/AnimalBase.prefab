@@ -413,6 +413,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CookingSort2D.CustomerView
   matchType: 0
   body: {fileID: 5561817376120413650}
+  blackOutline: {fileID: 691029093406513804}
+  whiteOutline: {fileID: 7480031103622195898}
   queueAnimation: waiting_0
   advanceTransitionAnimation: idle to waiting
   advanceAnimation: idle_0

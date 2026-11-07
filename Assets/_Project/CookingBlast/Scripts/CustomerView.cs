@@ -28,6 +28,11 @@ namespace CookingSort2D
         [SerializeField] private FoodColor matchType = FoodColor.Blue;
 
         [SerializeField] private SkeletonAnimation body;
+        [Header("Animal Outlines")]
+        [Tooltip("Black outline object. Hidden during the seat flight. Assign manually.")]
+        [SerializeField] private GameObject blackOutline;
+        [Tooltip("White outline object, visible only in gameplay row 2. Assign manually.")]
+        [SerializeField] private GameObject whiteOutline;
         [Header("Spine Animations")]
         [SerializeField, SpineAnimation(dataField: nameof(body))]
         private string queueAnimation;
@@ -53,6 +58,7 @@ namespace CookingSort2D
         private bool _boosterSelectable;
         private int _progressCapacity;
         private Coroutine _pulseRoutine;
+        private bool _mergeOutlineHidden;
         private Vector3 _seatedBaseScale = Vector3.one;
         private Coroutine _moveRoutine;
         private bool _queueTransitionPlaying;
@@ -90,6 +96,7 @@ namespace CookingSort2D
         public void SetFront(bool front)
         {
             _front = front && !_seated;
+            RefreshWhiteOutline();
             if (hitbox != null) hitbox.enabled = !_seated && (_front || _boosterSelectable);
             if (!_queueTransitionPlaying && !_seated)
                 PlayAnimation(_front ? advanceAnimation : queueAnimation, true);
@@ -99,6 +106,15 @@ namespace CookingSort2D
         {
             _boosterSelectable = selectable && !_seated;
             if (hitbox != null) hitbox.enabled = !_seated && (_front || _boosterSelectable);
+        }
+
+        private void RefreshWhiteOutline()
+        {
+            bool flyingToSeat = _seated && !_seatReady;
+            if (blackOutline != null)
+                blackOutline.SetActive(!flyingToSeat && !_mergeOutlineHidden);
+            if (whiteOutline != null)
+                whiteOutline.SetActive(_front && !_seated && !flyingToSeat);
         }
 
         public void SetQueueLane(CustomerQueue queue, int laneIndex)
@@ -125,6 +141,7 @@ namespace CookingSort2D
             _boosterSelectable = false;
             _queueTransitionPlaying = false;
             SetDemandBarVisible(false);
+            RefreshWhiteOutline();
             if (hitbox != null) hitbox.enabled = false;
             PlayAnimation(queueAnimation, true);
         }
@@ -142,6 +159,7 @@ namespace CookingSort2D
             _boosterSelectable = false;
             _queueTransitionPlaying = false;
             _queue = null;
+            RefreshWhiteOutline();
             if (hitbox != null) hitbox.enabled = false;
             SetDemandBarVisible(false);
 
@@ -167,6 +185,14 @@ namespace CookingSort2D
         {
             // The jelly merge owns scale until its animation finishes.
             StopServePulse();
+            _mergeOutlineHidden = true;
+            RefreshWhiteOutline();
+        }
+
+        public void FinishMergeVisual()
+        {
+            _mergeOutlineHidden = false;
+            RefreshWhiteOutline();
         }
 
         public void PrepareForExit()
@@ -216,6 +242,8 @@ namespace CookingSort2D
             if (_moveRoutine != null) StopCoroutine(_moveRoutine);
             _queueTransitionPlaying = false;
             _seatReady = false;
+            if (blackOutline != null) blackOutline.SetActive(false);
+            if (whiteOutline != null) whiteOutline.SetActive(false);
             // The demand bar belongs to the seated state: reveal it as soon as
             // the animal leaves CustomerQueue and starts its curved seat flight.
             SetDemandBarVisible(true);
@@ -445,6 +473,7 @@ namespace CookingSort2D
             transform.localRotation = Quaternion.identity;
             SetSortingOrder(settledSortingOrder);
             _seatReady = true;
+            RefreshWhiteOutline();
             PlayAnimation(seatAnimation, true);
             _moveRoutine = null;
         }
